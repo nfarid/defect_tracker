@@ -1,0 +1,24 @@
+
+#Build directory
+build*/
+_build*/
+out/
+
+#Hidden files
+.*
+!.gitignore
+!.clang-tidy
+!.astylerc
+!.clang-format
+!.uncrustify.cfg
+
+# Codeblocks generated files
+*.depend
+*.layout
+
+#QT Creator
+CMakeLists.txt.user
+*.pro.user*
+
+#Misc
+tmp/
