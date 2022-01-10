@@ -22,3 +22,7 @@ target_link_options("${APP_NAME}"
     PUBLIC "${OTHER_LINKER_OPTIONS}"
 )
 
+
+find_package("Drogon" CONFIG REQUIRED)
+set(LIBRARIES "Drogon::Drogon")
+target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
