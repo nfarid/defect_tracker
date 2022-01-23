@@ -4,9 +4,12 @@
 #include <iostream>
 
 int main() {
-    const auto& app = drogon::app();
+    auto& app = drogon::app();
 
-    std::cout<<"Hello world!"<<std::endl;
+    std::cout<<"Running app!"<<std::endl;
+
+    drogon::app().addListener("127.0.0.1", 3000);
+    app.run();
 
     return 0;
 }
