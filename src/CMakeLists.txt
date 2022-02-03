@@ -22,6 +22,12 @@ add_executable("${APP_NAME}"
 
     "controllers/home.cpp"
 
+    "models/account.cpp"
+    "models/comment.hpp"
+    "models/project.cpp"
+    "models/staff.cpp"
+    "models/ticket.cpp"
+
     "${VIEWSRC}"
 )
 
