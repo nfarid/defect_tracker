@@ -51,5 +51,10 @@ target_link_options("${APP_NAME}"
 
 
 find_package("Drogon" CONFIG REQUIRED)
-set(LIBRARIES "Drogon::Drogon")
+find_package("unofficial-sodium" CONFIG REQUIRED)
+set(LIBRARIES
+    "Drogon::Drogon"
+    "unofficial-sodium::sodium"
+    "unofficial-sodium::sodium_config_public"
+)
 target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")

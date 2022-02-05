@@ -20,7 +20,7 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    void get(const drogon::HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    static void get(const drogon::HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
 };
 
 
