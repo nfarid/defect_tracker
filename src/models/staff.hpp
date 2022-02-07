@@ -241,4 +241,4 @@ public:
 } // namespace drogon_model
 
 
-namespace model = drogon_model::bug_tracker;
+namespace Model = drogon_model::bug_tracker;
