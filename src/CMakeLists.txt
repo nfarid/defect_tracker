@@ -28,6 +28,8 @@ add_executable("${APP_NAME}"
     "models/staff.cpp"
     "models/ticket.cpp"
 
+    "util/all.cpp"
+
     "${VIEWSRC}"
 )
 
