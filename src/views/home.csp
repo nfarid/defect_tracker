@@ -2,10 +2,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <%inc #include <optional> %>
+    <%c++ const auto username=@@.get<std::optional<std::string> >("username"); %>
     <meta charset="UTF-8">
     <title>Foo</title>
 </head>
 <body>
-    <h1>Welcome!</h1>
+    <%c++ if(username) { %>
+        <h1>Welcome {%*username%}</h1>
+    <%c++ } else { %>
+        <h1>Guest welcome.</h1>
+    <%c++ } %>
 <body>
 </html>

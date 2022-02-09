@@ -2,6 +2,8 @@
 #ifndef HPP_HOME_CONTROLLERS
 #define HPP_HOME_CONTROLLERS
 
+#include "../models/account.hpp"
+
 #include <drogon/HttpController.h>
 
 
@@ -10,6 +12,7 @@ namespace Ctrlr
 
 
 using namespace drogon;
+using namespace drogon::orm;
 
 class Home : public drogon::HttpController<Home> {
 public:
@@ -20,7 +23,10 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void get(const drogon::HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    void get(const drogon::HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+
+private:
+    Mapper<Model::Account> m_account_orm = Mapper<Model::Account>(app().getDbClient("db") );
 };
 
 
