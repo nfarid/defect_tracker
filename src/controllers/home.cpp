@@ -1,8 +1,6 @@
 
 #include "./home.hpp"
 
-#include <iostream>
-
 
 namespace Ctrlr
 {

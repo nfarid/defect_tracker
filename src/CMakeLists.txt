@@ -2,6 +2,7 @@
 
 #Preprocess the view files
 file(GLOB SCP_LIST "${CMAKE_CURRENT_SOURCE_DIR}/views/*.csp")
+set(VIEW_SRC "")
 foreach(cspFile "${SCP_LIST}")
     message(STATUS "cspFile:" "${cspFile}")
     exec_program(basename ARGS "-s .csp ${cspFile}" OUTPUT_VARIABLE classname)
@@ -12,25 +13,31 @@ foreach(cspFile "${SCP_LIST}")
         DEPENDS "${cspFile}"
         VERBATIM
     )
-    set(VIEWSRC "${VIEWSRC}" "${classname}.cc")
+    set(VIEW_SRC "${VIEW_SRC}" "${classname}.cc")
     set_source_files_properties("${classname}.cc" COMPILE_FLAGS "-w")
 endforeach()
 
-
-add_executable("${APP_NAME}"
-    "main.cpp"
-
-    "controllers/home.cpp"
-
+set(MODEL_SRC
     "models/account.cpp"
     "models/comment.hpp"
     "models/project.cpp"
     "models/staff.cpp"
     "models/ticket.cpp"
+)
+set(CONTROLLER_SRC
+    "controllers/home.cpp"
+)
+set(MVC_SRC
+    "${CONTROLLER_SRC}"
+    "${MODEL_SRC}"
+    "${VIEW_SRC}"
+)
 
+
+add_executable("${APP_NAME}"
+    "main.cpp"
     "util/all.cpp"
-
-    "${VIEWSRC}"
+    "${MVC_SRC}"
 )
 
 set_property(
