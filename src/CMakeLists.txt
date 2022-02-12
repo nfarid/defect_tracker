@@ -67,3 +67,11 @@ set(LIBRARIES
     "unofficial-sodium::sodium_config_public"
 )
 target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
+
+
+
+#Test
+add_executable("${TEST_NAME}"
+    "main.test.cpp"
+)
+target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")
