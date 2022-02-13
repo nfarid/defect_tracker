@@ -17,46 +17,46 @@ typedef struct Url {
 
 // A simple url parser for parsing a database url
 // Url format is like this: scheme://username:password@host:port/path
-Url parse_url(std::string_view url) {
+Url parseUrl(std::string_view url) {
     // TODO: Improve implementation
     using std::string;
     const size_t len = size(url);
 
-    const auto scheme_endpos = url.find(':');
-    if( (scheme_endpos == string::npos) || (scheme_endpos + 3 >= len) ||
-                (url[scheme_endpos+1] != '/') || (url[scheme_endpos+2] != '/') )
+    const auto schemeEndpos = url.find(':');
+    if( (schemeEndpos == string::npos) || (schemeEndpos + 3 >= len) ||
+                (url[schemeEndpos+1] != '/') || (url[schemeEndpos+2] != '/') )
     {
         throw std::invalid_argument("Invalid Database URL, invalid scheme.");
     }
 
-    const auto username_startpos = scheme_endpos + 3;
-    const auto username_endpos = url.find(':', username_startpos);
-    if(username_endpos == string::npos)
+    const auto usernameStartpos = schemeEndpos + 3;
+    const auto usernameEndpos = url.find(':', usernameStartpos);
+    if(usernameEndpos == string::npos)
         throw std::invalid_argument("Invalid Database URL, invalid username.");
-    const auto username = url.substr(username_startpos, username_endpos - username_startpos);
+    const auto username = url.substr(usernameStartpos, usernameEndpos - usernameStartpos);
 
-    const auto password_startpos = username_endpos + 1;
-    const auto password_endpos = url.find('@', password_startpos);
-    if(password_endpos == string::npos)
+    const auto passwordStartpos = usernameEndpos + 1;
+    const auto passwordEndpos = url.find('@', passwordStartpos);
+    if(passwordEndpos == string::npos)
         throw std::invalid_argument("Invalid Database URL, invalid password.");
-    const auto password = url.substr(password_startpos, password_endpos - password_startpos);
+    const auto password = url.substr(passwordStartpos, passwordEndpos - passwordStartpos);
 
-    const auto host_startpos = password_endpos + 1;
-    const auto host_endpos = url.find(':', host_startpos);
-    if(host_endpos == string::npos)
+    const auto hostStartpos = passwordEndpos + 1;
+    const auto hostEndpos = url.find(':', hostStartpos);
+    if(hostEndpos == string::npos)
         throw std::invalid_argument("Invalid Database URL, invalid host.");
-    const auto host = url.substr(host_startpos, host_endpos - host_startpos);
+    const auto host = url.substr(hostStartpos, hostEndpos - hostStartpos);
 
-    const auto port_startpos = host_endpos + 1;
-    const auto port_endpos = url.find('/', port_startpos);
-    if(port_endpos == string::npos)
+    const auto portStartpos = hostEndpos + 1;
+    const auto portEndpos = url.find('/', portStartpos);
+    if(portEndpos == string::npos)
         throw std::invalid_argument("Invalid Database URL, invalid port.");
-    const auto port_str = url.substr(port_startpos, port_endpos - port_startpos);
+    const auto port_str = url.substr(portStartpos, portEndpos - portStartpos);
     const unsigned short port = Util::StrToNum{port_str};
 
-    const auto path_startpos = port_endpos + 1;
-    const auto path_endpos = len;
-    const auto path = url.substr(path_startpos, path_endpos - path_startpos);
+    const auto pathStartpos = portEndpos + 1;
+    const auto pathEndpos = len;
+    const auto path = url.substr(pathStartpos, pathEndpos - pathStartpos);
 
     return {
         string(username),
@@ -71,20 +71,20 @@ Url parse_url(std::string_view url) {
 }  // namespace
 
 
-drogon::HttpAppFramework& get_app() {
+drogon::HttpAppFramework& getApp() {
     auto& app = drogon::app();
 
     try {
-        const auto database_url = Util::get_environment("DATABASE");
-        const auto parsed_url = parse_url(database_url);
+        const auto databaseUrl = Util::getEnvironment("DATABASE_URL");
+        const auto parsedUrl = parseUrl(databaseUrl);
 
         app.createDbClient(
             "postgresql",
-            parsed_url.dbHost,
-            parsed_url.dbPort,
-            parsed_url.dbName,
-            parsed_url.dbUsername,
-            parsed_url.dbPassword,
+            parsedUrl.dbHost,
+            parsedUrl.dbPort,
+            parsedUrl.dbName,
+            parsedUrl.dbUsername,
+            parsedUrl.dbPassword,
             1,
             "",
             "db"

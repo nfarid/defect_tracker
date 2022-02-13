@@ -21,10 +21,10 @@ namespace Util
 using std::string_literals::operator""s;
 
 
-CStringView get_environment(CStringView env_var) {
-    const char* retval = std::getenv(env_var.c_str() );
+CStringView getEnvironment(CStringView envVar) {
+    const char* retval = std::getenv(envVar.c_str() );
     if(!retval)
-        throw std::runtime_error("Error: "s + to_string(env_var) + " not in environment");
+        throw std::runtime_error("Error: "s + to_string(envVar) + " not in environment");
     return CStringView(retval);
 }
 
@@ -33,7 +33,7 @@ namespace Details
 {
 
 
-void abort_with_message_(const char* message, const char* func, const char* line) {
+void abortWithMessage_(const char* message, const char* func, const char* line) {
     std::cerr<<"Abort program: "<<std::endl;
     std::cerr<<"At function: "<<func<<std::endl;
     std::cerr<<"At line: "<<line<<std::endl;

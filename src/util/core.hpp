@@ -46,33 +46,33 @@ template<typename F>
 class Finally final {
 public:
     UTIL_IMPLICIT Finally( F&& lambda ) noexcept :
-        m_func{static_cast<F&&>( lambda ) },
-        m_valid{true}
+        mFunc{static_cast<F&&>( lambda ) },
+        mValid{true}
     {}
 
     UTIL_IMPLICIT Finally(const F& lambda ) noexcept :
-        m_func{lambda},
-        m_valid{true}
+        mFunc{lambda},
+        mValid{true}
     {}
 
     Finally& operator=(Finally&&) = delete;  // No move nor copy
 
-    // m_func will be called once and only once by the end of Finally's scope
+    // mFunc will be called once and only once by the end of Finally's scope
     ~Finally() noexcept {
         (*this)();
     }
 
     // func can be called early
     void operator()() noexcept {
-        if(m_valid) {
-            m_valid = false;
-            m_func();
+        if(mValid) {
+            mValid = false;
+            mFunc();
         }
     }
 
 private:
-    F m_func;
-    bool m_valid{};
+    F mFunc;
+    bool mValid{};
 };
 
 // To indicate pure functions (i.e. it only returns a value and has no side effects)
@@ -196,7 +196,7 @@ namespace Details
 // Immediately exits (with a failure return) and prints message to stderr
 // Only used for ALWAYS_ASSERT macro
 [[noreturn]]
-void abort_with_message_(const char* message, const char* func = "", const char* line = "");
+void abortWithMessage_(const char* message, const char* func = "", const char* line = "");
 }    // namespace Detail
 /*YES-FORMAT*/
 

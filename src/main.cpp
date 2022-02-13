@@ -2,7 +2,7 @@
 #include "./app.hpp"
 
 int main() {
-    auto& app = get_app();
+    auto& app = getApp();
     app.run();
 
     return EXIT_SUCCESS;

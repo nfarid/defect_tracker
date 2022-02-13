@@ -27,7 +27,7 @@ public:
     void index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
 
 private:
-    Mapper<Model::Account> m_account_orm = Mapper<Model::Account>(app().getDbClient("db") );
+    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
 };
 
 

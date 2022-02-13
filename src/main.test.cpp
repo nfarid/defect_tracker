@@ -6,7 +6,7 @@
 #include "./app.hpp"
 
 int main(int argc, char** argv) {
-    auto& app = get_app();
+    auto& app = getApp();
     std::promise<void> promise;
     std::future<void> future = promise.get_future();
 

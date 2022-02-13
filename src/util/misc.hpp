@@ -30,7 +30,7 @@ bool contains(const C& container, const K& key) {
  * \brief Obtain the value of the specified environmental variable
  * \throws runtime_error if the specified environmental variable does not exist
  */
-CStringView get_environment(CStringView env_var);
+CStringView getEnvironment(CStringView env_var);
 
 /**
  * \brief Converts a string to a number
@@ -40,7 +40,7 @@ CStringView get_environment(CStringView env_var);
  * \example const auto x = str_to_num<int>("210");
  */
 template<typename T>
-T str_to_num(std::string_view str) {
+T strToNum(std::string_view str) {
     T out;
     const auto [ptr_, ec] = std::from_chars(str.data(), str.data() + size(str), out);
     if(ec == std::errc{}) // For some reason there isn't a std::errc::success
@@ -65,7 +65,7 @@ T str_to_num(std::string_view str) {
 using StrToNum = struct [[nodiscard]] StrToNum {
     template<typename T>
     constexpr operator T() {
-        return str_to_num<T>(m_str_);
+        return strToNum<T>(m_str_);
     }
 
     std::string_view m_str_ = "";

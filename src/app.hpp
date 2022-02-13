@@ -4,6 +4,6 @@
 
 #include <drogon/HttpAppFramework.h>
 
-drogon::HttpAppFramework& get_app();
+drogon::HttpAppFramework& getApp();
 
 #endif  // HPP_APP
