@@ -73,5 +73,7 @@ target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
 #Test
 add_executable("${TEST_NAME}"
     "main.test.cpp"
+    "controllers/home.test.cpp"
+    "${MVC_SRC}"
 )
 target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")

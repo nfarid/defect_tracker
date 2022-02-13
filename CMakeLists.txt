@@ -64,7 +64,6 @@ include("cmake/compiler_options.cmake")
 
 set(APP_NAME "${PROJECT_NAME}")
 set(TEST_NAME "test-${PROJECT_NAME}")
-set(MVC_SRC "")
 add_subdirectory("src/")
 
 
