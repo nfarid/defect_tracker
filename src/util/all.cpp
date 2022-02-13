@@ -43,7 +43,7 @@ void abort_with_message_(const char* message, const char* func, const char* line
 }
 
 
-}  // namespace Detail
+}  // namespace Details
 
 
 }  // namespace Util

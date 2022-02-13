@@ -216,11 +216,11 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
-            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
-            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
             sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)

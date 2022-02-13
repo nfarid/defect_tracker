@@ -212,7 +212,7 @@ void Staff::setStaffIdToNull() noexcept
     dirtyFlag_[2] = true;
 }
 
-void Staff::updateId(const uint64_t id)
+void Staff::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Staff::insertColumns() noexcept
@@ -451,13 +451,6 @@ bool Staff::validJsonOfField(size_t index,
         }
         break;
     case 1:
-        if(pJson.isNull() )
-            return true;
-        if(!pJson.isInt() ) {
-            err="Type error in the "+fieldName+" field";
-            return false;
-        }
-        break;
     case 2:
         if(pJson.isNull() )
             return true;

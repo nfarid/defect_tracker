@@ -212,7 +212,7 @@ void Account::setPasswordDigest(std::string&& pPasswordDigest) noexcept
     dirtyFlag_[2] = true;
 }
 
-void Account::updateId(const uint64_t id)
+void Account::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Account::insertColumns() noexcept
@@ -463,15 +463,6 @@ bool Account::validJsonOfField(size_t index,
         }
         break;
     case 1:
-        if(pJson.isNull() ) {
-            err="The " + fieldName + " column cannot be null";
-            return false;
-        }
-        if(!pJson.isString() ) {
-            err="Type error in the "+fieldName+" field";
-            return false;
-        }
-        break;
     case 2:
         if(pJson.isNull() ) {
             err="The " + fieldName + " column cannot be null";
