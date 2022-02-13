@@ -6,7 +6,7 @@ namespace Ctrlr
 {
 
 
-HttpViewData Home::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void Home::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto session = req->session();
     if(!session)
         std::abort();
@@ -20,7 +20,6 @@ HttpViewData Home::index(const HttpRequestPtr& req, std::function<void(const Htt
     data.insert("username", username);
     const auto response = HttpResponse::newHttpViewResponse("home.csp", data);
     cb(response);
-    return data;
 }
 
 

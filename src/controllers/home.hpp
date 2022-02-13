@@ -24,7 +24,7 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    HttpViewData index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    void index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
 
 private:
     Mapper<Model::Account> m_account_orm = Mapper<Model::Account>(app().getDbClient("db") );

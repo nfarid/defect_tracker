@@ -4,7 +4,7 @@
 
 using namespace drogon;
 
-DROGON_TEST(RemoteAPITest){
+DROGON_TEST(HomeControllerTest){
     auto client = HttpClient::newHttpClient("http://localhost:3000");
     auto req = HttpRequest::newHttpRequest();
     req->setPath("/");
