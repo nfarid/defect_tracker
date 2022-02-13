@@ -17,27 +17,25 @@ foreach(cspFile "${SCP_LIST}")
     set_source_files_properties("${classname}.cc" COMPILE_FLAGS "-w")
 endforeach()
 
-set(MODEL_SRC
+
+set(APP_SRC
+    "app.cpp"
+
+    "controllers/home.cpp"
+
     "models/account.cpp"
     "models/comment.hpp"
     "models/project.cpp"
     "models/staff.cpp"
     "models/ticket.cpp"
-)
-set(CONTROLLER_SRC
-    "controllers/home.cpp"
-)
-set(MVC_SRC
-    "${CONTROLLER_SRC}"
-    "${MODEL_SRC}"
+
+    "util/all.cpp"
+
     "${VIEW_SRC}"
 )
-
-
 add_executable("${APP_NAME}"
+    "${APP_SRC}"
     "main.cpp"
-    "util/all.cpp"
-    "${MVC_SRC}"
 )
 
 set_property(
@@ -72,8 +70,11 @@ target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
 
 #Test
 add_executable("${TEST_NAME}"
-    "main.test.cpp"
+    "${APP_SRC}"
+
     "controllers/home.test.cpp"
-    "${MVC_SRC}"
+
+    "main.test.cpp"
 )
+
 target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")
