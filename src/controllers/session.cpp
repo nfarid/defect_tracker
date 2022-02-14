@@ -14,11 +14,18 @@ void Session::newGet(const HttpRequestPtr& req, std::function<void(const HttpRes
         std::abort();
     const auto userId = session->getOptional<int32_t>("user");
 
-    if(!userId) {
+    // If the user has already logged in, then there's no point of the login page.
+    if(userId) {
         const auto res = HttpResponse::newRedirectionResponse("/");
         cb(res);
         return;
     }
+
+    std::optional<std::string> username{};
+    HttpViewData data;
+    data.insert("username", username);
+    const auto response = HttpResponse::newHttpViewResponse("login.csp", data);
+    cb(response);
 }
 
 

@@ -19,7 +19,6 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(Session::newGet, "/login", Get);
-        //ADD_METHOD_TO(Home::create, "/login", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 

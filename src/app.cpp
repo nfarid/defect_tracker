@@ -79,15 +79,15 @@ drogon::HttpAppFramework& getApp() {
         const auto parsedUrl = parseUrl(databaseUrl);
 
         app.createDbClient(
-            "postgresql",
-            parsedUrl.dbHost,
-            parsedUrl.dbPort,
-            parsedUrl.dbName,
-            parsedUrl.dbUsername,
-            parsedUrl.dbPassword,
-            1,
-            "",
-            "db"
+                "postgresql",
+                parsedUrl.dbHost,
+                parsedUrl.dbPort,
+                parsedUrl.dbName,
+                parsedUrl.dbUsername,
+                parsedUrl.dbPassword,
+                1,
+                "",
+                "db"
         );
     }catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;

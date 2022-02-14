@@ -1,16 +1,16 @@
 
 
 #Preprocess the view files
-file(GLOB SCP_LIST "${CMAKE_CURRENT_SOURCE_DIR}/views/*.csp")
+file(GLOB CSP_LIST "${CMAKE_CURRENT_SOURCE_DIR}/views/*.csp")
 set(VIEW_SRC "")
-foreach(cspFile "${SCP_LIST}")
-    message(STATUS "cspFile:" "${cspFile}")
-    exec_program(basename ARGS "-s .csp ${cspFile}" OUTPUT_VARIABLE classname)
+foreach(CSP_FILE ${CSP_LIST})
+    message(STATUS "CSP_FILE:" "${CSP_FILE}")
+    exec_program(basename ARGS "-s .csp ${CSP_FILE}" OUTPUT_VARIABLE classname)
     message(STATUS "view classname:" "${classname}")
     add_custom_command(OUTPUT "${classname}.h" "${classname}.cc"
         COMMAND drogon_ctl
-        ARGS create view "${cspFile}"
-        DEPENDS "${cspFile}"
+        ARGS create view "${CSP_FILE}"
+        DEPENDS "${CSP_FILE}"
         VERBATIM
     )
     set(VIEW_SRC "${VIEW_SRC}" "${classname}.cc")

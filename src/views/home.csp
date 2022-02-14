@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <%inc #include <optional> %>
     <%c++ const auto username=@@.get<std::optional<std::string> >("username"); %>
@@ -13,5 +13,5 @@
     <%c++ } else { %>
         <h1>Guest welcome.</h1>
     <%c++ } %>
-<body>
+</body>
 </html>

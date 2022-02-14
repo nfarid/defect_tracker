@@ -2,6 +2,8 @@
 #include <drogon/HttpClient.h>
 #include <drogon/drogon_test.h>
 
+#include <iostream>
+
 using namespace drogon;
 
 DROGON_TEST(HomeControllerTest){
@@ -16,5 +18,8 @@ DROGON_TEST(HomeControllerTest){
 
         CHECK(resp->getStatusCode() == k200OK);
         CHECK(resp->contentType() == CT_TEXT_HTML);
+
+        for(const auto& [k, v] : resp->getHeaders() )
+            std::cout<<k<<" : "<<v<<std::endl;
     });
 }
