@@ -9,7 +9,7 @@ namespace Ctrlr
 void Home::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto session = req->session();
     if(!session)
-        std::abort();
+        std::abort();// TODO: Change this.
 
     const auto userId = session->getOptional<int32_t>("user");
     std::optional<std::string> username{};
