@@ -2,6 +2,8 @@
 #include "./app.hpp"
 #include "./util/misc.hpp"
 
+#include <sodium.h>
+
 
 namespace
 {
@@ -72,6 +74,12 @@ Url parseUrl(std::string_view url) {
 
 
 drogon::HttpAppFramework& getApp() {
+    const auto sodiumError = sodium_init();
+    if(sodiumError) {
+        std::cerr<<"Sodium failed to initialised!"<<std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
     auto& app = drogon::app();
 
     try {
