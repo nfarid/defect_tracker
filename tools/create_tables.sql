@@ -4,13 +4,13 @@ CREATE SCHEMA public;
 
 CREATE TABLE Account(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    username TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
     password_digest TEXT NOT NULL
 );
 
 CREATE TABLE Project(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_name TEXT NOT NULL,
+    project_name TEXT NOT NULL UNIQUE,
     manager_id INTEGER REFERENCES Account(id) ON DELETE CASCADE
 );
 
@@ -24,7 +24,8 @@ CREATE TABLE Ticket(
     project_module TEXT,
     ticket_status StatusType NOT NULL,
     severity SeverityType NOT NULL,
-    assigned INTEGER REFERENCES Account(id) ON DELETE SET NULL
+    assigned INTEGER REFERENCES Account(id) ON DELETE SET NULL,
+    project INTEGER REFERENCES Project(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Staff(

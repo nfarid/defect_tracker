@@ -59,6 +59,7 @@ public:
         static const std::string _ticket_status;
         static const std::string _severity;
         static const std::string _assigned;
+        static const std::string _project;
     };
 
     const static int primaryKeyNumber;
@@ -187,9 +188,20 @@ public:
     void setAssignedToNull() noexcept;
 
 
+    /**  For column project  */
+    ///Get the value of the column project, returns the default value if the column is null
+    const int32_t& getValueOfProject() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t>& getProject() const noexcept;
+
+    ///Set the value of the column project
+    void setProject(const int32_t& pProject) noexcept;
+    void setProjectToNull() noexcept;
+
+
 
     static size_t getColumnNumber() noexcept {
-        return 7;
+        return 8;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -216,6 +228,7 @@ private:
     std::shared_ptr<std::string> ticketStatus_;
     std::shared_ptr<std::string> severity_;
     std::shared_ptr<int32_t> assigned_;
+    std::shared_ptr<int32_t> project_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -226,7 +239,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[7]={ false};
+    bool dirtyFlag_[8]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -272,6 +285,10 @@ public:
             sql += "assigned,";
             ++parametersCount;
         }
+        if(dirtyFlag_[7]) {
+            sql += "project,";
+            ++parametersCount;
+        }
         needSelection=true;
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
@@ -285,27 +302,31 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[3]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[4]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[5]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[6]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[7]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)
@@ -325,5 +346,3 @@ public:
 
 } // namespace drogon_model
 
-
-namespace Model = drogon_model::bug_tracker;

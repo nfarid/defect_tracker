@@ -15,6 +15,7 @@ const std::string Ticket::Cols::_project_module = "project_module";
 const std::string Ticket::Cols::_ticket_status = "ticket_status";
 const std::string Ticket::Cols::_severity = "severity";
 const std::string Ticket::Cols::_assigned = "assigned";
+const std::string Ticket::Cols::_project = "project";
 const std::string Ticket::primaryKeyName = "id";
 const bool Ticket::hasPrimaryKey = true;
 const std::string Ticket::tableName = "ticket";
@@ -26,7 +27,8 @@ const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"project_module", "std::string", "text", 0, false, false, false},
     {"ticket_status", "std::string", "USER-DEFINED", 0, false, false, true},
     {"severity", "std::string", "USER-DEFINED", 0, false, false, true},
-    {"assigned", "int32_t", "integer", 4, false, false, false}
+    {"assigned", "int32_t", "integer", 4, false, false, false},
+    {"project", "int32_t", "integer", 4, false, false, false}
 };
 const std::string& Ticket::getColumnName(size_t index) noexcept(false)
 {
@@ -51,9 +53,11 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             severity_=std::make_shared<std::string>(r["severity"].as<std::string>() );
         if(!r["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>(r["assigned"].as<int32_t>() );
+        if(!r["project"].isNull() )
+            project_=std::make_shared<int32_t>(r["project"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
-        if(offset + 7 > r.size() ) {
+        if(offset + 8 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
@@ -79,12 +83,15 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
         index = offset + 6;
         if(!r[index].isNull() )
             assigned_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+        index = offset + 7;
+        if(!r[index].isNull() )
+            project_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
 }
 
 Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 7) {
+    if(pMasqueradingVector.size() != 8) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -122,6 +129,11 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[6]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
 }
 
@@ -162,12 +174,17 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
         if(!pJson["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
     }
+    if(pJson.isMember("project") ) {
+        dirtyFlag_[7]=true;
+        if(!pJson["project"].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
+    }
 }
 
 void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 7) {
+    if(pMasqueradingVector.size() != 8) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -204,6 +221,11 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[6]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
 }
 
@@ -242,6 +264,11 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
         dirtyFlag_[6] = true;
         if(!pJson["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
+    }
+    if(pJson.isMember("project") ) {
+        dirtyFlag_[7] = true;
+        if(!pJson["project"].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
     }
 }
 
@@ -426,7 +453,32 @@ void Ticket::setAssignedToNull() noexcept
     dirtyFlag_[6] = true;
 }
 
-void Ticket::updateId(const uint64_t)
+const int32_t& Ticket::getValueOfProject() const noexcept
+{
+    const static int32_t defaultValue = int32_t();
+    if(project_)
+        return *project_;
+    return defaultValue;
+}
+
+const std::shared_ptr<int32_t>& Ticket::getProject() const noexcept
+{
+    return project_;
+}
+
+void Ticket::setProject(const int32_t& pProject) noexcept
+{
+    project_ = std::make_shared<int32_t>(pProject);
+    dirtyFlag_[7] = true;
+}
+
+void Ticket::setProjectToNull() noexcept
+{
+    project_.reset();
+    dirtyFlag_[7] = true;
+}
+
+void Ticket::updateId(const uint64_t id)
 {}
 
 const std::vector<std::string>& Ticket::insertColumns() noexcept
@@ -437,7 +489,8 @@ const std::vector<std::string>& Ticket::insertColumns() noexcept
         "project_module",
         "ticket_status",
         "severity",
-        "assigned"
+        "assigned",
+        "project"
     };
     return inCols;
 }
@@ -480,6 +533,12 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
         else
             binder << nullptr;
     }
+    if(dirtyFlag_[7]) {
+        if(getProject() )
+            binder << getValueOfProject();
+        else
+            binder << nullptr;
+    }
 }
 
 const std::vector<std::string> Ticket::updateColumns() const
@@ -497,6 +556,8 @@ const std::vector<std::string> Ticket::updateColumns() const
         ret.push_back(getColumnName(5) );
     if(dirtyFlag_[6])
         ret.push_back(getColumnName(6) );
+    if(dirtyFlag_[7])
+        ret.push_back(getColumnName(7) );
     return ret;
 }
 
@@ -538,6 +599,12 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
         else
             binder << nullptr;
     }
+    if(dirtyFlag_[7]) {
+        if(getProject() )
+            binder << getValueOfProject();
+        else
+            binder << nullptr;
+    }
 }
 
 Json::Value Ticket::toJson() const
@@ -571,6 +638,10 @@ Json::Value Ticket::toJson() const
         ret["assigned"]=getValueOfAssigned();
     else
         ret["assigned"]=Json::Value();
+    if(getProject() )
+        ret["project"]=getValueOfProject();
+    else
+        ret["project"]=Json::Value();
     return ret;
 }
 
@@ -578,7 +649,7 @@ Json::Value Ticket::toMasqueradedJson(
     const std::vector<std::string>& pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 7) {
+    if(pMasqueradingVector.size() == 8) {
         if(!pMasqueradingVector[0].empty() ) {
             if(getId() )
                 ret[pMasqueradingVector[0]]=getValueOfId();
@@ -621,6 +692,12 @@ Json::Value Ticket::toMasqueradedJson(
             else
                 ret[pMasqueradingVector[6]]=Json::Value();
         }
+        if(!pMasqueradingVector[7].empty() ) {
+            if(getProject() )
+                ret[pMasqueradingVector[7]]=getValueOfProject();
+            else
+                ret[pMasqueradingVector[7]]=Json::Value();
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -652,6 +729,10 @@ Json::Value Ticket::toMasqueradedJson(
         ret["assigned"]=getValueOfAssigned();
     else
         ret["assigned"]=Json::Value();
+    if(getProject() )
+        ret["project"]=getValueOfProject();
+    else
+        ret["project"]=Json::Value();
     return ret;
 }
 
@@ -697,6 +778,10 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "assigned", pJson["assigned"], err, true) )
             return false;
     }
+    if(pJson.isMember("project") ) {
+        if(!validJsonOfField(7, "project", pJson["project"], err, true) )
+            return false;
+    }
     return true;
 }
 
@@ -704,7 +789,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 7) {
+    if(pMasqueradingVector.size() != 8) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -763,6 +848,12 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
                     return false;
             }
         }
+        if(!pMasqueradingVector[7].empty() ) {
+            if(pJson.isMember(pMasqueradingVector[7]) ) {
+                if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true) )
+                    return false;
+            }
+        }
     }catch(const Json::LogicError& e)
     {
         err = e.what();
@@ -804,6 +895,10 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "assigned", pJson["assigned"], err, false) )
             return false;
     }
+    if(pJson.isMember("project") ) {
+        if(!validJsonOfField(7, "project", pJson["project"], err, false) )
+            return false;
+    }
     return true;
 }
 
@@ -811,7 +906,7 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 7) {
+    if(pMasqueradingVector.size() != 8) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -845,6 +940,10 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         }
         if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]) ) {
             if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, false) )
+                return false;
+        }
+        if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
+            if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false) )
                 return false;
         }
     }catch(const Json::LogicError& e)
@@ -907,6 +1006,7 @@ bool Ticket::validJsonOfField(size_t index,
         }
         break;
     case 6:
+    case 7:
         if(pJson.isNull() )
             return true;
         if(!pJson.isInt() ) {
