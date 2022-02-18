@@ -1,36 +1,32 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <%c++ const auto& login_error = @@.get<std::string>("login_error"); %>
-    <%c++ const auto& login_username = @@.get<std::string>("login_username"); %>
-</head>
-<body>
-    <main>
-        <form action="/login" method="POST">
-            <fieldset>
-                <legend>Enter your login details:</legend>
-                <%c++ if(!login_error.empty() ) { %>
-                    <p>{%login_error%}</p>
-                <%c++ } %>
-                Login:
-                <br/>
-                <label>
-                    Username:
-                    <input type="text" id="login_username" name="login_username" value="{%login_username%}"/>
-                </label>
-                <br/>
-                <label>
-                    Password:
-                    <input type="password" id="login_password" name="login_password"/>
-                </label>
-                <br/>
-            <input type="submit" value="submit">
-            </fieldset>
-        </form>
-    </main>
-</body>
-</html>
+<%view _header.csp %>
+
+
+<%c++ const auto login_error = @@.get<std::string>("login_error"); %>
+<%c++ const auto login_username = @@.get<std::string>("login_username"); %>
+
+<form action="/login" method="POST">
+    <fieldset>
+        <legend>Enter your login details:</legend>
+        <%c++ if(!login_error.empty() ) { %>
+            <p>{%login_error%}</p>
+        <%c++ } %>
+        Login:
+        <br/>
+        <label>
+            Username:
+            <input type="text" id="login_username" name="login_username" value="{%login_username%}"/>
+        </label>
+        <br/>
+        <label>
+            Password:
+            <input type="password" id="login_password" name="login_password"/>
+        </label>
+        <br/>
+    <input type="submit" value="submit">
+    </fieldset>
+</form>
+
+
+<%view _footer.csp %>
 

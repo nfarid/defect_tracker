@@ -1,9 +1,14 @@
 
 #include "./home.hpp"
 
+#include <string>
+
 
 namespace Ctrlr
 {
+
+
+using std::string_literals::operator""s;
 
 
 void Home::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
@@ -17,6 +22,7 @@ void Home::index(const HttpRequestPtr& req, std::function<void(const HttpRespons
         username = mAccountOrm.findByPrimaryKey(*userId).getValueOfUsername();
 
     HttpViewData data;
+    data.insert("title", "Home"s);
     data.insert("username", username);
     const auto response = HttpResponse::newHttpViewResponse("home.csp", data);
     cb(response);

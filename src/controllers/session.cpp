@@ -26,12 +26,15 @@ void Session::newGet(const HttpRequestPtr& req, std::function<void(const HttpRes
     if(userId)
         return cb(HttpResponse::newRedirectionResponse("/") );
 
+    HttpViewData data;
+    data.insert("title", "Login"s);
     cb(HttpResponse::newHttpViewResponse("login.csp", {}) );
 }
 
 void Session::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto& postParams = req->parameters();
     HttpViewData data;
+    data.insert("title", "Login"s);
 
     // Check if the username and password has been entered
     const auto usernameIter = postParams.find("login_username");
