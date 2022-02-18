@@ -1,8 +1,7 @@
 
 #include "./session.hpp"
 #include "../util/core.hpp"
-
-#include <sodium.h>
+#include "../util/hash.hpp"
 
 #include <array>
 #include <iostream>
@@ -55,13 +54,7 @@ void Session::create(const HttpRequestPtr& req, std::function<void(const HttpRes
     const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
     auto userFuture = mAccountOrm.findFutureBy(userCriteria);
 
-    std::array<char, crypto_pwhash_STRBYTES> passwordHash{};
-    if(crypto_pwhash_str(passwordHash.data(), password.c_str(), size(password),
-                crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_MODERATE) )
-    {
-        // TODO: Better error handling
-        std::abort();
-    }
+    const auto passwordHash = Util::hash(password);
 
     try {
         const auto& foundUserLst = userFuture.get();
@@ -72,7 +65,7 @@ void Session::create(const HttpRequestPtr& req, std::function<void(const HttpRes
         }
         const auto& user = foundUserLst.front();
 
-        if(user.getValueOfPasswordDigest() != passwordHash.data() ) {
+        if(!Util::verifyHash(user.getValueOfPasswordDigest(), password) ) {
             // Incorrect password
             data.insert("login_error", "Incorrect password"s);
             data.insert("login_username", username);
