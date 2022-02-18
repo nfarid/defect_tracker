@@ -4,16 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <%c++ const auto& login_error = @@.get<std::string>("login_error"); %>
+    <%c++ const auto& login_username = @@.get<std::string>("login_username"); %>
 </head>
 <body>
     <main>
         <form action="/login" method="POST">
-            <label>
+            <fieldset>
+                <legend>Enter your login details:</legend>
+                <%c++ if(!login_error.empty() ) { %>
+                    <p>{%login_error%}</p>
+                <%c++ } %>
                 Login:
                 <br/>
                 <label>
                     Username:
-                    <input type="text" id="login_username" name="login_username"/>
+                    <input type="text" id="login_username" name="login_username" value="{%login_username%}"/>
                 </label>
                 <br/>
                 <label>
@@ -21,8 +27,8 @@
                     <input type="password" id="login_password" name="login_password"/>
                 </label>
                 <br/>
-            </label>
             <input type="submit" value="submit">
+            </fieldset>
         </form>
     </main>
 </body>
