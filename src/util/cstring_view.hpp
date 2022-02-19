@@ -281,7 +281,7 @@ public:
      * \returns the number of code-units copied which is min(count, size() - pos)
      * \throws std::out_of_range if pos > size()
      */
-    constexpr size_type copy(pointer dest, size_type count, size_type pos = 0) const {
+    size_type copy(pointer dest, size_type count, size_type pos = 0) const {
         return m_sv.copy(dest, count, pos);
     }
 
