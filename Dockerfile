@@ -2,6 +2,7 @@
 FROM docker.io/drogonframework/drogon
 
 WORKDIR /src
+ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update -y
 RUN apt-get install zip cmake -y
 RUN git clone https://github.com/microsoft/vcpkg --depth 1
@@ -24,10 +25,10 @@ RUN cmake ..
 RUN cmake --build . -- -j12
 
 RUN mkdir /app
-RUN mv bin/defect_tracker /app
+RUN mv app/defect_tracker /app
 
 WORKDIR /app
-ENTRYPOINT ./defect_tracker
+ENTRYPOINT ./defect_tracker $PORT
 
 
 
