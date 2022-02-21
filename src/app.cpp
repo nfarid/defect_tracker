@@ -102,7 +102,9 @@ drogon::HttpAppFramework& getApp() {
         std::exit(EXIT_FAILURE);
     }
 
-    app.addListener("127.0.0.1", 3000);
+    const auto portStr = Util::getEnvironment("PORT");
+    const unsigned short port = Util::StrToNum{portStr};
+    app.addListener("0.0.0.0", port);
     app.enableSession();
 
     return app;
