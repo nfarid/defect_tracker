@@ -74,8 +74,10 @@ add_executable("${TEST_NAME}"
     "${APP_SRC}"
 
     "controllers/home.test.cpp"
+    "controllers/session.test.cpp"
 
     "main.test.cpp"
 )
 
 target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")
+ParseAndAddDrogonTests("${TEST_NAME}")
