@@ -21,6 +21,7 @@ public:
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(Home::index, "/", Get);
         ADD_METHOD_TO(Home::index, "/index", Get);
+        ADD_METHOD_TO(Home::index, "/home", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
