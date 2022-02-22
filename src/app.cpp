@@ -19,6 +19,52 @@ typedef struct Url {
 
 // A simple url parser for parsing a database url
 // Url format is like this: scheme://username:password@host:port/path
+Url parseUrl(std::string_view url);
+
+
+}  // namespace
+
+
+drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl) {
+    const auto sodiumError = sodium_init();
+    if(sodiumError) {
+        std::cerr<<"Sodium failed to initialised! "<<sodiumError<<std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    auto& app = drogon::app();
+
+    try {
+        const auto parsedUrl = parseUrl(dbUrl);
+        app.createDbClient(
+                "postgresql",
+                parsedUrl.dbHost,
+                parsedUrl.dbPort,
+                parsedUrl.dbName,
+                parsedUrl.dbUsername,
+                parsedUrl.dbPassword,
+                1,
+                "",
+                "db"
+        );
+    }catch(std::exception& ex) {
+        std::cerr<<"Unable to create a database: "<<std::endl;
+        std::cerr<<ex.what()<<std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    std::clog<<"Listening at port "<<port<<std::endl;
+    app.addListener("0.0.0.0", port);
+    app.enableSession();
+
+    return app;
+}
+
+
+namespace
+{
+
+
 Url parseUrl(std::string_view url) {
     // TODO: Improve implementation
     using std::string;
@@ -72,40 +118,3 @@ Url parseUrl(std::string_view url) {
 
 }  // namespace
 
-
-drogon::HttpAppFramework& getApp() {
-    const auto sodiumError = sodium_init();
-    if(sodiumError) {
-        std::cerr<<"Sodium failed to initialised!"<<std::endl;
-        std::exit(EXIT_FAILURE);
-    }
-
-    auto& app = drogon::app();
-
-    try {
-        const auto databaseUrl = Util::getEnvironment("DATABASE_URL");
-        const auto parsedUrl = parseUrl(databaseUrl);
-
-        app.createDbClient(
-                "postgresql",
-                parsedUrl.dbHost,
-                parsedUrl.dbPort,
-                parsedUrl.dbName,
-                parsedUrl.dbUsername,
-                parsedUrl.dbPassword,
-                1,
-                "",
-                "db"
-        );
-    }catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        std::exit(EXIT_FAILURE);
-    }
-
-    const auto portStr = Util::getEnvironment("PORT");
-    const unsigned short port = Util::StrToNum{portStr};
-    app.addListener("0.0.0.0", port);
-    app.enableSession();
-
-    return app;
-}

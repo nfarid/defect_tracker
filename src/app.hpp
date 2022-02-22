@@ -4,6 +4,11 @@
 
 #include <drogon/HttpAppFramework.h>
 
-drogon::HttpAppFramework& getApp();
+#include <string_view>
+
+/**
+ * \brief getApp - Create a drogon app
+ */
+drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl);
 
 #endif  // HPP_APP
