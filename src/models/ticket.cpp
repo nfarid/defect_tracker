@@ -478,7 +478,7 @@ void Ticket::setProjectToNull() noexcept
     dirtyFlag_[7] = true;
 }
 
-void Ticket::updateId(const uint64_t id)
+void Ticket::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Ticket::insertColumns() noexcept

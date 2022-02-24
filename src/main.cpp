@@ -28,7 +28,13 @@ int main(int argc, char** argv) {
             portStr = "3000";
         }
     }
-    const unsigned short port = Util::StrToNum{portStr};
+    unsigned short port = 3000;
+    try {
+        port = Util::StrToNum{portStr};
+    } catch(std::exception& ex) {
+        std::cerr<<ex.what()<<std::endl;
+        std::cerr<<"Invalid port specified, defaulting to 3000"<<std::endl;
+    }
 
     try {
         if(dbUrl.empty() )
