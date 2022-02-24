@@ -1,6 +1,6 @@
 
-#ifndef HPP_CONTROLLERS_USER_SESSION
-#define HPP_CONTROLLERS_USER_SESSION
+#ifndef HPP_CONTROLLERS_USER
+#define HPP_CONTROLLERS_USER
 
 #include "../models/account.hpp"
 
@@ -13,12 +13,12 @@ namespace Ctrlr
 
 using namespace drogon;
 
-class UserSession : public drogon::HttpController<UserSession> {
+class User : public drogon::HttpController<User> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(UserSession::newGet, "/login", Get);
-    ADD_METHOD_TO(UserSession::create, "/login", Post);
+        ADD_METHOD_TO(User::newGet, "/signup", Get);
+    ADD_METHOD_TO(User::create, "/signup", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -30,6 +30,6 @@ private:
 };
 
 
-} // namespace Ctrlr
+}// namespace Ctrlr
 
-#endif  // ifndef HPP_CONTROLLERS_USER_SESSION
+#endif  // ifndef HPP_CONTROLLERS_USER

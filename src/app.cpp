@@ -57,6 +57,9 @@ drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl) {
     app.addListener("0.0.0.0", port);
     app.enableSession();
 
+    for(const auto& [path, method, handler] : app.getHandlersInfo() )
+        std::cout<<path<<" ; "<<method<<" ; "<<handler<<std::endl;
+
     return app;
 }
 

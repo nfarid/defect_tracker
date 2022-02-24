@@ -1,0 +1,6 @@
+
+<%view _header.csp %>
+
+<h1>Signup</h1>
+
+<%view _footer.csp %>

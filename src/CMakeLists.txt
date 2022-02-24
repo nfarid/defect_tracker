@@ -22,6 +22,7 @@ set(APP_SRC
     "app.cpp"
 
     "controllers/home.cpp"
+    "controllers/user.cpp"
     "controllers/user_session.cpp"
 
     "models/account.cpp"
