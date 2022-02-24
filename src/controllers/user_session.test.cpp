@@ -10,7 +10,7 @@ using namespace drogon;
 using std::string_literals::operator""s;
 
 // Test when the user goes to the login page
-DROGON_TEST(SessionController_New){
+DROGON_TEST(UserSessionController_New){
     auto client = HttpClient::newHttpClient(localhost, testPort);
 
     auto req = HttpRequest::newHttpRequest();
@@ -26,7 +26,7 @@ DROGON_TEST(SessionController_New){
 }
 
 // Test when a correct user session is created
-DROGON_TEST(SessionController_Create){
+DROGON_TEST(UserSessionController_Create){
     auto client = HttpClient::newHttpClient(localhost, testPort);
     client->enableCookies();
 
@@ -61,8 +61,8 @@ DROGON_TEST(SessionController_Create){
     });
 }
 
-// Test when a incorrect user session is created
-DROGON_TEST(SessionController_CreateIncorrect){
+// Test when a user tries to create a session with the wrong details
+DROGON_TEST(UserSessionController_CreateIncorrect){
     auto client = HttpClient::newHttpClient(localhost, testPort);
     client->enableCookies();
 

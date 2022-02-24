@@ -22,7 +22,7 @@ set(APP_SRC
     "app.cpp"
 
     "controllers/home.cpp"
-    "controllers/session.cpp"
+    "controllers/user_session.cpp"
 
     "models/account.cpp"
     "models/comment.hpp"
@@ -74,7 +74,7 @@ add_executable("${TEST_NAME}"
     "${APP_SRC}"
 
     "controllers/home.test.cpp"
-    "controllers/session.test.cpp"
+    "controllers/user_session.test.cpp"
 
     "main.test.cpp"
 )

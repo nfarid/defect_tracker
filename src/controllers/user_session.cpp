@@ -1,5 +1,5 @@
 
-#include "./session.hpp"
+#include "./user_session.hpp"
 #include "../util/core.hpp"
 #include "../util/hash.hpp"
 
@@ -15,7 +15,7 @@ namespace Ctrlr
 using std::string_literals::operator""s;
 
 
-void Session::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void UserSession::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto session = req->session();
     if(!session) {
         std::cerr<<"Session is not enabled"<<std::endl;
@@ -32,7 +32,7 @@ void Session::newGet(const HttpRequestPtr& req, std::function<void(const HttpRes
     cb(HttpResponse::newHttpViewResponse("login.csp", {}) );
 }
 
-void Session::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void UserSession::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto& postParams = req->parameters();
     HttpViewData data;
     data.insert("title", "Login"s);
