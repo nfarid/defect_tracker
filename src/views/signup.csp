@@ -1,6 +1,32 @@
 
 <%view _header.csp %>
 
-<h1>Signup</h1>
+
+<%c++ const auto signup_error = @@.get<std::string>("signup_error"); %>
+<%c++ const auto signup_username = @@.get<std::string>("signup_username"); %>
+
+<!--TODO: Refactor this. -->
+<form action="/signup" method="POST">
+    <fieldset>
+        <legend>Create an account:</legend>
+        <%c++ if(!signup_error.empty() ) { %>
+            <p>{%signup_error%}</p>
+        <%c++ } %>
+        <br/>
+        <label>
+            Username:
+            <input type="text" id="signup_username" name="signup_username" value="{%signup_username%}"/>
+        </label>
+        <br/>
+        <label>
+            Password:
+            <input type="password" id="signup_password" name="signup_password"/>
+        </label>
+        <br/>
+    <input type="submit" value="submit">
+    </fieldset>
+</form>
+
 
 <%view _footer.csp %>
+
