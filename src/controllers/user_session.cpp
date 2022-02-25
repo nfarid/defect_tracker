@@ -85,6 +85,18 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
     UTIL_UNREACHABLE();
 }
 
+void UserSession::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)
+{
+    const auto session = req->session();
+    if(!session) {
+        std::cerr<<"Session is not enabled"<<std::endl;
+        throw std::runtime_error("Session is not enabled");
+    }
+    // There's no check if the user is logged in or not, since the result is the same either way
+    req->session()->clear();
+    return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
+}
+
 
 }  // namespace Ctrlr
 
