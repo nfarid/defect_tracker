@@ -81,3 +81,45 @@ DROGON_TEST(UserSessionController_CreateIncorrect){
         CHECK(resp->getStatusCode() != k201Created);
     });
 }
+
+// Test when a users login then logout
+DROGON_TEST(UserSessionController_Destroy){
+    auto client = HttpClient::newHttpClient(localhost, testPort);
+    client->enableCookies();
+
+    auto createReq = HttpRequest::newHttpFormPostRequest();
+    createReq->setPath("/login");
+
+    // This presume that there's a user with username of username and password digest of password in the test database
+    createReq->setParameter("login_username", "username");
+    createReq->setParameter("login_password", "password");
+
+    client->sendRequest(createReq, [TEST_CTX, client](ReqResult res, const HttpResponsePtr& resp){
+        REQUIRE(res == ReqResult::Ok);
+        REQUIRE(resp != nullptr);
+        // Once a user session is created, redirect back to the homepage
+        CHECK(resp->getStatusCode() == k303SeeOther);
+        CHECK(resp->getHeader("location"s) == "/"s);
+
+        // Test the logout
+        auto destroyReq = HttpRequest::newHttpFormPostRequest();
+        destroyReq->setPath("/logout");
+        client->sendRequest(destroyReq, [TEST_CTX, client](ReqResult res, const HttpResponsePtr& resp){
+            REQUIRE(res == ReqResult::Ok);
+            REQUIRE(resp != nullptr);
+            // After logout, redirect back to the homepage
+            CHECK(resp->getStatusCode() == k303SeeOther);
+            CHECK(resp->getHeader("location"s) == "/"s);
+
+            // If the user has logged out, then they can access the login page again
+            auto newReq = HttpRequest::newHttpRequest();
+            newReq->setPath("/login");
+            client->sendRequest(newReq, [TEST_CTX](ReqResult res, const HttpResponsePtr& resp){
+                REQUIRE(res == ReqResult::Ok);
+                REQUIRE(resp != nullptr);
+                // After logout, redirect back to the homepage
+                CHECK(resp->getStatusCode() == k200OK);
+            });
+        });
+    });
+}
