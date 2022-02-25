@@ -42,7 +42,7 @@ DROGON_TEST(UserSessionController_Create){
         REQUIRE(resp != nullptr);
 
         // Once a user session is created, redirect back to the homepage
-        CHECK(resp->getStatusCode() == k201Created);
+        CHECK(resp->getStatusCode() == k303SeeOther);
         CHECK(resp->getHeader("location"s) == "/"s);
 
         // Test when the user tries to login twice in a row

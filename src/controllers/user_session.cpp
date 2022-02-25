@@ -76,7 +76,7 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
 
         // Everything is correct, so the user can login
         req->session()->insert("user", user.getValueOfId() );
-        return cb(HttpResponse::newRedirectionResponse("/", k201Created) );
+        return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     } catch(std::exception& ex) {
         // TODO: Better error handling
         std::cerr<<ex.what()<<std::endl;

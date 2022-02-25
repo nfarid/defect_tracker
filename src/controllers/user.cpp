@@ -67,10 +67,9 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     newAccount.setUsername(username);
     newAccount.setPasswordDigest(passwordHash);
     try {
-        mAccountOrm.insert(newAccount);
-        std::cerr<<newAccount.getValueOfId()<<std::endl;
+        mAccountOrm.insert(newAccount);  // This will also set the id for newAccount
         req->session()->insert("user", newAccount.getValueOfId() );
-        return cb(HttpResponse::newRedirectionResponse("/", k201Created) );
+        return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     }catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
         data.insert("signup_error", "There seems to be an error"s);
