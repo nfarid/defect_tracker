@@ -11,6 +11,8 @@
 #include <cstring>
 
 int main(int argc, char** argv) {
+    std::clog<<"Starting the tests, make sure that create_test_data.sql has been ran before"<<std::endl;
+
     // Get database url by command line (then try environment)
     std::string_view dbUrl{};
     for(int i=1; i+1<argc; ++i) {
