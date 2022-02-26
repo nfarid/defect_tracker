@@ -21,12 +21,14 @@ public:
         ADD_METHOD_TO(User::show, "/user/{1}", Get);
         ADD_METHOD_TO(User::newGet, "/signup", Get);
         ADD_METHOD_TO(User::create, "/signup", Post);
+        ADD_METHOD_TO(User::destroy, "/user/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     void show(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id);
     static void newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
     void create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    void destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id);
 
 private:
     Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
@@ -38,7 +40,7 @@ void User::show(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&
     HttpViewData data;
     try {
         const auto user = mAccountOrm.findByPrimaryKey(id);
-        const auto username = user.getValueOfUsername();
+        const auto& username = user.getValueOfUsername();
         data.insert("user_username", username);
         return cb(HttpResponse::newHttpViewResponse("user.csp", data) );
     }  catch(std::exception& ex) {
@@ -110,6 +112,22 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
         data.insert("signup_error", "There seems to be an error"s);
         return cb(HttpResponse::newHttpViewResponse("signup.csp", data) );
     }
+}
+
+void User::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
+{
+    const auto session = req->session();
+    if(!session) {
+        std::cerr<<"Session is not enabled"<<std::endl;
+        throw std::runtime_error("Session is not enabled");
+    }
+
+    const auto userId = session->getOptional<int32_t>("user");
+    if(!userId || (*userId != id) )
+        return cb(HttpResponse::newNotFoundResponse() );
+
+    mAccountOrm.deleteByPrimaryKey(id);
+    cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
 }
 
 
