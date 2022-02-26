@@ -1,0 +1,11 @@
+
+<%view _header.csp %>
+
+
+<%c++ const auto user_username = @@.get<std::string>("user_username"); %>
+
+<h1>{%user_username%}</h1>
+<h2>User</h2>
+
+<%view _footer.csp %>
+

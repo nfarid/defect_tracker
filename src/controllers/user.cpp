@@ -18,11 +18,13 @@ class User : public drogon::HttpController<User> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
+        ADD_METHOD_TO(User::show, "/user/{1}", Get);
         ADD_METHOD_TO(User::newGet, "/signup", Get);
-    ADD_METHOD_TO(User::create, "/signup", Post);
+        ADD_METHOD_TO(User::create, "/signup", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
+    void show(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id);
     static void newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
     void create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
 
@@ -30,6 +32,20 @@ private:
     Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
 };
 
+
+void User::show(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
+{
+    HttpViewData data;
+    try {
+        const auto user = mAccountOrm.findByPrimaryKey(id);
+        const auto username = user.getValueOfUsername();
+        data.insert("user_username", username);
+        return cb(HttpResponse::newHttpViewResponse("user.csp", data) );
+    }  catch(std::exception& ex) {
+        std::cerr<<ex.what()<<std::endl;
+        return cb(HttpResponse::newNotFoundResponse() );
+    }
+}
 
 void User::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     // TODO: Refactor this
