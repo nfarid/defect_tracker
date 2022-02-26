@@ -27,7 +27,7 @@ DROGON_TEST(UserController_New){
     });
 }
 
-DROGON_TEST(UserController_Create){
+DROGON_TEST(UserController_CreateAndDestroy){
     auto client = HttpClient::newHttpClient(localhost, testPort);
     client->enableCookies();
 
@@ -38,17 +38,29 @@ DROGON_TEST(UserController_Create){
     createReq->setParameter("signup_username", new_username);
     createReq->setParameter("signup_password", "new_password");
 
-    client->sendRequest(createReq, [TEST_CTX, new_username](ReqResult res, const HttpResponsePtr& resp){
+    client->sendRequest(createReq, [TEST_CTX, new_username, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);
         REQUIRE(resp != nullptr);
         // User is redirected to homepage after signup
-        std::cout<<"http: "<<resp->statusCode()<<std::endl;
-        for(const auto& [k, v] : resp->getHeaders() )
-            std::cout<<k<<" ; "<<v<<std::endl;
         REQUIRE(resp->getHeader("location"s) == "/"s);
 
+        // The user should be in the database
         Mapper<Model::Account> orm = Mapper<Model::Account>(app().getDbClient("db") );
         const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
-        REQUIRE(orm.count(userCriteria) == 1);
+        const auto foundUserLst = orm.findBy(userCriteria);
+        REQUIRE(size(foundUserLst) == 1);
+
+        const auto id = foundUserLst.front().getValueOfId();
+        // Delete the user
+        auto deleteReq = HttpRequest::newHttpFormPostRequest();
+        deleteReq->setPath("/user/"s + std::to_string(id) + "/delete");
+        client->sendRequest(deleteReq, [TEST_CTX, userCriteria, orm]
+        (ReqResult res, const HttpResponsePtr& resp) mutable{
+            REQUIRE(res == ReqResult::Ok);
+            REQUIRE(resp != nullptr);
+            REQUIRE(resp->getHeader("location"s) == "/"s);
+            // User should not be in the database
+            REQUIRE(orm.count(userCriteria) == 0);
+        });
     });
 }
