@@ -35,13 +35,24 @@ private:
 };
 
 
-void User::show(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
+void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
 {
     HttpViewData data;
+
+    const auto session = req->session();
+    if(!session) {
+        std::cerr<<"Session is not enabled"<<std::endl;
+        throw std::runtime_error("Session is not enabled");
+    }
+    const auto currentUserId = session->getOptional<int32_t>("user");
+    if(currentUserId && (*currentUserId == id) )
+        data.insert("user_delete", "allowed"s);
+
     try {
         const auto user = mAccountOrm.findByPrimaryKey(id);
         const auto& username = user.getValueOfUsername();
         data.insert("user_username", username);
+        data.insert("user_id", std::to_string(id) );
         return cb(HttpResponse::newHttpViewResponse("user.csp", data) );
     }  catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -123,9 +134,12 @@ void User::destroy(const HttpRequestPtr& req, std::function<void(const HttpRespo
     }
 
     const auto userId = session->getOptional<int32_t>("user");
-    if(!userId || (*userId != id) )
+    if(!userId || (*userId != id) ) {
+        // Should be http 403
         return cb(HttpResponse::newNotFoundResponse() );
+    }
 
+    session->clear();
     mAccountOrm.deleteByPrimaryKey(id);
     cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
 }
