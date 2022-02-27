@@ -21,6 +21,7 @@ endforeach()
 set(APP_SRC
     "app.cpp"
 
+    "controllers/auxiliary.cpp"
     "controllers/home.cpp"
     "controllers/user.cpp"
     "controllers/user_session.cpp"

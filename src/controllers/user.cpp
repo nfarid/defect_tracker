@@ -1,6 +1,7 @@
 
-#include "../util/hash.hpp"
+#include "./auxiliary.hpp"
 #include "../models/account.hpp"
+#include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -11,8 +12,9 @@ namespace Ctrlr
 {
 
 
-using namespace drogon;
 using std::string_literals::operator""s;
+using namespace Aux;
+using namespace drogon;
 
 class User : public drogon::HttpController<User> {
 public:
@@ -39,11 +41,7 @@ void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponse
 {
     HttpViewData data;
 
-    const auto session = req->session();
-    if(!session) {
-        std::cerr<<"Session is not enabled"<<std::endl;
-        throw std::runtime_error("Session is not enabled");
-    }
+    const SessionPtr session = getSession(req);
     const auto currentUserId = session->getOptional<int32_t>("user");
     if(currentUserId && (*currentUserId == id) )
         data.insert("user_delete", "allowed"s);
@@ -62,11 +60,7 @@ void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponse
 
 void User::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     // TODO: Refactor this
-    const auto session = req->session();
-    if(!session) {
-        std::cerr<<"Session is not enabled"<<std::endl;
-        throw std::runtime_error("Session is not enabled");
-    }
+    const SessionPtr session = getSession(req);
     const auto userId = session->getOptional<int32_t>("user");
 
     // If the user has already logged in, there's no point of the signup page
@@ -116,7 +110,8 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     newAccount.setPasswordDigest(passwordHash);
     try {
         mAccountOrm.insert(newAccount);  // This will also set the id for newAccount
-        req->session()->insert("user", newAccount.getValueOfId() );
+        SessionPtr session = getSession(req);
+        session->insert("user", newAccount.getValueOfId() );
         return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     }catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -127,11 +122,7 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
 
 void User::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
 {
-    const auto session = req->session();
-    if(!session) {
-        std::cerr<<"Session is not enabled"<<std::endl;
-        throw std::runtime_error("Session is not enabled");
-    }
+    SessionPtr session = getSession(req);
 
     const auto userId = session->getOptional<int32_t>("user");
     if(!userId || (*userId != id) ) {

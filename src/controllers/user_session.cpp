@@ -1,4 +1,5 @@
 
+#include "./auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../util/core.hpp"
 #include "../util/hash.hpp"
@@ -14,8 +15,9 @@ namespace Ctrlr
 {
 
 
-using namespace drogon;
 using std::string_literals::operator""s;
+using namespace Aux;
+using namespace drogon;
 
 class UserSession : public drogon::HttpController<UserSession> {
 public:
@@ -37,11 +39,7 @@ private:
 
 
 void UserSession::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
-    const auto session = req->session();
-    if(!session) {
-        std::cerr<<"Session is not enabled"<<std::endl;
-        throw std::runtime_error("Session is not enabled");
-    }
+    const SessionPtr session = getSession(req);
     const auto userId = session->getOptional<int32_t>("user");
 
     // If the user has already logged in, there's no point of the login page.
@@ -96,7 +94,8 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
         }
 
         // Everything is correct, so the user can login
-        req->session()->insert("user", user.getValueOfId() );
+        SessionPtr session = getSession(req);
+        session->insert("user", user.getValueOfId() );
         return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     } catch(std::exception& ex) {
         // TODO: Better error handling
@@ -108,11 +107,7 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
 
 void UserSession::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)
 {
-    const auto session = req->session();
-    if(!session) {
-        std::cerr<<"Session is not enabled"<<std::endl;
-        throw std::runtime_error("Session is not enabled");
-    }
+    const SessionPtr session = getSession(req);
     // There's no check if the user is logged in or not, since the result is the same either way
     req->session()->clear();
     return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
