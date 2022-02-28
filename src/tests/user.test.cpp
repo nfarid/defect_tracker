@@ -9,6 +9,7 @@
  #include <string>
 
 using namespace drogon;
+using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(UserController_New){

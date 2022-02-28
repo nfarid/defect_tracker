@@ -15,6 +15,7 @@ namespace Ctrlr
 using std::string_literals::operator""s;
 using namespace Aux;
 using namespace drogon;
+using namespace drogon::orm;
 
 class User : public drogon::HttpController<User> {
 public:

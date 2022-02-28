@@ -18,6 +18,7 @@ namespace Ctrlr
 using std::string_literals::operator""s;
 using namespace Aux;
 using namespace drogon;
+using namespace drogon::orm;
 
 class UserSession : public drogon::HttpController<UserSession> {
 public:
@@ -40,7 +41,6 @@ private:
 
 void UserSession::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const SessionPtr session = getSession(req);
-    const auto userId = session->getOptional<int32_t>("user_id");
     // If the user has already logged in, there's no point of the login page.
     if(isLoggedIn(*session) )
         return cb(HttpResponse::newRedirectionResponse("/") );

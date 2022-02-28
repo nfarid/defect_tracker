@@ -26,10 +26,9 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    void index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    static void index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
 
 private:
-    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
 };
 
 

@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <iostream>
 
-using namespace drogon::orm;
-
 
 namespace drogon
 {
@@ -47,6 +45,9 @@ namespace drogon_model
 
 namespace bug_tracker
 {
+
+
+using namespace drogon::orm;
 
 
 class Staff{
