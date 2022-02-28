@@ -35,8 +35,8 @@ DROGON_TEST(UserController_CreateAndDestroy){
     createReq->setPath("/signup");
 
     const std::string new_username = "new_username";
-    createReq->setParameter("signup_username", new_username);
-    createReq->setParameter("signup_password", "new_password");
+    createReq->setParameter("form_username", new_username);
+    createReq->setParameter("form_password", "new_password");
 
     client->sendRequest(createReq, [TEST_CTX, new_username, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);

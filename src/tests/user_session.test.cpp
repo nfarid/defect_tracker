@@ -34,8 +34,8 @@ DROGON_TEST(UserSessionController_Create){
     createReq->setPath("/login");
 
     // This presume that there's a user with username of username and password digest of password in the test database
-    createReq->setParameter("login_username", "username");
-    createReq->setParameter("login_password", "password");
+    createReq->setParameter("form_username", "username");
+    createReq->setParameter("form_password", "password");
 
     client->sendRequest(createReq, [TEST_CTX, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);
@@ -70,8 +70,8 @@ DROGON_TEST(UserSessionController_CreateIncorrect){
     createReq->setPath("/login");
 
     // This presume that there isn't a user with username of wrong username and password digest of wrong password in the test database
-    createReq->setParameter("login_username", "wrong username");
-    createReq->setParameter("login_password", "wrong password");
+    createReq->setParameter("form_username", "wrong username");
+    createReq->setParameter("form_password", "wrong password");
 
     client->sendRequest(createReq, [TEST_CTX, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);
@@ -91,8 +91,8 @@ DROGON_TEST(UserSessionController_Destroy){
     createReq->setPath("/login");
 
     // This presume that there's a user with username of username and password digest of password in the test database
-    createReq->setParameter("login_username", "username");
-    createReq->setParameter("login_password", "password");
+    createReq->setParameter("form_username", "username");
+    createReq->setParameter("form_password", "password");
 
     client->sendRequest(createReq, [TEST_CTX, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);
