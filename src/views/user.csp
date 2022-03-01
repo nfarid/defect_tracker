@@ -6,8 +6,7 @@
 <%c++ const auto user_id = @@.get<std::string>("user_id"); %>
 <%c++ const auto user_delete = @@.get<std::string>("user_delete"); %>
 
-<h1>{%user_username%}</h1>
-<h2>User</h2>
+<h1>User: {%user_username%}</h1>
 
 <%c++ if(!user_delete.empty() ) { %>
     <form action="/user/{%user_id%}/delete" method="POST">

@@ -40,18 +40,19 @@ private:
 
 void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
 {
-    HttpViewData data;
-
     const SessionPtr session = getSession(req);
-    const auto currentUserId = session->getOptional<int32_t>("user");
-    if(currentUserId && (*currentUserId == id) )
-        data.insert("user_delete", "allowed"s);
 
     try {
         const auto user = mAccountOrm.findByPrimaryKey(id);
-        const auto& username = user.getValueOfUsername();
+        const std::string& username = user.getValueOfUsername();
+
+        HttpViewData data = getViewData(username, *session);
+        const auto currentUserId = session->getOptional<int32_t>("user");
+        if(currentUserId && (*currentUserId == id) )
+            data.insert("user_delete", "allowed"s);
         data.insert("user_username", username);
         data.insert("user_id", std::to_string(id) );
+
         return cb(HttpResponse::newHttpViewResponse("user.csp", data) );
     }  catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
