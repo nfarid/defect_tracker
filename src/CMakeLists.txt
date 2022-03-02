@@ -23,6 +23,7 @@ set(APP_SRC
 
     "controllers/auxiliary.cpp"
     "controllers/home.cpp"
+    "controllers/project.cpp"
     "controllers/user.cpp"
     "controllers/user_session.cpp"
 

@@ -1,0 +1,12 @@
+
+<%view _header.csp %>
+
+<%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto manager_name = @@.get<std::string>("manager_name"); %>
+
+
+<h1>Project:{%title%}</h1>
+<p>Manager: {%manager_name%}</p>
+
+<%view _footer.csp %>
+
