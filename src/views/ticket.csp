@@ -1,0 +1,11 @@
+
+
+<%view _header.csp %>
+
+<%c++ const auto title = @@.get<std::string>("title"); %>
+
+
+<h1>Ticket:{%title%}</h1>
+
+<%view _footer.csp %>
+
