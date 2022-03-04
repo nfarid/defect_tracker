@@ -347,3 +347,5 @@ public:
 
 } // namespace drogon_model
 
+
+namespace Model = drogon_model::bug_tracker;
