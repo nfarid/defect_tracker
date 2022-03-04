@@ -22,7 +22,7 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    void show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id);
+    void show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
 
 private:
     Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );

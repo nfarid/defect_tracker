@@ -4,8 +4,10 @@
 
 #include <drogon/Session.h>
 #include <drogon/HttpRequest.h>
+#include <drogon/HttpResponse.h>
 #include <drogon/HttpViewData.h>
 
+#include <functional>
 #include <string>
 
 
@@ -33,6 +35,10 @@ drogon::HttpViewData getViewData(const std::string& title, const drogon::Session
  * \brief Check if the user is logged in
  */
 bool isLoggedIn(const drogon::Session& session);
+
+
+// A drogon callback function object that takes a http response from the controller
+using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;
 
 
 }  // namespace Aux

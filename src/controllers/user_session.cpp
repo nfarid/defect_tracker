@@ -30,9 +30,9 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
-    void create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
-    static void destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    static void newGet(const HttpRequestPtr& req, ResponseCallback&& cb);
+    void create(const HttpRequestPtr& req, ResponseCallback&& cb);
+    static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
 
 private:
     Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
