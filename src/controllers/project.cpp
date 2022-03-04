@@ -2,6 +2,7 @@
 #include "./auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../models/project.hpp"
+#include "../models/ticket.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -27,6 +28,7 @@ public:
 private:
     Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
     Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(app().getDbClient("db") );
+    Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
 };
 
 void Project::show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
