@@ -6,6 +6,8 @@
 
 #include <drogon/HttpController.h>
 
+#include <string>
+
 
 namespace Ctrlr
 {
@@ -34,10 +36,21 @@ private:
 void Project::show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
 {
     try {
-        const auto project = mProjectOrm.findByPrimaryKey(id);
-        const auto manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
+        const Model::Project project = mProjectOrm.findByPrimaryKey(id);
+        const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
+
+        const Criteria ticketCriteria{Model::Ticket::Cols::_project, CompareOperator::EQ, project.getValueOfId()};
+        const std::vector ticketLst = mTicketOrm.findBy(ticketCriteria);
+
+        // Since the view only need the id and title
+//        std::vector<std::pair<std::string, std::string> > ticketIdTitleLst;
+//        ticketIdTitleLst.reserve(ticketModelLst.size() );
+//        for(const auto& ticket : ticketModelLst)
+//            ticketIdTitleLst.emplace_back(std::to_string(ticket.getValueOfId() ), ticket.getValueOfTitle() );
+
         HttpViewData data = getViewData(project.getValueOfProjectName(), *getSession(req) );
         data.insert("manager_name", manager.getValueOfUsername() );
+        data.insert("ticket_lst", ticketLst);
         return cb(HttpResponse::newHttpViewResponse("project.csp", data) );
     } catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;

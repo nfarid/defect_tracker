@@ -1,12 +1,26 @@
 
+<%inc #include <models/ticket.hpp> %>
+
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto manager_name = @@.get<std::string>("manager_name"); %>
 
+<%c++ /*Every ticket in ticket_lst contains an id and a title*/ %>
+<%c++ const auto ticket_lst = @@.get<std::vector<Model::Ticket>>("ticket_lst"); %>
+
 
 <h1>Project:{%title%}</h1>
 <p>Manager: {%manager_name%}</p>
+
+<%c++ if(!ticket_lst.empty() ) { %>
+    <h3>List of current ticket: </h3>
+    <ul>
+        <%c++ for(const auto& ticket : ticket_lst) { %>
+            <li><a href="/ticket/{%ticket.getValueOfId()%}">{%ticket.getValueOfTitle()%}</a></li>
+        <%c++ } %>
+    </ul>
+<%c++ } %>
 
 <%view _footer.csp %>
 

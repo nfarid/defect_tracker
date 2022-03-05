@@ -61,6 +61,10 @@ target_link_options("${APP_NAME}"
     PUBLIC "${OTHER_LINKER_OPTIONS}"
 )
 
+target_include_directories("${APP_NAME}"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 
 find_package("Drogon" CONFIG REQUIRED)
 find_package("unofficial-sodium" CONFIG REQUIRED)
@@ -86,3 +90,4 @@ add_executable("${TEST_NAME}"
 
 target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")
 ParseAndAddDrogonTests("${TEST_NAME}")
+target_include_directories("${TEST_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
