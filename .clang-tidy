@@ -68,7 +68,6 @@ google-readability-casting,
 google-runtime-operator,
 
 hicpp-exception-baseclass,
-hicpp-signed-bitwise,
 
 llvm-header-guard,
 llvm-include-order,
