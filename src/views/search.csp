@@ -1,0 +1,20 @@
+
+<%inc #include <models/project.hpp> %>
+
+<%view _header.csp %>
+
+<%c++ const auto project_lst = @@.get<std::vector<Model::Project> >("project_lst"); %>
+
+<h1>Project Search</h1>
+
+<ul>
+    <%c++ for(const auto& project : project_lst) { %>
+    <%c++ const std::string& project_name = project.getValueOfProjectName(); %>
+    <%c++ const int32_t project_id = project.getValueOfId(); %>
+        <li><a href="/project/{%project_id%}">{%project_name%}</a></li>
+    <%c++ } %>
+</ul>
+
+
+<%view _footer.csp %>
+

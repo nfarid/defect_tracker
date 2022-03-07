@@ -1,6 +1,4 @@
 
-<%inc #include <optional> %>
-
 <%view _header.csp %>
 
 <%c++ const auto session_username = @@.get<std::string>("session_username"); %>
