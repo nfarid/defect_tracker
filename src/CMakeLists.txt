@@ -28,6 +28,7 @@ set(APP_SRC
     "controllers/user.cpp"
     "controllers/user_session.cpp"
 
+    "models/auxiliary.cpp"
     "models/account.cpp"
     "models/comment.hpp"
     "models/project.cpp"
