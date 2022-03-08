@@ -16,7 +16,6 @@ namespace Ctrlr
 using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
-using std::string_literals::operator""s;
 
 class Project : public HttpController<Project> {
 public:
@@ -56,20 +55,14 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 }
 
 void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb, const std::string& query){
-    std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
     try {
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
         const Criteria projectCriteria{Model::Project::Cols::_project_name, CompareOperator::EQ, query};
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
+        // TODO: Add proper text search
         const std::vector projectLst = mProjectOrm.findBy(projectCriteria);
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
         HttpViewData data = getViewData("project_search", *getSession(req) );
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
         data.insert("project_lst", projectLst);
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
         return cb(HttpResponse::newHttpViewResponse("search.csp", data) );
     }  catch(std::exception& ex) {
-        std::cerr<<"here: "<<__FUNCTION__<<" : "<<__LINE__<<" : "<<__FILE__<<std::endl;
         std::cerr<<ex.what()<<std::endl;
         return cb(HttpResponse::newNotFoundResponse() );
     }
