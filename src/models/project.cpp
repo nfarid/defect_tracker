@@ -35,7 +35,7 @@ Project::Project(const Row& r, const ssize_t indexOffset) noexcept
             projectName_=std::make_shared<std::string>(r["project_name"].as<std::string>() );
         if(!r["manager_id"].isNull() )
             managerId_=std::make_shared<int32_t>(r["manager_id"].as<int32_t>() );
-    } else {
+    } else  {
         size_t offset = static_cast<size_t>(indexOffset);
         if(offset + 3 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
@@ -63,17 +63,18 @@ Project::Project(const Json::Value& pJson, const std::vector<std::string>& pMasq
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64()) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull() )
+        if(!pJson[pMasqueradingVector[1]].isNull() ) {
             projectName_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString() );
+        }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64()) );
     }
 }
 
@@ -82,7 +83,7 @@ Project::Project(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("id") ) {
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64()) );
     }
     if(pJson.isMember("project_name") ) {
         dirtyFlag_[1]=true;
@@ -92,7 +93,7 @@ Project::Project(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("manager_id") ) {
         dirtyFlag_[2]=true;
         if(!pJson["manager_id"].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64()) );
     }
 }
 
@@ -105,7 +106,7 @@ void Project::updateByMasqueradedJson(const Json::Value& pJson,
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64()) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
@@ -115,7 +116,7 @@ void Project::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64()) );
     }
 }
 
@@ -123,7 +124,7 @@ void Project::updateByJson(const Json::Value& pJson) noexcept(false)
 {
     if(pJson.isMember("id") ) {
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64()) );
     }
     if(pJson.isMember("project_name") ) {
         dirtyFlag_[1] = true;
@@ -133,7 +134,7 @@ void Project::updateByJson(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("manager_id") ) {
         dirtyFlag_[2] = true;
         if(!pJson["manager_id"].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64()) );
     }
 }
 
@@ -212,7 +213,7 @@ void Project::setManagerIdToNull() noexcept
     dirtyFlag_[2] = true;
 }
 
-void Project::updateId(const uint64_t )
+void Project::updateId(const uint64_t id)
 {}
 
 const std::vector<std::string>& Project::insertColumns() noexcept
@@ -334,7 +335,7 @@ bool Project::validateJsonForCreation(const Json::Value& pJson, std::string& err
     if(pJson.isMember("project_name") ) {
         if(!validJsonOfField(1, "project_name", pJson["project_name"], err, true) )
             return false;
-    } else {
+    } else  {
         err="The project_name column cannot be null";
         return false;
     }
@@ -364,7 +365,7 @@ bool Project::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
-            } else {
+            } else    {
                 err="The " + pMasqueradingVector[1] + " column cannot be null";
                 return false;
             }
@@ -388,7 +389,7 @@ bool Project::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("id") ) {
         if(!validJsonOfField(0, "id", pJson["id"], err, false) )
             return false;
-    } else {
+    } else  {
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
@@ -415,7 +416,7 @@ bool Project::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false) )
                 return false;
-        } else {
+        } else    {
             err = "The value of primary key must be set in the json object for update";
             return false;
         }

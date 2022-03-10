@@ -56,9 +56,10 @@ public:
         static const std::string _id;
         static const std::string _title;
         static const std::string _descr;
-        static const std::string _project_module;
         static const std::string _ticket_status;
         static const std::string _severity;
+        static const std::string _created_date;
+        static const std::string _resolved_date;
         static const std::string _assigned;
         static const std::string _project;
     };
@@ -144,18 +145,6 @@ public:
     void setDescr(std::string&& pDescr) noexcept;
 
 
-    /**  For column project_module  */
-    ///Get the value of the column project_module, returns the default value if the column is null
-    const std::string& getValueOfProjectModule() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getProjectModule() const noexcept;
-
-    ///Set the value of the column project_module
-    void setProjectModule(const std::string& pProjectModule) noexcept;
-    void setProjectModule(std::string&& pProjectModule) noexcept;
-    void setProjectModuleToNull() noexcept;
-
-
     /**  For column ticket_status  */
     ///Get the value of the column ticket_status, returns the default value if the column is null
     const std::string& getValueOfTicketStatus() const noexcept;
@@ -178,6 +167,27 @@ public:
     void setSeverity(std::string&& pSeverity) noexcept;
 
 
+    /**  For column created_date  */
+    ///Get the value of the column created_date, returns the default value if the column is null
+    const trantor::Date& getValueOfCreatedDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<trantor::Date>& getCreatedDate() const noexcept;
+
+    ///Set the value of the column created_date
+    void setCreatedDate(const trantor::Date& pCreatedDate) noexcept;
+
+
+    /**  For column resolved_date  */
+    ///Get the value of the column resolved_date, returns the default value if the column is null
+    const trantor::Date& getValueOfResolvedDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<trantor::Date>& getResolvedDate() const noexcept;
+
+    ///Set the value of the column resolved_date
+    void setResolvedDate(const trantor::Date& pResolvedDate) noexcept;
+    void setResolvedDateToNull() noexcept;
+
+
     /**  For column assigned  */
     ///Get the value of the column assigned, returns the default value if the column is null
     const int32_t& getValueOfAssigned() const noexcept;
@@ -197,12 +207,11 @@ public:
 
     ///Set the value of the column project
     void setProject(const int32_t& pProject) noexcept;
-    void setProjectToNull() noexcept;
 
 
 
     static size_t getColumnNumber() noexcept {
-        return 8;
+        return 9;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -215,7 +224,7 @@ private:
     friend Mapper<Ticket>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Ticket>;
-#endif  // ifdef __cpp_impl_coroutine
+#endif // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -225,9 +234,10 @@ private:
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> title_;
     std::shared_ptr<std::string> descr_;
-    std::shared_ptr<std::string> projectModule_;
     std::shared_ptr<std::string> ticketStatus_;
     std::shared_ptr<std::string> severity_;
+    std::shared_ptr<trantor::Date> createdDate_;
+    std::shared_ptr<trantor::Date> resolvedDate_;
     std::shared_ptr<int32_t> assigned_;
     std::shared_ptr<int32_t> project_;
     struct MetaData{
@@ -240,7 +250,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[8]={ false};
+    bool dirtyFlag_[9]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -271,22 +281,26 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[3]) {
-            sql += "project_module,";
-            ++parametersCount;
-        }
-        if(dirtyFlag_[4]) {
             sql += "ticket_status,";
             ++parametersCount;
         }
-        if(dirtyFlag_[5]) {
+        if(dirtyFlag_[4]) {
             sql += "severity,";
             ++parametersCount;
         }
+        if(dirtyFlag_[5]) {
+            sql += "created_date,";
+            ++parametersCount;
+        }
         if(dirtyFlag_[6]) {
-            sql += "assigned,";
+            sql += "resolved_date,";
             ++parametersCount;
         }
         if(dirtyFlag_[7]) {
+            sql += "assigned,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[8]) {
             sql += "project,";
             ++parametersCount;
         }
@@ -294,7 +308,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else {
+        } else   {
             sql += ") values (";
         }
 
@@ -303,31 +317,35 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[3]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[4]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[5]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[6]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[7]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[8]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)

@@ -55,7 +55,7 @@ public:
     struct Cols{
         static const std::string _id;
         static const std::string _username;
-        static const std::string _password_digest;
+        static const std::string _password_hash;
     };
 
     const static int primaryKeyNumber;
@@ -128,15 +128,15 @@ public:
     void setUsername(std::string&& pUsername) noexcept;
 
 
-    /**  For column password_digest  */
-    ///Get the value of the column password_digest, returns the default value if the column is null
-    const std::string& getValueOfPasswordDigest() const noexcept;
+    /**  For column password_hash  */
+    ///Get the value of the column password_hash, returns the default value if the column is null
+    const std::string& getValueOfPasswordHash() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getPasswordDigest() const noexcept;
+    const std::shared_ptr<std::string>& getPasswordHash() const noexcept;
 
-    ///Set the value of the column password_digest
-    void setPasswordDigest(const std::string& pPasswordDigest) noexcept;
-    void setPasswordDigest(std::string&& pPasswordDigest) noexcept;
+    ///Set the value of the column password_hash
+    void setPasswordHash(const std::string& pPasswordHash) noexcept;
+    void setPasswordHash(std::string&& pPasswordHash) noexcept;
 
 
 
@@ -154,7 +154,7 @@ private:
     friend Mapper<Account>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Account>;
-#endif  // ifdef __cpp_impl_coroutine
+#endif // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -163,7 +163,7 @@ private:
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> username_;
-    std::shared_ptr<std::string> passwordDigest_;
+    std::shared_ptr<std::string> passwordHash_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -201,14 +201,14 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[2]) {
-            sql += "password_digest,";
+            sql += "password_hash,";
             ++parametersCount;
         }
         needSelection=true;
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else {
+        } else   {
             sql += ") values (";
         }
 
@@ -217,11 +217,11 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)

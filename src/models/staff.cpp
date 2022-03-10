@@ -17,8 +17,8 @@ const std::string Staff::tableName = "staff";
 
 const std::vector<typename Staff::MetaData> Staff::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
-    {"project_id", "int32_t", "integer", 4, false, false, false},
-    {"staff_id", "int32_t", "integer", 4, false, false, false}
+    {"project_id", "int32_t", "integer", 4, false, false, true},
+    {"staff_id", "int32_t", "integer", 4, false, false, true}
 };
 const std::string& Staff::getColumnName(size_t index) noexcept(false)
 {
@@ -181,12 +181,6 @@ void Staff::setProjectId(const int32_t& pProjectId) noexcept
     dirtyFlag_[1] = true;
 }
 
-void Staff::setProjectIdToNull() noexcept
-{
-    projectId_.reset();
-    dirtyFlag_[1] = true;
-}
-
 const int32_t& Staff::getValueOfStaffId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
@@ -206,13 +200,7 @@ void Staff::setStaffId(const int32_t& pStaffId) noexcept
     dirtyFlag_[2] = true;
 }
 
-void Staff::setStaffIdToNull() noexcept
-{
-    staffId_.reset();
-    dirtyFlag_[2] = true;
-}
-
-void Staff::updateId(const uint64_t)
+void Staff::updateId(const uint64_t id)
 {}
 
 const std::vector<std::string>& Staff::insertColumns() noexcept
@@ -334,10 +322,16 @@ bool Staff::validateJsonForCreation(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("project_id") ) {
         if(!validJsonOfField(1, "project_id", pJson["project_id"], err, true) )
             return false;
+    } else {
+        err="The project_id column cannot be null";
+        return false;
     }
     if(pJson.isMember("staff_id") ) {
         if(!validJsonOfField(2, "staff_id", pJson["staff_id"], err, true) )
             return false;
+    } else {
+        err="The staff_id column cannot be null";
+        return false;
     }
     return true;
 }
@@ -361,12 +355,18 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
+            } else {
+                err="The " + pMasqueradingVector[1] + " column cannot be null";
+                return false;
             }
         }
         if(!pMasqueradingVector[2].empty() ) {
             if(pJson.isMember(pMasqueradingVector[2]) ) {
                 if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true) )
                     return false;
+            } else {
+                err="The " + pMasqueradingVector[2] + " column cannot be null";
+                return false;
             }
         }
     }catch(const Json::LogicError& e)
@@ -452,8 +452,10 @@ bool Staff::validJsonOfField(size_t index,
         break;
     case 1:
     case 2:
-        if(pJson.isNull() )
-            return true;
+        if(pJson.isNull() ) {
+            err="The " + fieldName + " column cannot be null";
+            return false;
+        }
         if(!pJson.isInt() ) {
             err="Type error in the "+fieldName+" field";
             return false;

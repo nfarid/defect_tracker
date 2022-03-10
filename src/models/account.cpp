@@ -10,7 +10,7 @@ using namespace drogon_model::bug_tracker;
 
 const std::string Account::Cols::_id = "id";
 const std::string Account::Cols::_username = "username";
-const std::string Account::Cols::_password_digest = "password_digest";
+const std::string Account::Cols::_password_hash = "password_hash";
 const std::string Account::primaryKeyName = "id";
 const bool Account::hasPrimaryKey = true;
 const std::string Account::tableName = "account";
@@ -18,7 +18,7 @@ const std::string Account::tableName = "account";
 const std::vector<typename Account::MetaData> Account::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"username", "std::string", "text", 0, false, false, true},
-    {"password_digest", "std::string", "text", 0, false, false, true}
+    {"password_hash", "std::string", "text", 0, false, false, true}
 };
 const std::string& Account::getColumnName(size_t index) noexcept(false)
 {
@@ -33,8 +33,8 @@ Account::Account(const Row& r, const ssize_t indexOffset) noexcept
             id_=std::make_shared<int32_t>(r["id"].as<int32_t>() );
         if(!r["username"].isNull() )
             username_=std::make_shared<std::string>(r["username"].as<std::string>() );
-        if(!r["password_digest"].isNull() )
-            passwordDigest_=std::make_shared<std::string>(r["password_digest"].as<std::string>() );
+        if(!r["password_hash"].isNull() )
+            passwordHash_=std::make_shared<std::string>(r["password_hash"].as<std::string>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
         if(offset + 3 > r.size() ) {
@@ -50,7 +50,7 @@ Account::Account(const Row& r, const ssize_t indexOffset) noexcept
             username_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 2;
         if(!r[index].isNull() )
-            passwordDigest_=std::make_shared<std::string>(r[index].as<std::string>() );
+            passwordHash_=std::make_shared<std::string>(r[index].as<std::string>() );
     }
 }
 
@@ -73,7 +73,7 @@ Account::Account(const Json::Value& pJson, const std::vector<std::string>& pMasq
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            passwordDigest_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            passwordHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
 }
 
@@ -89,10 +89,10 @@ Account::Account(const Json::Value& pJson) noexcept(false)
         if(!pJson["username"].isNull() )
             username_=std::make_shared<std::string>(pJson["username"].asString() );
     }
-    if(pJson.isMember("password_digest") ) {
+    if(pJson.isMember("password_hash") ) {
         dirtyFlag_[2]=true;
-        if(!pJson["password_digest"].isNull() )
-            passwordDigest_=std::make_shared<std::string>(pJson["password_digest"].asString() );
+        if(!pJson["password_hash"].isNull() )
+            passwordHash_=std::make_shared<std::string>(pJson["password_hash"].asString() );
     }
 }
 
@@ -115,7 +115,7 @@ void Account::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            passwordDigest_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            passwordHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
 }
 
@@ -130,10 +130,10 @@ void Account::updateByJson(const Json::Value& pJson) noexcept(false)
         if(!pJson["username"].isNull() )
             username_=std::make_shared<std::string>(pJson["username"].asString() );
     }
-    if(pJson.isMember("password_digest") ) {
+    if(pJson.isMember("password_hash") ) {
         dirtyFlag_[2] = true;
-        if(!pJson["password_digest"].isNull() )
-            passwordDigest_=std::make_shared<std::string>(pJson["password_digest"].asString() );
+        if(!pJson["password_hash"].isNull() )
+            passwordHash_=std::make_shared<std::string>(pJson["password_hash"].asString() );
     }
 }
 
@@ -187,39 +187,39 @@ void Account::setUsername(std::string&& pUsername) noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string& Account::getValueOfPasswordDigest() const noexcept
+const std::string& Account::getValueOfPasswordHash() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(passwordDigest_)
-        return *passwordDigest_;
+    if(passwordHash_)
+        return *passwordHash_;
     return defaultValue;
 }
 
-const std::shared_ptr<std::string>& Account::getPasswordDigest() const noexcept
+const std::shared_ptr<std::string>& Account::getPasswordHash() const noexcept
 {
-    return passwordDigest_;
+    return passwordHash_;
 }
 
-void Account::setPasswordDigest(const std::string& pPasswordDigest) noexcept
+void Account::setPasswordHash(const std::string& pPasswordHash) noexcept
 {
-    passwordDigest_ = std::make_shared<std::string>(pPasswordDigest);
+    passwordHash_ = std::make_shared<std::string>(pPasswordHash);
     dirtyFlag_[2] = true;
 }
 
-void Account::setPasswordDigest(std::string&& pPasswordDigest) noexcept
+void Account::setPasswordHash(std::string&& pPasswordHash) noexcept
 {
-    passwordDigest_ = std::make_shared<std::string>(std::move(pPasswordDigest) );
+    passwordHash_ = std::make_shared<std::string>(std::move(pPasswordHash) );
     dirtyFlag_[2] = true;
 }
 
-void Account::updateId(const uint64_t)
+void Account::updateId(const uint64_t id)
 {}
 
 const std::vector<std::string>& Account::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "username",
-        "password_digest"
+        "password_hash"
     };
     return inCols;
 }
@@ -233,8 +233,8 @@ void Account::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getPasswordDigest() )
-            binder << getValueOfPasswordDigest();
+        if(getPasswordHash() )
+            binder << getValueOfPasswordHash();
         else
             binder << nullptr;
     }
@@ -259,8 +259,8 @@ void Account::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getPasswordDigest() )
-            binder << getValueOfPasswordDigest();
+        if(getPasswordHash() )
+            binder << getValueOfPasswordHash();
         else
             binder << nullptr;
     }
@@ -277,10 +277,10 @@ Json::Value Account::toJson() const
         ret["username"]=getValueOfUsername();
     else
         ret["username"]=Json::Value();
-    if(getPasswordDigest() )
-        ret["password_digest"]=getValueOfPasswordDigest();
+    if(getPasswordHash() )
+        ret["password_hash"]=getValueOfPasswordHash();
     else
-        ret["password_digest"]=Json::Value();
+        ret["password_hash"]=Json::Value();
     return ret;
 }
 
@@ -302,8 +302,8 @@ Json::Value Account::toMasqueradedJson(
                 ret[pMasqueradingVector[1]]=Json::Value();
         }
         if(!pMasqueradingVector[2].empty() ) {
-            if(getPasswordDigest() )
-                ret[pMasqueradingVector[2]]=getValueOfPasswordDigest();
+            if(getPasswordHash() )
+                ret[pMasqueradingVector[2]]=getValueOfPasswordHash();
             else
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
@@ -318,10 +318,10 @@ Json::Value Account::toMasqueradedJson(
         ret["username"]=getValueOfUsername();
     else
         ret["username"]=Json::Value();
-    if(getPasswordDigest() )
-        ret["password_digest"]=getValueOfPasswordDigest();
+    if(getPasswordHash() )
+        ret["password_hash"]=getValueOfPasswordHash();
     else
-        ret["password_digest"]=Json::Value();
+        ret["password_hash"]=Json::Value();
     return ret;
 }
 
@@ -338,11 +338,11 @@ bool Account::validateJsonForCreation(const Json::Value& pJson, std::string& err
         err="The username column cannot be null";
         return false;
     }
-    if(pJson.isMember("password_digest") ) {
-        if(!validJsonOfField(2, "password_digest", pJson["password_digest"], err, true) )
+    if(pJson.isMember("password_hash") ) {
+        if(!validJsonOfField(2, "password_hash", pJson["password_hash"], err, true) )
             return false;
     } else {
-        err="The password_digest column cannot be null";
+        err="The password_hash column cannot be null";
         return false;
     }
     return true;
@@ -402,8 +402,8 @@ bool Account::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(1, "username", pJson["username"], err, false) )
             return false;
     }
-    if(pJson.isMember("password_digest") ) {
-        if(!validJsonOfField(2, "password_digest", pJson["password_digest"], err, false) )
+    if(pJson.isMember("password_hash") ) {
+        if(!validJsonOfField(2, "password_hash", pJson["password_hash"], err, false) )
             return false;
     }
     return true;

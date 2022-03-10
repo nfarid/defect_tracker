@@ -11,9 +11,10 @@ using namespace drogon_model::bug_tracker;
 const std::string Ticket::Cols::_id = "id";
 const std::string Ticket::Cols::_title = "title";
 const std::string Ticket::Cols::_descr = "descr";
-const std::string Ticket::Cols::_project_module = "project_module";
 const std::string Ticket::Cols::_ticket_status = "ticket_status";
 const std::string Ticket::Cols::_severity = "severity";
+const std::string Ticket::Cols::_created_date = "created_date";
+const std::string Ticket::Cols::_resolved_date = "resolved_date";
 const std::string Ticket::Cols::_assigned = "assigned";
 const std::string Ticket::Cols::_project = "project";
 const std::string Ticket::primaryKeyName = "id";
@@ -24,11 +25,12 @@ const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"title", "std::string", "text", 0, false, false, true},
     {"descr", "std::string", "text", 0, false, false, true},
-    {"project_module", "std::string", "text", 0, false, false, false},
     {"ticket_status", "std::string", "USER-DEFINED", 0, false, false, true},
     {"severity", "std::string", "USER-DEFINED", 0, false, false, true},
+    {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
+    {"resolved_date", "trantor::Date", "timestamp without time zone", 0, false, false, false},
     {"assigned", "int32_t", "integer", 4, false, false, false},
-    {"project", "int32_t", "integer", 4, false, false, false}
+    {"project", "int32_t", "integer", 4, false, false, true}
 };
 const std::string& Ticket::getColumnName(size_t index) noexcept(false)
 {
@@ -45,19 +47,51 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             title_=std::make_shared<std::string>(r["title"].as<std::string>() );
         if(!r["descr"].isNull() )
             descr_=std::make_shared<std::string>(r["descr"].as<std::string>() );
-        if(!r["project_module"].isNull() )
-            projectModule_=std::make_shared<std::string>(r["project_module"].as<std::string>() );
         if(!r["ticket_status"].isNull() )
             ticketStatus_=std::make_shared<std::string>(r["ticket_status"].as<std::string>() );
         if(!r["severity"].isNull() )
             severity_=std::make_shared<std::string>(r["severity"].as<std::string>() );
+        if(!r["created_date"].isNull() ) {
+            auto timeStr = r["created_date"].as<std::string>();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+        if(!r["resolved_date"].isNull() ) {
+            auto timeStr = r["resolved_date"].as<std::string>();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
         if(!r["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>(r["assigned"].as<int32_t>() );
         if(!r["project"].isNull() )
             project_=std::make_shared<int32_t>(r["project"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
-        if(offset + 8 > r.size() ) {
+        if(offset + 9 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
@@ -73,17 +107,50 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             descr_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 3;
         if(!r[index].isNull() )
-            projectModule_=std::make_shared<std::string>(r[index].as<std::string>() );
+            ticketStatus_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 4;
         if(!r[index].isNull() )
-            ticketStatus_=std::make_shared<std::string>(r[index].as<std::string>() );
-        index = offset + 5;
-        if(!r[index].isNull() )
             severity_=std::make_shared<std::string>(r[index].as<std::string>() );
+        index = offset + 5;
+        if(!r[index].isNull() ) {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
         index = offset + 6;
+        if(!r[index].isNull() ) {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+        index = offset + 7;
         if(!r[index].isNull() )
             assigned_=std::make_shared<int32_t>(r[index].as<int32_t>() );
-        index = offset + 7;
+        index = offset + 8;
         if(!r[index].isNull() )
             project_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
@@ -91,7 +158,7 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
 
 Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8) {
+    if(pMasqueradingVector.size() != 9) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -113,27 +180,62 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            projectModule_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
+            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString() );
+            severity_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString() );
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]) ) {
         dirtyFlag_[5] = true;
-        if(!pJson[pMasqueradingVector[5]].isNull() )
-            severity_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString() );
+        if(!pJson[pMasqueradingVector[5]].isNull() ) {
+            auto timeStr = pJson[pMasqueradingVector[5]].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]) ) {
         dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[6]].asInt64() ) );
+        if(!pJson[pMasqueradingVector[6]].isNull() ) {
+            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
     }
 }
 
@@ -154,28 +256,63 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
         if(!pJson["descr"].isNull() )
             descr_=std::make_shared<std::string>(pJson["descr"].asString() );
     }
-    if(pJson.isMember("project_module") ) {
-        dirtyFlag_[3]=true;
-        if(!pJson["project_module"].isNull() )
-            projectModule_=std::make_shared<std::string>(pJson["project_module"].asString() );
-    }
     if(pJson.isMember("ticket_status") ) {
-        dirtyFlag_[4]=true;
+        dirtyFlag_[3]=true;
         if(!pJson["ticket_status"].isNull() )
             ticketStatus_=std::make_shared<std::string>(pJson["ticket_status"].asString() );
     }
     if(pJson.isMember("severity") ) {
-        dirtyFlag_[5]=true;
+        dirtyFlag_[4]=true;
         if(!pJson["severity"].isNull() )
             severity_=std::make_shared<std::string>(pJson["severity"].asString() );
     }
-    if(pJson.isMember("assigned") ) {
+    if(pJson.isMember("created_date") ) {
+        dirtyFlag_[5]=true;
+        if(!pJson["created_date"].isNull() ) {
+            auto timeStr = pJson["created_date"].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
+    if(pJson.isMember("resolved_date") ) {
         dirtyFlag_[6]=true;
+        if(!pJson["resolved_date"].isNull() ) {
+            auto timeStr = pJson["resolved_date"].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
+    if(pJson.isMember("assigned") ) {
+        dirtyFlag_[7]=true;
         if(!pJson["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
     }
     if(pJson.isMember("project") ) {
-        dirtyFlag_[7]=true;
+        dirtyFlag_[8]=true;
         if(!pJson["project"].isNull() )
             project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
     }
@@ -184,7 +321,7 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
 void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8) {
+    if(pMasqueradingVector.size() != 9) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -205,27 +342,62 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            projectModule_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
+            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString() );
+            severity_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString() );
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]) ) {
         dirtyFlag_[5] = true;
-        if(!pJson[pMasqueradingVector[5]].isNull() )
-            severity_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString() );
+        if(!pJson[pMasqueradingVector[5]].isNull() ) {
+            auto timeStr = pJson[pMasqueradingVector[5]].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]) ) {
         dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[6]].asInt64() ) );
+        if(!pJson[pMasqueradingVector[6]].isNull() ) {
+            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull() )
+            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
     }
 }
 
@@ -245,28 +417,63 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
         if(!pJson["descr"].isNull() )
             descr_=std::make_shared<std::string>(pJson["descr"].asString() );
     }
-    if(pJson.isMember("project_module") ) {
-        dirtyFlag_[3] = true;
-        if(!pJson["project_module"].isNull() )
-            projectModule_=std::make_shared<std::string>(pJson["project_module"].asString() );
-    }
     if(pJson.isMember("ticket_status") ) {
-        dirtyFlag_[4] = true;
+        dirtyFlag_[3] = true;
         if(!pJson["ticket_status"].isNull() )
             ticketStatus_=std::make_shared<std::string>(pJson["ticket_status"].asString() );
     }
     if(pJson.isMember("severity") ) {
-        dirtyFlag_[5] = true;
+        dirtyFlag_[4] = true;
         if(!pJson["severity"].isNull() )
             severity_=std::make_shared<std::string>(pJson["severity"].asString() );
     }
-    if(pJson.isMember("assigned") ) {
+    if(pJson.isMember("created_date") ) {
+        dirtyFlag_[5] = true;
+        if(!pJson["created_date"].isNull() ) {
+            auto timeStr = pJson["created_date"].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
+    if(pJson.isMember("resolved_date") ) {
         dirtyFlag_[6] = true;
+        if(!pJson["resolved_date"].isNull() ) {
+            auto timeStr = pJson["resolved_date"].asString();
+            struct tm stm{};
+            memset(&stm, 0, sizeof(stm) );
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p) {
+                if(*p=='.') {
+                    std::string decimals(p+1, &timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                        decimals += "0";
+                    decimalNum = static_cast<size_t>(atol(decimals.c_str() ) );
+                }
+                resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
+    if(pJson.isMember("assigned") ) {
+        dirtyFlag_[7] = true;
         if(!pJson["assigned"].isNull() )
             assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
     }
     if(pJson.isMember("project") ) {
-        dirtyFlag_[7] = true;
+        dirtyFlag_[8] = true;
         if(!pJson["project"].isNull() )
             project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
     }
@@ -347,37 +554,6 @@ void Ticket::setDescr(std::string&& pDescr) noexcept
     dirtyFlag_[2] = true;
 }
 
-const std::string& Ticket::getValueOfProjectModule() const noexcept
-{
-    const static std::string defaultValue = std::string();
-    if(projectModule_)
-        return *projectModule_;
-    return defaultValue;
-}
-
-const std::shared_ptr<std::string>& Ticket::getProjectModule() const noexcept
-{
-    return projectModule_;
-}
-
-void Ticket::setProjectModule(const std::string& pProjectModule) noexcept
-{
-    projectModule_ = std::make_shared<std::string>(pProjectModule);
-    dirtyFlag_[3] = true;
-}
-
-void Ticket::setProjectModule(std::string&& pProjectModule) noexcept
-{
-    projectModule_ = std::make_shared<std::string>(std::move(pProjectModule) );
-    dirtyFlag_[3] = true;
-}
-
-void Ticket::setProjectModuleToNull() noexcept
-{
-    projectModule_.reset();
-    dirtyFlag_[3] = true;
-}
-
 const std::string& Ticket::getValueOfTicketStatus() const noexcept
 {
     const static std::string defaultValue = std::string();
@@ -394,13 +570,13 @@ const std::shared_ptr<std::string>& Ticket::getTicketStatus() const noexcept
 void Ticket::setTicketStatus(const std::string& pTicketStatus) noexcept
 {
     ticketStatus_ = std::make_shared<std::string>(pTicketStatus);
-    dirtyFlag_[4] = true;
+    dirtyFlag_[3] = true;
 }
 
 void Ticket::setTicketStatus(std::string&& pTicketStatus) noexcept
 {
     ticketStatus_ = std::make_shared<std::string>(std::move(pTicketStatus) );
-    dirtyFlag_[4] = true;
+    dirtyFlag_[3] = true;
 }
 
 const std::string& Ticket::getValueOfSeverity() const noexcept
@@ -419,13 +595,57 @@ const std::shared_ptr<std::string>& Ticket::getSeverity() const noexcept
 void Ticket::setSeverity(const std::string& pSeverity) noexcept
 {
     severity_ = std::make_shared<std::string>(pSeverity);
-    dirtyFlag_[5] = true;
+    dirtyFlag_[4] = true;
 }
 
 void Ticket::setSeverity(std::string&& pSeverity) noexcept
 {
     severity_ = std::make_shared<std::string>(std::move(pSeverity) );
+    dirtyFlag_[4] = true;
+}
+
+const trantor::Date& Ticket::getValueOfCreatedDate() const noexcept
+{
+    const static trantor::Date defaultValue = trantor::Date();
+    if(createdDate_)
+        return *createdDate_;
+    return defaultValue;
+}
+
+const std::shared_ptr<trantor::Date>& Ticket::getCreatedDate() const noexcept
+{
+    return createdDate_;
+}
+
+void Ticket::setCreatedDate(const trantor::Date& pCreatedDate) noexcept
+{
+    createdDate_ = std::make_shared<trantor::Date>(pCreatedDate);
     dirtyFlag_[5] = true;
+}
+
+const trantor::Date& Ticket::getValueOfResolvedDate() const noexcept
+{
+    const static trantor::Date defaultValue = trantor::Date();
+    if(resolvedDate_)
+        return *resolvedDate_;
+    return defaultValue;
+}
+
+const std::shared_ptr<trantor::Date>& Ticket::getResolvedDate() const noexcept
+{
+    return resolvedDate_;
+}
+
+void Ticket::setResolvedDate(const trantor::Date& pResolvedDate) noexcept
+{
+    resolvedDate_ = std::make_shared<trantor::Date>(pResolvedDate);
+    dirtyFlag_[6] = true;
+}
+
+void Ticket::setResolvedDateToNull() noexcept
+{
+    resolvedDate_.reset();
+    dirtyFlag_[6] = true;
 }
 
 const int32_t& Ticket::getValueOfAssigned() const noexcept
@@ -444,13 +664,13 @@ const std::shared_ptr<int32_t>& Ticket::getAssigned() const noexcept
 void Ticket::setAssigned(const int32_t& pAssigned) noexcept
 {
     assigned_ = std::make_shared<int32_t>(pAssigned);
-    dirtyFlag_[6] = true;
+    dirtyFlag_[7] = true;
 }
 
 void Ticket::setAssignedToNull() noexcept
 {
     assigned_.reset();
-    dirtyFlag_[6] = true;
+    dirtyFlag_[7] = true;
 }
 
 const int32_t& Ticket::getValueOfProject() const noexcept
@@ -469,16 +689,10 @@ const std::shared_ptr<int32_t>& Ticket::getProject() const noexcept
 void Ticket::setProject(const int32_t& pProject) noexcept
 {
     project_ = std::make_shared<int32_t>(pProject);
-    dirtyFlag_[7] = true;
+    dirtyFlag_[8] = true;
 }
 
-void Ticket::setProjectToNull() noexcept
-{
-    project_.reset();
-    dirtyFlag_[7] = true;
-}
-
-void Ticket::updateId(const uint64_t)
+void Ticket::updateId(const uint64_t id)
 {}
 
 const std::vector<std::string>& Ticket::insertColumns() noexcept
@@ -486,9 +700,10 @@ const std::vector<std::string>& Ticket::insertColumns() noexcept
     static const std::vector<std::string> inCols={
         "title",
         "descr",
-        "project_module",
         "ticket_status",
         "severity",
+        "created_date",
+        "resolved_date",
         "assigned",
         "project"
     };
@@ -510,30 +725,36 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getProjectModule() )
-            binder << getValueOfProjectModule();
-        else
-            binder << nullptr;
-    }
-    if(dirtyFlag_[4]) {
         if(getTicketStatus() )
             binder << getValueOfTicketStatus();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[5]) {
+    if(dirtyFlag_[4]) {
         if(getSeverity() )
             binder << getValueOfSeverity();
         else
             binder << nullptr;
     }
+    if(dirtyFlag_[5]) {
+        if(getCreatedDate() )
+            binder << getValueOfCreatedDate();
+        else
+            binder << nullptr;
+    }
     if(dirtyFlag_[6]) {
+        if(getResolvedDate() )
+            binder << getValueOfResolvedDate();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[7]) {
         if(getAssigned() )
             binder << getValueOfAssigned();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[7]) {
+    if(dirtyFlag_[8]) {
         if(getProject() )
             binder << getValueOfProject();
         else
@@ -558,6 +779,8 @@ const std::vector<std::string> Ticket::updateColumns() const
         ret.push_back(getColumnName(6) );
     if(dirtyFlag_[7])
         ret.push_back(getColumnName(7) );
+    if(dirtyFlag_[8])
+        ret.push_back(getColumnName(8) );
     return ret;
 }
 
@@ -576,30 +799,36 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getProjectModule() )
-            binder << getValueOfProjectModule();
-        else
-            binder << nullptr;
-    }
-    if(dirtyFlag_[4]) {
         if(getTicketStatus() )
             binder << getValueOfTicketStatus();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[5]) {
+    if(dirtyFlag_[4]) {
         if(getSeverity() )
             binder << getValueOfSeverity();
         else
             binder << nullptr;
     }
+    if(dirtyFlag_[5]) {
+        if(getCreatedDate() )
+            binder << getValueOfCreatedDate();
+        else
+            binder << nullptr;
+    }
     if(dirtyFlag_[6]) {
+        if(getResolvedDate() )
+            binder << getValueOfResolvedDate();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[7]) {
         if(getAssigned() )
             binder << getValueOfAssigned();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[7]) {
+    if(dirtyFlag_[8]) {
         if(getProject() )
             binder << getValueOfProject();
         else
@@ -622,10 +851,6 @@ Json::Value Ticket::toJson() const
         ret["descr"]=getValueOfDescr();
     else
         ret["descr"]=Json::Value();
-    if(getProjectModule() )
-        ret["project_module"]=getValueOfProjectModule();
-    else
-        ret["project_module"]=Json::Value();
     if(getTicketStatus() )
         ret["ticket_status"]=getValueOfTicketStatus();
     else
@@ -634,6 +859,14 @@ Json::Value Ticket::toJson() const
         ret["severity"]=getValueOfSeverity();
     else
         ret["severity"]=Json::Value();
+    if(getCreatedDate() )
+        ret["created_date"]=getCreatedDate()->toDbStringLocal();
+    else
+        ret["created_date"]=Json::Value();
+    if(getResolvedDate() )
+        ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
+    else
+        ret["resolved_date"]=Json::Value();
     if(getAssigned() )
         ret["assigned"]=getValueOfAssigned();
     else
@@ -649,7 +882,7 @@ Json::Value Ticket::toMasqueradedJson(
     const std::vector<std::string>& pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 8) {
+    if(pMasqueradingVector.size() == 9) {
         if(!pMasqueradingVector[0].empty() ) {
             if(getId() )
                 ret[pMasqueradingVector[0]]=getValueOfId();
@@ -669,34 +902,40 @@ Json::Value Ticket::toMasqueradedJson(
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
         if(!pMasqueradingVector[3].empty() ) {
-            if(getProjectModule() )
-                ret[pMasqueradingVector[3]]=getValueOfProjectModule();
+            if(getTicketStatus() )
+                ret[pMasqueradingVector[3]]=getValueOfTicketStatus();
             else
                 ret[pMasqueradingVector[3]]=Json::Value();
         }
         if(!pMasqueradingVector[4].empty() ) {
-            if(getTicketStatus() )
-                ret[pMasqueradingVector[4]]=getValueOfTicketStatus();
+            if(getSeverity() )
+                ret[pMasqueradingVector[4]]=getValueOfSeverity();
             else
                 ret[pMasqueradingVector[4]]=Json::Value();
         }
         if(!pMasqueradingVector[5].empty() ) {
-            if(getSeverity() )
-                ret[pMasqueradingVector[5]]=getValueOfSeverity();
+            if(getCreatedDate() )
+                ret[pMasqueradingVector[5]]=getCreatedDate()->toDbStringLocal();
             else
                 ret[pMasqueradingVector[5]]=Json::Value();
         }
         if(!pMasqueradingVector[6].empty() ) {
-            if(getAssigned() )
-                ret[pMasqueradingVector[6]]=getValueOfAssigned();
+            if(getResolvedDate() )
+                ret[pMasqueradingVector[6]]=getResolvedDate()->toDbStringLocal();
             else
                 ret[pMasqueradingVector[6]]=Json::Value();
         }
         if(!pMasqueradingVector[7].empty() ) {
-            if(getProject() )
-                ret[pMasqueradingVector[7]]=getValueOfProject();
+            if(getAssigned() )
+                ret[pMasqueradingVector[7]]=getValueOfAssigned();
             else
                 ret[pMasqueradingVector[7]]=Json::Value();
+        }
+        if(!pMasqueradingVector[8].empty() ) {
+            if(getProject() )
+                ret[pMasqueradingVector[8]]=getValueOfProject();
+            else
+                ret[pMasqueradingVector[8]]=Json::Value();
         }
         return ret;
     }
@@ -713,10 +952,6 @@ Json::Value Ticket::toMasqueradedJson(
         ret["descr"]=getValueOfDescr();
     else
         ret["descr"]=Json::Value();
-    if(getProjectModule() )
-        ret["project_module"]=getValueOfProjectModule();
-    else
-        ret["project_module"]=Json::Value();
     if(getTicketStatus() )
         ret["ticket_status"]=getValueOfTicketStatus();
     else
@@ -725,6 +960,14 @@ Json::Value Ticket::toMasqueradedJson(
         ret["severity"]=getValueOfSeverity();
     else
         ret["severity"]=Json::Value();
+    if(getCreatedDate() )
+        ret["created_date"]=getCreatedDate()->toDbStringLocal();
+    else
+        ret["created_date"]=Json::Value();
+    if(getResolvedDate() )
+        ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
+    else
+        ret["resolved_date"]=Json::Value();
     if(getAssigned() )
         ret["assigned"]=getValueOfAssigned();
     else
@@ -756,31 +999,41 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         err="The descr column cannot be null";
         return false;
     }
-    if(pJson.isMember("project_module") ) {
-        if(!validJsonOfField(3, "project_module", pJson["project_module"], err, true) )
-            return false;
-    }
     if(pJson.isMember("ticket_status") ) {
-        if(!validJsonOfField(4, "ticket_status", pJson["ticket_status"], err, true) )
+        if(!validJsonOfField(3, "ticket_status", pJson["ticket_status"], err, true) )
             return false;
     } else {
         err="The ticket_status column cannot be null";
         return false;
     }
     if(pJson.isMember("severity") ) {
-        if(!validJsonOfField(5, "severity", pJson["severity"], err, true) )
+        if(!validJsonOfField(4, "severity", pJson["severity"], err, true) )
             return false;
     } else {
         err="The severity column cannot be null";
         return false;
     }
+    if(pJson.isMember("created_date") ) {
+        if(!validJsonOfField(5, "created_date", pJson["created_date"], err, true) )
+            return false;
+    } else {
+        err="The created_date column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("resolved_date") ) {
+        if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, true) )
+            return false;
+    }
     if(pJson.isMember("assigned") ) {
-        if(!validJsonOfField(6, "assigned", pJson["assigned"], err, true) )
+        if(!validJsonOfField(7, "assigned", pJson["assigned"], err, true) )
             return false;
     }
     if(pJson.isMember("project") ) {
-        if(!validJsonOfField(7, "project", pJson["project"], err, true) )
+        if(!validJsonOfField(8, "project", pJson["project"], err, true) )
             return false;
+    } else {
+        err="The project column cannot be null";
+        return false;
     }
     return true;
 }
@@ -789,7 +1042,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 8) {
+    if(pMasqueradingVector.size() != 9) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -822,6 +1075,9 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[3]) ) {
                 if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true) )
                     return false;
+            } else {
+                err="The " + pMasqueradingVector[3] + " column cannot be null";
+                return false;
             }
         }
         if(!pMasqueradingVector[4].empty() ) {
@@ -854,6 +1110,15 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
                     return false;
             }
         }
+        if(!pMasqueradingVector[8].empty() ) {
+            if(pJson.isMember(pMasqueradingVector[8]) ) {
+                if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true) )
+                    return false;
+            } else {
+                err="The " + pMasqueradingVector[8] + " column cannot be null";
+                return false;
+            }
+        }
     }catch(const Json::LogicError& e)
     {
         err = e.what();
@@ -879,24 +1144,28 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(2, "descr", pJson["descr"], err, false) )
             return false;
     }
-    if(pJson.isMember("project_module") ) {
-        if(!validJsonOfField(3, "project_module", pJson["project_module"], err, false) )
-            return false;
-    }
     if(pJson.isMember("ticket_status") ) {
-        if(!validJsonOfField(4, "ticket_status", pJson["ticket_status"], err, false) )
+        if(!validJsonOfField(3, "ticket_status", pJson["ticket_status"], err, false) )
             return false;
     }
     if(pJson.isMember("severity") ) {
-        if(!validJsonOfField(5, "severity", pJson["severity"], err, false) )
+        if(!validJsonOfField(4, "severity", pJson["severity"], err, false) )
+            return false;
+    }
+    if(pJson.isMember("created_date") ) {
+        if(!validJsonOfField(5, "created_date", pJson["created_date"], err, false) )
+            return false;
+    }
+    if(pJson.isMember("resolved_date") ) {
+        if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, false) )
             return false;
     }
     if(pJson.isMember("assigned") ) {
-        if(!validJsonOfField(6, "assigned", pJson["assigned"], err, false) )
+        if(!validJsonOfField(7, "assigned", pJson["assigned"], err, false) )
             return false;
     }
     if(pJson.isMember("project") ) {
-        if(!validJsonOfField(7, "project", pJson["project"], err, false) )
+        if(!validJsonOfField(8, "project", pJson["project"], err, false) )
             return false;
     }
     return true;
@@ -906,7 +1175,7 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 8) {
+    if(pMasqueradingVector.size() != 9) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -946,6 +1215,10 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
             if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false) )
                 return false;
         }
+        if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
+            if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false) )
+                return false;
+        }
     }catch(const Json::LogicError& e)
     {
         err = e.what();
@@ -977,23 +1250,7 @@ bool Ticket::validJsonOfField(size_t index,
         break;
     case 1:
     case 2:
-        if(pJson.isNull() ) {
-            err="The " + fieldName + " column cannot be null";
-            return false;
-        }
-        if(!pJson.isString() ) {
-            err="Type error in the "+fieldName+" field";
-            return false;
-        }
-        break;
     case 3:
-        if(pJson.isNull() )
-            return true;
-        if(!pJson.isString() ) {
-            err="Type error in the "+fieldName+" field";
-            return false;
-        }
-        break;
     case 4:
     case 5:
         if(pJson.isNull() ) {
@@ -1006,9 +1263,26 @@ bool Ticket::validJsonOfField(size_t index,
         }
         break;
     case 6:
+        if(pJson.isNull() )
+            return true;
+        if(!pJson.isString() ) {
+            err="Type error in the "+fieldName+" field";
+            return false;
+        }
+        break;
     case 7:
         if(pJson.isNull() )
             return true;
+        if(!pJson.isInt() ) {
+            err="Type error in the "+fieldName+" field";
+            return false;
+        }
+        break;
+    case 8:
+        if(pJson.isNull() ) {
+            err="The " + fieldName + " column cannot be null";
+            return false;
+        }
         if(!pJson.isInt() ) {
             err="Type error in the "+fieldName+" field";
             return false;

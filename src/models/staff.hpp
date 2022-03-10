@@ -125,7 +125,6 @@ public:
 
     ///Set the value of the column project_id
     void setProjectId(const int32_t& pProjectId) noexcept;
-    void setProjectIdToNull() noexcept;
 
 
     /**  For column staff_id  */
@@ -136,7 +135,6 @@ public:
 
     ///Set the value of the column staff_id
     void setStaffId(const int32_t& pStaffId) noexcept;
-    void setStaffIdToNull() noexcept;
 
 
 
@@ -154,7 +152,7 @@ private:
     friend Mapper<Staff>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Staff>;
-#endif  // ifdef __cpp_impl_coroutine
+#endif // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -208,7 +206,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else {
+        } else   {
             sql += ") values (";
         }
 
@@ -217,11 +215,11 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
-            n = static_cast<size_t>(sprintf(placeholderStr, "$%d,", placeholder++) );
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)
