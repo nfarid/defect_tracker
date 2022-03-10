@@ -1,5 +1,6 @@
 
 #include "./auxiliary.hpp"
+#include "../constants.hpp"
 #include "../models/ticket.hpp"
 
 #include <drogon/HttpController.h>
@@ -27,17 +28,21 @@ public:
 };
 
 void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
-    mTicketOrm.findByPrimaryKey(id,
-                [=](const Model::Ticket& ticket){
-            const std::string& title = ticket.getValueOfTitle();
-            const auto data = getViewData(title, *getSession(req) );
-            return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
-        },
-                [cb](const DrogonDbException& ex){
-            std::cerr<<ex.base().what()<<std::endl;
-            return cb(HttpResponse::newNotFoundResponse() );
-        }
-    );
+    try {
+        const auto ticket = mTicketOrm.findByPrimaryKey(id);
+        const std::string& title = ticket.getValueOfTitle();
+        const std::string& description = ticket.getValueOfDescr();
+        const std::string createdDate = ticket.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
+        const std::string projectId = std::to_string(ticket.getValueOfProject() );
+        auto data = getViewData(title, *getSession(req) );
+        data.insert("ticket_description", description);
+        data.insert("ticket_created_date", createdDate);
+        data.insert("ticket_project_id", projectId);
+        return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
+    } catch(const DrogonDbException& ex) {
+        std::cerr<<ex.base().what()<<std::endl;
+        return cb(HttpResponse::newNotFoundResponse() );
+    }
 }
 
 

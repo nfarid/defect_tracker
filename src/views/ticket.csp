@@ -3,9 +3,15 @@
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto ticket_description = @@.get<std::string>("ticket_description"); %>
+<%c++ const auto ticket_created_date = @@.get<std::string>("ticket_created_date"); %>
+<%c++ const auto ticket_project_id = @@.get<std::string>("ticket_project_id"); %>
 
 
 <h1>Ticket:{%title%}</h1>
+<p> Created at: {%ticket_created_date%}</p>
+<p> Description: {%ticket_description%}</p>
+<a href="/project/{%ticket_project_id%}">Project</a>
 
 <%view _footer.csp %>
 
