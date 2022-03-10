@@ -24,13 +24,13 @@ class UserSession : public drogon::HttpController<UserSession> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(UserSession::newGet, "/login", Get);
+        ADD_METHOD_TO(UserSession::newForm, "/login", Get);
         ADD_METHOD_TO(UserSession::create, "/login", Post);
         ADD_METHOD_TO(UserSession::destroy, "/logout", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void newGet(const HttpRequestPtr& req, ResponseCallback&& cb);
+    static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
     void create(const HttpRequestPtr& req, ResponseCallback&& cb);
     static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
 
@@ -39,7 +39,7 @@ private:
 };
 
 
-void UserSession::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void UserSession::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the login page.
     if(isLoggedIn(*session) )
@@ -91,7 +91,7 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
         }
         const auto& user = foundUserLst.front();
 
-        if(!Util::verifyHash(user.getValueOfPasswordDigest(), password) ) {
+        if(!Util::verifyHash(user.getValueOfPasswordHash(), password) ) {
             // Incorrect password
             data.insert("form_error", "Incorrect password"s);
             data.insert("form_username", username);

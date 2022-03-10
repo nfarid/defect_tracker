@@ -22,14 +22,14 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(User::show, "/user/{1}", Get);
-        ADD_METHOD_TO(User::newGet, "/signup", Get);
+        ADD_METHOD_TO(User::newForm, "/signup", Get);
         ADD_METHOD_TO(User::create, "/signup", Post);
         ADD_METHOD_TO(User::destroy, "/user/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     void show(const HttpRequestPtr&, ResponseCallback&& cb, int32_t id);
-    static void newGet(const HttpRequestPtr& req, ResponseCallback&& cb);
+    static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
     void create(const HttpRequestPtr& req, ResponseCallback&& cb);
     void destroy(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
 
@@ -60,7 +60,7 @@ void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponse
     }
 }
 
-void User::newGet(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void User::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the signup page
     if(isLoggedIn(*session) )
@@ -108,7 +108,7 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     // Create a new account (and then redirect to the home page)
     Model::Account newAccount;
     newAccount.setUsername(username);
-    newAccount.setPasswordDigest(passwordHash);
+    newAccount.setPasswordHash(passwordHash);
     try {
         mAccountOrm.insert(newAccount);  // This will also set the id for newAccount
         SessionPtr session = getSession(req);
