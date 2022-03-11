@@ -1,0 +1,34 @@
+
+<%inc #include <json/value.h> %>
+
+<%view _header.csp %>
+
+<%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto project = @@.get<Json::Value>("project"); %>
+
+<%c++ const auto project_name = project["project_name"].asString(); %>
+<h1>{%project_name%}'s Report Form: </h1>
+
+<%c++ const auto project_id = project["id"].asInt(); %>
+<form action="/project/{%project_id%}/report" method="POST">
+    <fieldset>
+        <legend>{%title%}</legend>
+        <br/>
+
+        <label>
+            Title:
+            <input type="text" id="form_title" name="form_title" value=""/>
+        </label>
+        <br/>
+
+        <label>
+            Description:
+            <textarea id="form_descr" name="form_descr" rows="4" cols="50"></textarea>
+        </label>
+        <br/>
+
+        <input type="submit" value="submit">
+    </fieldset>
+</form>
+
+<%view _footer.csp %>
