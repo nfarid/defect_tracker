@@ -32,9 +32,5 @@ INSERT INTO Ticket(title, descr, ticket_status, severity, created_date, assigned
 INSERT INTO Staff(project_id, staff_id) VALUES
     ( (SELECT id FROM Project WHERE project_name='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_1') );
 
-
-
-
-
-
-
+INSERT INTO Comment(post, created_date, project) VALUES
+    ('This is an example post', CURRENT_TIMESTAMP, (SELECT id FROM Ticket WHERE title='example_ticket_1') );

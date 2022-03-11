@@ -30,7 +30,7 @@ set(APP_SRC
 
     "models/auxiliary.cpp"
     "models/account.cpp"
-    "models/comment.hpp"
+    "models/comment.cpp"
     "models/project.cpp"
     "models/staff.cpp"
     "models/ticket.cpp"

@@ -54,7 +54,9 @@ class Comment{
 public:
     struct Cols{
         static const std::string _id;
-        static const std::string _text;
+        static const std::string _post;
+        static const std::string _created_date;
+        static const std::string _project;
     };
 
     const static int primaryKeyNumber;
@@ -116,20 +118,40 @@ public:
     void setId(const int32_t& pId) noexcept;
 
 
-    /**  For column text  */
-    ///Get the value of the column text, returns the default value if the column is null
-    const std::string& getValueOfText() const noexcept;
+    /**  For column post  */
+    ///Get the value of the column post, returns the default value if the column is null
+    const std::string& getValueOfPost() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getText() const noexcept;
+    const std::shared_ptr<std::string>& getPost() const noexcept;
 
-    ///Set the value of the column text
-    void setText(const std::string& pText) noexcept;
-    void setText(std::string&& pText) noexcept;
+    ///Set the value of the column post
+    void setPost(const std::string& pPost) noexcept;
+    void setPost(std::string&& pPost) noexcept;
+
+
+    /**  For column created_date  */
+    ///Get the value of the column created_date, returns the default value if the column is null
+    const trantor::Date& getValueOfCreatedDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<trantor::Date>& getCreatedDate() const noexcept;
+
+    ///Set the value of the column created_date
+    void setCreatedDate(const trantor::Date& pCreatedDate) noexcept;
+
+
+    /**  For column project  */
+    ///Get the value of the column project, returns the default value if the column is null
+    const int32_t& getValueOfProject() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t>& getProject() const noexcept;
+
+    ///Set the value of the column project
+    void setProject(const int32_t& pProject) noexcept;
 
 
 
     static size_t getColumnNumber() noexcept {
-        return 2;
+        return 4;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -150,7 +172,9 @@ private:
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
-    std::shared_ptr<std::string> text_;
+    std::shared_ptr<std::string> post_;
+    std::shared_ptr<trantor::Date> createdDate_;
+    std::shared_ptr<int32_t> project_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -161,7 +185,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[2]={ false};
+    bool dirtyFlag_[4]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -184,7 +208,15 @@ public:
         sql += "id,";
         ++parametersCount;
         if(dirtyFlag_[1]) {
-            sql += "text,";
+            sql += "post,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[2]) {
+            sql += "created_date,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[3]) {
+            sql += "project,";
             ++parametersCount;
         }
         needSelection=true;
@@ -200,6 +232,14 @@ public:
         size_t n=0;
         sql +="default,";
         if(dirtyFlag_[1]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[2]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[3]) {
             n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
