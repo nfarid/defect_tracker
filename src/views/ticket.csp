@@ -1,17 +1,33 @@
 
+<%inc #include <json/value.h> %>
 
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto ticket_description = @@.get<std::string>("ticket_description"); %>
-<%c++ const auto ticket_created_date = @@.get<std::string>("ticket_created_date"); %>
-<%c++ const auto ticket_project_id = @@.get<std::string>("ticket_project_id"); %>
+<%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
+<%c++ const auto commentLst = @@.get<std::vector<Json::Value> >("commentLst"); %>
 
+<h1>{%title%}</h1>
 
-<h1>Ticket:{%title%}</h1>
-<p> Created at: {%ticket_created_date%}</p>
-<p> Description: {%ticket_description%}</p>
-<a href="/project/{%ticket_project_id%}">Project</a>
+<%c++ const auto ticket_desc = ticket["desc"].asString(); %>
+<p>{%ticket_desc;%}</p>
+
+<%c++ const auto project_id = ticket["project"].asInt(); %>
+<a href="/project/{%project_id%}">Project</a>
+
+<%c++ const auto ticket_created_date = ticket["created_date"].asString(); %>
+<p>Creation date: {%ticket_created_date%}</p>
+
+<%c++ if(!commentLst.empty() ) { %>
+    <p>Comments: </p>
+    <ul>
+        <%c++ for(const auto& comment : commentLst) { %>
+            <%c++ const auto post = comment["post"].asString(); %>
+            <p>{%post%}</p>
+        <%c++ } %>
+    </ul>
+<%c++ } %>
+
 
 <%view _footer.csp %>
 

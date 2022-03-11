@@ -2,6 +2,7 @@
 #include "./auxiliary.hpp"
 #include "../constants.hpp"
 #include "../models/ticket.hpp"
+#include "../models/comment.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -25,22 +26,37 @@ public:
 
     void show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
     Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
+    Mapper<Model::Comment> mCommentOrm = Mapper<Model::Comment>(app().getDbClient("db") );
 };
 
 void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
     try {
-        const auto ticket = mTicketOrm.findByPrimaryKey(id);
-        const std::string& title = ticket.getValueOfTitle();
-        const std::string& description = ticket.getValueOfDescr();
-        const std::string createdDate = ticket.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
-        const std::string projectId = std::to_string(ticket.getValueOfProject() );
-        auto data = getViewData(title, *getSession(req) );
-        data.insert("ticket_description", description);
-        data.insert("ticket_created_date", createdDate);
-        data.insert("ticket_project_id", projectId);
+        // TODO:
+        auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
+        const Criteria commentCriteria{Model::Comment::Cols::_project, CompareOperator::EQ, id};
+        auto commentLstFuture = mCommentOrm.findFutureBy(commentCriteria);
+
+        const auto ticket = ticketFuture.get();
+        const auto commentLst = commentLstFuture.get();
+        std::vector<Json::Value> commentLstJson{};
+        commentLstJson.reserve(size(commentLst) );
+        for(const auto& comment : commentLst) {
+            auto commentJson = comment.toJson();
+            commentJson["created_date"] = comment.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
+            commentLstJson.push_back(std::move(commentJson) );
+        }
+        auto ticketJson = ticket.toJson();
+        ticketJson["created_date"] = ticket.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
+
+        auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
+        data.insert("ticket", std::move(ticketJson) );
+        data.insert("commentLst", std::move(commentLstJson) );
         return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
-    } catch(const DrogonDbException& ex) {
-        std::cerr<<ex.base().what()<<std::endl;
+    } catch(const std::exception& ex) {
+        std::cerr<<ex.what()<<std::endl;
+        return cb(HttpResponse::newNotFoundResponse() );
+    }
+}
         return cb(HttpResponse::newNotFoundResponse() );
     }
 }
