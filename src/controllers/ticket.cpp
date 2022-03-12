@@ -8,6 +8,8 @@
 
 #include <drogon/HttpController.h>
 
+#include <algorithm>
+
 
 namespace Ctrlr
 {
@@ -87,9 +89,63 @@ void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t i
     }
 }
 
-void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId) {
     try {
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(id);
+        const auto& postParams = req->parameters();
+        const Model::Project project = mProjectOrm.findByPrimaryKey(projectId);
+        HttpViewData data = getViewData("New Ticket", *getSession(req) );
+        data.insert("severityLst", severityLstJson() );
+        data.insert("project", project.toJson() );
+
+        // Check if the form data has been entered
+        // TODO: Refactor this
+        const auto titleIter = postParams.find("form_title");
+        if(titleIter == end(postParams) ) {
+            data.insert("form_error", "Title has not been entered"s);
+            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+            resp->setStatusCode(k422UnprocessableEntity);
+            return cb(resp);
+        }
+        const std::string& title = titleIter->second;
+        data.insert("form_title", title);
+        const auto descriptionIter = postParams.find("form_description");
+        if(descriptionIter == end(postParams) ) {
+            data.insert("form_error", "Description has not been entered"s);
+            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+            resp->setStatusCode(k422UnprocessableEntity);
+            return cb(resp);
+        }
+        const std::string& description = descriptionIter->second;
+        data.insert("form_descrption", description);
+        const auto severityIter = postParams.find("form_severity");
+        if(descriptionIter == end(postParams) ) {
+            data.insert("form_error", "Severity has not been entered"s);
+            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+            resp->setStatusCode(k422UnprocessableEntity);
+            return cb(resp);
+        }
+        const std::string& severity = severityIter->second;
+
+        // Verify form data
+        // TODO: Add more checks
+        // Check if severity is valid (i.e it's in severityLst)
+        if(std::find(begin(severityLst), end(severityLst), severity) == end(severityLst) ) {
+            data.insert("form_error", "Severity has not been entered correctly"s);
+            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+            resp->setStatusCode(k422UnprocessableEntity);
+            return cb(resp);
+        }
+
+        // Insert the new ticket into the database
+        Model::Ticket newTicket;
+        newTicket.setTitle(title);
+        newTicket.setDescr(description);
+        newTicket.setSeverity(severity);
+        newTicket.setTicketStatus("new");
+        newTicket.setCreatedDate(trantor::Date::now() );
+        newTicket.setProject(projectId);
+        mTicketOrm.insert(newTicket);
+        return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     }  catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
         return cb(HttpResponse::newNotFoundResponse() );

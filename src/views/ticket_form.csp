@@ -6,9 +6,17 @@
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
 <%c++ const auto severityLst = @@.get<Json::Value>("severityLst"); %>
+<%c++ const auto form_title = @@.get<std::string>("form_title"); %>
+<%c++ const auto form_description = @@.get<std::string>("form_description"); %>
+<%c++ const auto form_severity = @@.get<std::string>("form_severity"); %>
 
 <%c++ const auto project_name = project["project_name"].asString(); %>
 <h1>{%project_name%}'s Report Form: </h1>
+
+<h2>{%form_title%}</h2>
+<h2>{%form_description%}</h2>
+<h2>{%form_severity%}</h2>
+
 
 <%c++ const auto project_id = project["id"].asInt(); %>
 <form action="/project/{%project_id%}/report" method="POST">
@@ -18,13 +26,13 @@
 
         <label>
             Title:
-            <input type="text" id="form_title" name="form_title" value=""/>
+            <input type="text" id="form_title" name="form_title" value="{%form_title%}"/>
         </label>
         <br/>
 
         <label>
             Description:
-            <textarea id="form_descr" name="form_descr" rows="4" cols="50"></textarea>
+            <textarea id="form_description" name="form_description" rows="4" cols="50">{%form_description%}</textarea>
         </label>
         <br/>
 
