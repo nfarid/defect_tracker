@@ -5,6 +5,7 @@
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
+<%c++ const auto severityLst = @@.get<Json::Value>("severityLst"); %>
 
 <%c++ const auto project_name = project["project_name"].asString(); %>
 <h1>{%project_name%}'s Report Form: </h1>
@@ -24,6 +25,18 @@
         <label>
             Description:
             <textarea id="form_descr" name="form_descr" rows="4" cols="50"></textarea>
+        </label>
+        <br/>
+
+
+        <label>
+            Severity:
+            <select name="form_severity" id="form_severity">
+            <%c++ for(const Json::Value& severityJson : severityLst) { %>
+                <%c++ const auto severity = severityJson.asString(); %>
+                <option value="{%severity%}">{%severity%}</option>
+            <%c++ } %>
+            </select>
         </label>
         <br/>
 

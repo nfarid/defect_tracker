@@ -5,7 +5,7 @@
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
-<%c++ const auto commentLst = @@.get<std::vector<Json::Value> >("commentLst"); %>
+<%c++ const auto commentLst = @@.get<Json::Value>("commentLst"); %>
 
 <h1>{%title%}</h1>
 
