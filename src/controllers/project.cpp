@@ -6,6 +6,7 @@
 
 #include <drogon/HttpController.h>
 
+#include <algorithm>
 #include <string>
 
 
@@ -56,14 +57,19 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 
 void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb, const std::string& query){
     try {
-        const Criteria projectCriteria{Model::Project::Cols::_project_name, CompareOperator::Like, query};
-        // TODO: Add proper text search
-        const std::vector projectLst = mProjectOrm.findBy(projectCriteria);
+        std::string tsQuery(size(query), '\0');
+        std::transform(begin(query), end(query), begin(tsQuery), [](char c){return(c==' ' ? '|' : c);});
+
+        // TODO: Remove SQL-injection vulnerability here
+        auto db = app().getDbClient("db");
+        std::string sqlQuery =
+                "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery('"  + tsQuery + "');";
+        const auto projectLst = db->execSqlSync(sqlQuery);
         Json::Value projectLstJson{};
         for(const auto& project : projectLst) {
             Json::Value projectJson{};
-            projectJson["name"] = project.getValueOfProjectName();
-            projectJson["id"] = project.getValueOfId();
+            projectJson["name"] = project["project_name"].c_str();
+            projectJson["id"] = project["id"].c_str();
             projectLstJson.append(std::move(projectJson) );
         }
 

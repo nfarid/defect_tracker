@@ -10,7 +10,7 @@
 <ul>
     <%c++ for(const auto& project : projectLst) { %>
         <%c++ const auto project_name = project["name"].asString(); %>
-        <%c++ const auto project_id = project["id"].asInt(); %>
+        <%c++ const auto project_id = project["id"].asString(); %>
         <li><a href="/project/{%project_id%}">{%project_name%}</a></li>
     <%c++ } %>
 </ul>
