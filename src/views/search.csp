@@ -1,16 +1,16 @@
 
-<%inc #include <models/project.hpp> %>
+<%inc #include <json/value.h> %>
 
 <%view _header.csp %>
 
-<%c++ const auto project_lst = @@.get<std::vector<Model::Project> >("project_lst"); %>
+<%c++ const auto projectLst = @@.get<Json::Value>("projectLst"); %>
 
 <h1>Project Search</h1>
 
 <ul>
-    <%c++ for(const auto& project : project_lst) { %>
-    <%c++ const std::string& project_name = project.getValueOfProjectName(); %>
-    <%c++ const int32_t project_id = project.getValueOfId(); %>
+    <%c++ for(const auto& project : projectLst) { %>
+        <%c++ const auto project_name = project["name"].asString(); %>
+        <%c++ const auto project_id = project["id"].asInt(); %>
         <li><a href="/project/{%project_id%}">{%project_name%}</a></li>
     <%c++ } %>
 </ul>

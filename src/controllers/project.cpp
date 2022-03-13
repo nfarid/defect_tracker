@@ -56,11 +56,19 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 
 void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb, const std::string& query){
     try {
-        const Criteria projectCriteria{Model::Project::Cols::_project_name, CompareOperator::EQ, query};
+        const Criteria projectCriteria{Model::Project::Cols::_project_name, CompareOperator::Like, query};
         // TODO: Add proper text search
         const std::vector projectLst = mProjectOrm.findBy(projectCriteria);
+        Json::Value projectLstJson{};
+        for(const auto& project : projectLst) {
+            Json::Value projectJson{};
+            projectJson["name"] = project.getValueOfProjectName();
+            projectJson["id"] = project.getValueOfId();
+            projectLstJson.append(std::move(projectJson) );
+        }
+
         HttpViewData data = getViewData("project_search", *getSession(req) );
-        data.insert("project_lst", projectLst);
+        data.insert("projectLst", projectLstJson);
         return cb(HttpResponse::newHttpViewResponse("search.csp", data) );
     }  catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
