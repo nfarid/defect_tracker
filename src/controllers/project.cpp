@@ -58,14 +58,18 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 
 void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb){
     try {
-        // action would be /search?q=query
-        const std::string& query = req->parameters().at("q");
-        // tsQuery would be like query, but with the spaces replaced with '|', allowing searching by token
-        std::string tsQuery(size(query), '\0');
-        std::transform(begin(query), end(query), begin(tsQuery), [](char c){return(c==' ' ? '|' : c);});
+        // action would be /search?search_project=param
+        const std::string& param = req->parameters().at("search_project");
+
+        // TODO: Make this more robust (e.g. trim string)
+        // query would be like the get param, but with the spaces replaced with '|', allowing searching by token
+        std::string query(size(param), '\0');
+        std::transform(begin(param), end(param), begin(query), [](char c){return(c==' ' ? '|' : c);});
+        if(!query.empty() && (query.back() == '|') ) // query should not end with |
+            query.pop_back();
 
         const auto projectLst = mDB->execSqlSync(
-            "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery($1)", tsQuery);
+            "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery($1)", query);
         Json::Value projectLstJson{};
         for(const auto& project : projectLst) {
             Json::Value projectJson{};
