@@ -1,26 +1,31 @@
 
-<%inc #include <models/ticket.hpp> %>
+<%inc #include <json/value.h> %>
 
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto manager_name = @@.get<std::string>("manager_name"); %>
+<%c++ const auto managerName = @@.get<std::string>("managerName"); %>
+<%c++ const auto projectId = @@.get<std::string>("projectId"); %>
 
-<%c++ /*Every ticket in ticket_lst contains an id and a title*/ %>
-<%c++ const auto ticket_lst = @@.get<std::vector<Model::Ticket>>("ticket_lst"); %>
+<%c++ /*Every ticket in ticketLst contains an id and a title*/ %>
+<%c++ const auto ticketLst = @@.get<Json::Value>("ticketLst"); %>
 
 
 <h1>Project:{%title%}</h1>
-<p>Manager: {%manager_name%}</p>
+<p>Manager: {%managerName%}</p>
 
-<%c++ if(!ticket_lst.empty() ) { %>
+<%c++ if(!ticketLst.empty() ) { %>
     <h3>List of current ticket: </h3>
     <ul>
-        <%c++ for(const auto& ticket : ticket_lst) { %>
-            <li><a href="/ticket/{%ticket.getValueOfId()%}">{%ticket.getValueOfTitle()%}</a></li>
+        <%c++ for(const auto& ticket : ticketLst) { %>
+            <%c++ const auto ticketId = ticket["id"].asInt(); %>
+            <%c++ const auto ticketTitle = ticket["title"].asString(); %>
+            <li><a href="/ticket/{%ticketId%}">{%ticketTitle%}</a></li>
         <%c++ } %>
     </ul>
 <%c++ } %>
+
+<a href="/project/{%projectId%}/report">Report an issue</a>
 
 <%view _footer.csp %>
 

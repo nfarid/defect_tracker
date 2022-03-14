@@ -45,10 +45,14 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 
         const Criteria ticketCriteria{Model::Ticket::Cols::_project, CompareOperator::EQ, project.getValueOfId()};
         const std::vector ticketLst = mTicketOrm.findBy(ticketCriteria);
+        Json::Value ticketLstJson{};
+        for(const auto& ticket : ticketLst)
+            ticketLstJson.append(ticket.toJson() );
 
         HttpViewData data = getViewData(project.getValueOfProjectName(), *getSession(req) );
-        data.insert("manager_name", manager.getValueOfUsername() );
-        data.insert("ticket_lst", ticketLst);
+        data.insert("managerName", manager.getValueOfUsername() );
+        data.insert("ticketLst", ticketLstJson);
+        data.insert("projectId", std::to_string(id) );
         return cb(HttpResponse::newHttpViewResponse("project.csp", data) );
     } catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
