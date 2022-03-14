@@ -23,17 +23,18 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(Project::show, "/project/{1}", Get);
-        ADD_METHOD_TO(Project::search, "/search?q={1}", Get);
+        ADD_METHOD_TO(Project::search, "/search", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     void show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
-    void search(const HttpRequestPtr& req, ResponseCallback&& cb, const std::string& query);
+    void search(const HttpRequestPtr& req, ResponseCallback&& cb);
 
 private:
-    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
-    Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(app().getDbClient("db") );
-    Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
+    DbClientPtr mDB = app().getDbClient("db");
+    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(mDB);
+    Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(mDB);
+    Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(mDB);
 };
 
 void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
@@ -55,16 +56,16 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
     }
 }
 
-void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb, const std::string& query){
+void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb){
     try {
+        // action would be /search?q=query
+        const std::string& query = req->parameters().at("q");
+        // tsQuery would be like query, but with the spaces replaced with '|', allowing searching by token
         std::string tsQuery(size(query), '\0');
         std::transform(begin(query), end(query), begin(tsQuery), [](char c){return(c==' ' ? '|' : c);});
 
-        // TODO: Remove SQL-injection vulnerability here
-        auto db = app().getDbClient("db");
-        std::string sqlQuery =
-                "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery('"  + tsQuery + "');";
-        const auto projectLst = db->execSqlSync(sqlQuery);
+        const auto projectLst = mDB->execSqlSync(
+            "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery($1)", tsQuery);
         Json::Value projectLstJson{};
         for(const auto& project : projectLst) {
             Json::Value projectJson{};
