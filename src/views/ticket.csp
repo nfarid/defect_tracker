@@ -12,8 +12,9 @@
 <%c++ const auto ticket_desc = ticket["desc"].asString(); %>
 <p>{%ticket_desc;%}</p>
 
-<%c++ const auto project_id = ticket["project"].asInt(); %>
-<a href="/project/{%project_id%}">Project</a>
+<%c++ const auto projectId = ticket["project"].asInt(); %>
+<%c++ const auto projectName = ticket["project_name"].asString(); %>
+<a href="/project/{%projectId%}">{%projectName%}</a>
 
 <%c++ const auto ticket_created_date = ticket["created_date"].asString(); %>
 <p>Creation date: {%ticket_created_date%}</p>
