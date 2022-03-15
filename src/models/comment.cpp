@@ -11,7 +11,7 @@ using namespace drogon_model::bug_tracker;
 const std::string Comment::Cols::_id = "id";
 const std::string Comment::Cols::_post = "post";
 const std::string Comment::Cols::_created_date = "created_date";
-const std::string Comment::Cols::_project = "project";
+const std::string Comment::Cols::_ticket_id = "ticket_id";
 const std::string Comment::primaryKeyName = "id";
 const bool Comment::hasPrimaryKey = true;
 const std::string Comment::tableName = "comment";
@@ -20,7 +20,7 @@ const std::vector<typename Comment::MetaData> Comment::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"post", "std::string", "text", 0, false, false, true},
     {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
-    {"project", "int32_t", "integer", 4, false, false, true}
+    {"ticket_id", "int32_t", "integer", 4, false, false, true}
 };
 const std::string& Comment::getColumnName(size_t index) noexcept(false)
 {
@@ -52,8 +52,8 @@ Comment::Comment(const Row& r, const ssize_t indexOffset) noexcept
                 createdDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
             }
         }
-        if(!r["project"].isNull() )
-            project_=std::make_shared<int32_t>(r["project"].as<int32_t>() );
+        if(!r["ticket_id"].isNull() )
+            ticketId_=std::make_shared<int32_t>(r["ticket_id"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
         if(offset + 4 > r.size() ) {
@@ -87,7 +87,7 @@ Comment::Comment(const Row& r, const ssize_t indexOffset) noexcept
         }
         index = offset + 3;
         if(!r[index].isNull() )
-            project_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+            ticketId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
 }
 
@@ -130,7 +130,7 @@ Comment::Comment(const Json::Value& pJson, const std::vector<std::string>& pMasq
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
+            ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
     }
 }
 
@@ -166,10 +166,10 @@ Comment::Comment(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("project") ) {
+    if(pJson.isMember("ticket_id") ) {
         dirtyFlag_[3]=true;
-        if(!pJson["project"].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
+        if(!pJson["ticket_id"].isNull() )
+            ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["ticket_id"].asInt64() ) );
     }
 }
 
@@ -212,7 +212,7 @@ void Comment::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
+            ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
     }
 }
 
@@ -247,10 +247,10 @@ void Comment::updateByJson(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("project") ) {
+    if(pJson.isMember("ticket_id") ) {
         dirtyFlag_[3] = true;
-        if(!pJson["project"].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
+        if(!pJson["ticket_id"].isNull() )
+            ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["ticket_id"].asInt64() ) );
     }
 }
 
@@ -323,22 +323,22 @@ void Comment::setCreatedDate(const trantor::Date& pCreatedDate) noexcept
     dirtyFlag_[2] = true;
 }
 
-const int32_t& Comment::getValueOfProject() const noexcept
+const int32_t& Comment::getValueOfTicketId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
-    if(project_)
-        return *project_;
+    if(ticketId_)
+        return *ticketId_;
     return defaultValue;
 }
 
-const std::shared_ptr<int32_t>& Comment::getProject() const noexcept
+const std::shared_ptr<int32_t>& Comment::getTicketId() const noexcept
 {
-    return project_;
+    return ticketId_;
 }
 
-void Comment::setProject(const int32_t& pProject) noexcept
+void Comment::setTicketId(const int32_t& pTicketId) noexcept
 {
-    project_ = std::make_shared<int32_t>(pProject);
+    ticketId_ = std::make_shared<int32_t>(pTicketId);
     dirtyFlag_[3] = true;
 }
 
@@ -350,7 +350,7 @@ const std::vector<std::string>& Comment::insertColumns() noexcept
     static const std::vector<std::string> inCols={
         "post",
         "created_date",
-        "project"
+        "ticket_id"
     };
     return inCols;
 }
@@ -370,8 +370,8 @@ void Comment::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getProject() )
-            binder << getValueOfProject();
+        if(getTicketId() )
+            binder << getValueOfTicketId();
         else
             binder << nullptr;
     }
@@ -404,8 +404,8 @@ void Comment::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getProject() )
-            binder << getValueOfProject();
+        if(getTicketId() )
+            binder << getValueOfTicketId();
         else
             binder << nullptr;
     }
@@ -426,10 +426,10 @@ Json::Value Comment::toJson() const
         ret["created_date"]=getCreatedDate()->toDbStringLocal();
     else
         ret["created_date"]=Json::Value();
-    if(getProject() )
-        ret["project"]=getValueOfProject();
+    if(getTicketId() )
+        ret["ticket_id"]=getValueOfTicketId();
     else
-        ret["project"]=Json::Value();
+        ret["ticket_id"]=Json::Value();
     return ret;
 }
 
@@ -457,8 +457,8 @@ Json::Value Comment::toMasqueradedJson(
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
         if(!pMasqueradingVector[3].empty() ) {
-            if(getProject() )
-                ret[pMasqueradingVector[3]]=getValueOfProject();
+            if(getTicketId() )
+                ret[pMasqueradingVector[3]]=getValueOfTicketId();
             else
                 ret[pMasqueradingVector[3]]=Json::Value();
         }
@@ -477,10 +477,10 @@ Json::Value Comment::toMasqueradedJson(
         ret["created_date"]=getCreatedDate()->toDbStringLocal();
     else
         ret["created_date"]=Json::Value();
-    if(getProject() )
-        ret["project"]=getValueOfProject();
+    if(getTicketId() )
+        ret["ticket_id"]=getValueOfTicketId();
     else
-        ret["project"]=Json::Value();
+        ret["ticket_id"]=Json::Value();
     return ret;
 }
 
@@ -504,11 +504,11 @@ bool Comment::validateJsonForCreation(const Json::Value& pJson, std::string& err
         err="The created_date column cannot be null";
         return false;
     }
-    if(pJson.isMember("project") ) {
-        if(!validJsonOfField(3, "project", pJson["project"], err, true) )
+    if(pJson.isMember("ticket_id") ) {
+        if(!validJsonOfField(3, "ticket_id", pJson["ticket_id"], err, true) )
             return false;
     } else {
-        err="The project column cannot be null";
+        err="The ticket_id column cannot be null";
         return false;
     }
     return true;
@@ -581,8 +581,8 @@ bool Comment::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(2, "created_date", pJson["created_date"], err, false) )
             return false;
     }
-    if(pJson.isMember("project") ) {
-        if(!validJsonOfField(3, "project", pJson["project"], err, false) )
+    if(pJson.isMember("ticket_id") ) {
+        if(!validJsonOfField(3, "ticket_id", pJson["ticket_id"], err, false) )
             return false;
     }
     return true;

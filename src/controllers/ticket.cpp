@@ -45,7 +45,7 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         // Obtain ticket, project and comment models
         auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
 
-        const Criteria commentCriteria{Model::Comment::Cols::_project, CompareOperator::EQ, id};
+        const Criteria commentCriteria{Model::Comment::Cols::_ticket_id, CompareOperator::EQ, id};
         auto commentLstFuture = mCommentOrm.findFutureBy(commentCriteria);
 
         // Convert these values to json
@@ -58,11 +58,11 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         }
 
         const auto ticket = ticketFuture.get();
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProject() );
+        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
         auto ticketJson = ticket.toJson();
         ticketJson["created_date"] = ticket.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
         const auto project = projectFuture.get();
-        ticketJson["project_name"] = project.getValueOfProjectName();
+        ticketJson["project_name"] = project.getValueOfTitle();
 
         // Send the data to the ticket view
         auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
@@ -141,11 +141,11 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         // Insert the new ticket into the database
         Model::Ticket newTicket;
         newTicket.setTitle(title);
-        newTicket.setDescr(description);
+        newTicket.setDescrption(description);
         newTicket.setSeverity(severity);
-        newTicket.setTicketStatus("new");
+        newTicket.setStatus("new");
         newTicket.setCreatedDate(trantor::Date::now() );
-        newTicket.setProject(projectId);
+        newTicket.setProjectId(projectId);
         mTicketOrm.insert(newTicket);
         return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     }  catch(const std::exception& ex) {

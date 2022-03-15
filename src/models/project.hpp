@@ -54,7 +54,7 @@ class Project{
 public:
     struct Cols{
         static const std::string _id;
-        static const std::string _project_name;
+        static const std::string _title;
         static const std::string _manager_id;
     };
 
@@ -117,15 +117,15 @@ public:
     void setId(const int32_t& pId) noexcept;
 
 
-    /**  For column project_name  */
-    ///Get the value of the column project_name, returns the default value if the column is null
-    const std::string& getValueOfProjectName() const noexcept;
+    /**  For column title  */
+    ///Get the value of the column title, returns the default value if the column is null
+    const std::string& getValueOfTitle() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getProjectName() const noexcept;
+    const std::shared_ptr<std::string>& getTitle() const noexcept;
 
-    ///Set the value of the column project_name
-    void setProjectName(const std::string& pProjectName) noexcept;
-    void setProjectName(std::string&& pProjectName) noexcept;
+    ///Set the value of the column title
+    void setTitle(const std::string& pTitle) noexcept;
+    void setTitle(std::string&& pTitle) noexcept;
 
 
     /**  For column manager_id  */
@@ -154,7 +154,7 @@ private:
     friend Mapper<Project>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Project>;
-#endif // ifdef __cpp_impl_coroutine
+#endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -162,7 +162,7 @@ private:
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
-    std::shared_ptr<std::string> projectName_;
+    std::shared_ptr<std::string> title_;
     std::shared_ptr<int32_t> managerId_;
     struct MetaData{
         const std::string colName_;
@@ -197,7 +197,7 @@ public:
         sql += "id,";
         ++parametersCount;
         if(dirtyFlag_[1]) {
-            sql += "project_name,";
+            sql += "title,";
             ++parametersCount;
         }
         if(dirtyFlag_[2]) {
@@ -208,7 +208,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else   {
+        } else {
             sql += ") values (";
         }
 

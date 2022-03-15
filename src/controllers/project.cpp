@@ -43,13 +43,13 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
         const Model::Project project = mProjectOrm.findByPrimaryKey(id);
         const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
 
-        const Criteria ticketCriteria{Model::Ticket::Cols::_project, CompareOperator::EQ, project.getValueOfId()};
+        const Criteria ticketCriteria{Model::Ticket::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
         const std::vector ticketLst = mTicketOrm.findBy(ticketCriteria);
         Json::Value ticketLstJson{};
         for(const auto& ticket : ticketLst)
             ticketLstJson.append(ticket.toJson() );
 
-        HttpViewData data = getViewData(project.getValueOfProjectName(), *getSession(req) );
+        HttpViewData data = getViewData(project.getValueOfTitle(), *getSession(req) );
         data.insert("managerName", manager.getValueOfUsername() );
         data.insert("ticketLst", ticketLstJson);
         data.insert("projectId", std::to_string(id) );

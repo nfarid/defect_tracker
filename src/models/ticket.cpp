@@ -10,13 +10,13 @@ using namespace drogon_model::bug_tracker;
 
 const std::string Ticket::Cols::_id = "id";
 const std::string Ticket::Cols::_title = "title";
-const std::string Ticket::Cols::_descr = "descr";
-const std::string Ticket::Cols::_ticket_status = "ticket_status";
+const std::string Ticket::Cols::_descrption = "descrption";
+const std::string Ticket::Cols::_status = "status";
 const std::string Ticket::Cols::_severity = "severity";
 const std::string Ticket::Cols::_created_date = "created_date";
 const std::string Ticket::Cols::_resolved_date = "resolved_date";
-const std::string Ticket::Cols::_assigned = "assigned";
-const std::string Ticket::Cols::_project = "project";
+const std::string Ticket::Cols::_assigned_id = "assigned_id";
+const std::string Ticket::Cols::_project_id = "project_id";
 const std::string Ticket::primaryKeyName = "id";
 const bool Ticket::hasPrimaryKey = true;
 const std::string Ticket::tableName = "ticket";
@@ -24,13 +24,13 @@ const std::string Ticket::tableName = "ticket";
 const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"title", "std::string", "text", 0, false, false, true},
-    {"descr", "std::string", "text", 0, false, false, true},
-    {"ticket_status", "std::string", "USER-DEFINED", 0, false, false, true},
+    {"descrption", "std::string", "text", 0, false, false, true},
+    {"status", "std::string", "USER-DEFINED", 0, false, false, true},
     {"severity", "std::string", "USER-DEFINED", 0, false, false, true},
     {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
     {"resolved_date", "trantor::Date", "timestamp without time zone", 0, false, false, false},
-    {"assigned", "int32_t", "integer", 4, false, false, false},
-    {"project", "int32_t", "integer", 4, false, false, true}
+    {"assigned_id", "int32_t", "integer", 4, false, false, false},
+    {"project_id", "int32_t", "integer", 4, false, false, true}
 };
 const std::string& Ticket::getColumnName(size_t index) noexcept(false)
 {
@@ -45,10 +45,10 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             id_=std::make_shared<int32_t>(r["id"].as<int32_t>() );
         if(!r["title"].isNull() )
             title_=std::make_shared<std::string>(r["title"].as<std::string>() );
-        if(!r["descr"].isNull() )
-            descr_=std::make_shared<std::string>(r["descr"].as<std::string>() );
-        if(!r["ticket_status"].isNull() )
-            ticketStatus_=std::make_shared<std::string>(r["ticket_status"].as<std::string>() );
+        if(!r["descrption"].isNull() )
+            descrption_=std::make_shared<std::string>(r["descrption"].as<std::string>() );
+        if(!r["status"].isNull() )
+            status_=std::make_shared<std::string>(r["status"].as<std::string>() );
         if(!r["severity"].isNull() )
             severity_=std::make_shared<std::string>(r["severity"].as<std::string>() );
         if(!r["created_date"].isNull() ) {
@@ -85,10 +85,10 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
                 resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
             }
         }
-        if(!r["assigned"].isNull() )
-            assigned_=std::make_shared<int32_t>(r["assigned"].as<int32_t>() );
-        if(!r["project"].isNull() )
-            project_=std::make_shared<int32_t>(r["project"].as<int32_t>() );
+        if(!r["assigned_id"].isNull() )
+            assignedId_=std::make_shared<int32_t>(r["assigned_id"].as<int32_t>() );
+        if(!r["project_id"].isNull() )
+            projectId_=std::make_shared<int32_t>(r["project_id"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
         if(offset + 9 > r.size() ) {
@@ -104,10 +104,10 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             title_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 2;
         if(!r[index].isNull() )
-            descr_=std::make_shared<std::string>(r[index].as<std::string>() );
+            descrption_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 3;
         if(!r[index].isNull() )
-            ticketStatus_=std::make_shared<std::string>(r[index].as<std::string>() );
+            status_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 4;
         if(!r[index].isNull() )
             severity_=std::make_shared<std::string>(r[index].as<std::string>() );
@@ -149,10 +149,10 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
         }
         index = offset + 7;
         if(!r[index].isNull() )
-            assigned_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+            assignedId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
         index = offset + 8;
         if(!r[index].isNull() )
-            project_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+            projectId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
 }
 
@@ -165,7 +165,7 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
@@ -175,12 +175,12 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            descr_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            descrption_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
+            status_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
         dirtyFlag_[4] = true;
@@ -230,12 +230,12 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
     }
 }
 
@@ -244,22 +244,22 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("id") ) {
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
     if(pJson.isMember("title") ) {
         dirtyFlag_[1]=true;
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("descr") ) {
+    if(pJson.isMember("descrption") ) {
         dirtyFlag_[2]=true;
-        if(!pJson["descr"].isNull() )
-            descr_=std::make_shared<std::string>(pJson["descr"].asString() );
+        if(!pJson["descrption"].isNull() )
+            descrption_=std::make_shared<std::string>(pJson["descrption"].asString() );
     }
-    if(pJson.isMember("ticket_status") ) {
+    if(pJson.isMember("status") ) {
         dirtyFlag_[3]=true;
-        if(!pJson["ticket_status"].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson["ticket_status"].asString() );
+        if(!pJson["status"].isNull() )
+            status_=std::make_shared<std::string>(pJson["status"].asString() );
     }
     if(pJson.isMember("severity") ) {
         dirtyFlag_[4]=true;
@@ -306,15 +306,15 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("assigned") ) {
+    if(pJson.isMember("assigned_id") ) {
         dirtyFlag_[7]=true;
-        if(!pJson["assigned"].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
+        if(!pJson["assigned_id"].isNull() )
+            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
     }
-    if(pJson.isMember("project") ) {
+    if(pJson.isMember("project_id") ) {
         dirtyFlag_[8]=true;
-        if(!pJson["project"].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
+        if(!pJson["project_id"].isNull() )
+            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["project_id"].asInt64() ) );
     }
 }
 
@@ -327,7 +327,7 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
@@ -337,12 +337,12 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            descr_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            descrption_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
+            status_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString() );
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
         dirtyFlag_[4] = true;
@@ -392,12 +392,12 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
     }
 }
 
@@ -405,22 +405,22 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
 {
     if(pJson.isMember("id") ) {
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
     if(pJson.isMember("title") ) {
         dirtyFlag_[1] = true;
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("descr") ) {
+    if(pJson.isMember("descrption") ) {
         dirtyFlag_[2] = true;
-        if(!pJson["descr"].isNull() )
-            descr_=std::make_shared<std::string>(pJson["descr"].asString() );
+        if(!pJson["descrption"].isNull() )
+            descrption_=std::make_shared<std::string>(pJson["descrption"].asString() );
     }
-    if(pJson.isMember("ticket_status") ) {
+    if(pJson.isMember("status") ) {
         dirtyFlag_[3] = true;
-        if(!pJson["ticket_status"].isNull() )
-            ticketStatus_=std::make_shared<std::string>(pJson["ticket_status"].asString() );
+        if(!pJson["status"].isNull() )
+            status_=std::make_shared<std::string>(pJson["status"].asString() );
     }
     if(pJson.isMember("severity") ) {
         dirtyFlag_[4] = true;
@@ -467,15 +467,15 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("assigned") ) {
+    if(pJson.isMember("assigned_id") ) {
         dirtyFlag_[7] = true;
-        if(!pJson["assigned"].isNull() )
-            assigned_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned"].asInt64() ) );
+        if(!pJson["assigned_id"].isNull() )
+            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
     }
-    if(pJson.isMember("project") ) {
+    if(pJson.isMember("project_id") ) {
         dirtyFlag_[8] = true;
-        if(!pJson["project"].isNull() )
-            project_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project"].asInt64() ) );
+        if(!pJson["project_id"].isNull() )
+            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["project_id"].asInt64() ) );
     }
 }
 
@@ -529,53 +529,53 @@ void Ticket::setTitle(std::string&& pTitle) noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string& Ticket::getValueOfDescr() const noexcept
+const std::string& Ticket::getValueOfDescrption() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(descr_)
-        return *descr_;
+    if(descrption_)
+        return *descrption_;
     return defaultValue;
 }
 
-const std::shared_ptr<std::string>& Ticket::getDescr() const noexcept
+const std::shared_ptr<std::string>& Ticket::getDescrption() const noexcept
 {
-    return descr_;
+    return descrption_;
 }
 
-void Ticket::setDescr(const std::string& pDescr) noexcept
+void Ticket::setDescrption(const std::string& pDescrption) noexcept
 {
-    descr_ = std::make_shared<std::string>(pDescr);
+    descrption_ = std::make_shared<std::string>(pDescrption);
     dirtyFlag_[2] = true;
 }
 
-void Ticket::setDescr(std::string&& pDescr) noexcept
+void Ticket::setDescrption(std::string&& pDescrption) noexcept
 {
-    descr_ = std::make_shared<std::string>(std::move(pDescr) );
+    descrption_ = std::make_shared<std::string>(std::move(pDescrption) );
     dirtyFlag_[2] = true;
 }
 
-const std::string& Ticket::getValueOfTicketStatus() const noexcept
+const std::string& Ticket::getValueOfStatus() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(ticketStatus_)
-        return *ticketStatus_;
+    if(status_)
+        return *status_;
     return defaultValue;
 }
 
-const std::shared_ptr<std::string>& Ticket::getTicketStatus() const noexcept
+const std::shared_ptr<std::string>& Ticket::getStatus() const noexcept
 {
-    return ticketStatus_;
+    return status_;
 }
 
-void Ticket::setTicketStatus(const std::string& pTicketStatus) noexcept
+void Ticket::setStatus(const std::string& pStatus) noexcept
 {
-    ticketStatus_ = std::make_shared<std::string>(pTicketStatus);
+    status_ = std::make_shared<std::string>(pStatus);
     dirtyFlag_[3] = true;
 }
 
-void Ticket::setTicketStatus(std::string&& pTicketStatus) noexcept
+void Ticket::setStatus(std::string&& pStatus) noexcept
 {
-    ticketStatus_ = std::make_shared<std::string>(std::move(pTicketStatus) );
+    status_ = std::make_shared<std::string>(std::move(pStatus) );
     dirtyFlag_[3] = true;
 }
 
@@ -648,47 +648,47 @@ void Ticket::setResolvedDateToNull() noexcept
     dirtyFlag_[6] = true;
 }
 
-const int32_t& Ticket::getValueOfAssigned() const noexcept
+const int32_t& Ticket::getValueOfAssignedId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
-    if(assigned_)
-        return *assigned_;
+    if(assignedId_)
+        return *assignedId_;
     return defaultValue;
 }
 
-const std::shared_ptr<int32_t>& Ticket::getAssigned() const noexcept
+const std::shared_ptr<int32_t>& Ticket::getAssignedId() const noexcept
 {
-    return assigned_;
+    return assignedId_;
 }
 
-void Ticket::setAssigned(const int32_t& pAssigned) noexcept
+void Ticket::setAssignedId(const int32_t& pAssignedId) noexcept
 {
-    assigned_ = std::make_shared<int32_t>(pAssigned);
+    assignedId_ = std::make_shared<int32_t>(pAssignedId);
     dirtyFlag_[7] = true;
 }
 
-void Ticket::setAssignedToNull() noexcept
+void Ticket::setAssignedIdToNull() noexcept
 {
-    assigned_.reset();
+    assignedId_.reset();
     dirtyFlag_[7] = true;
 }
 
-const int32_t& Ticket::getValueOfProject() const noexcept
+const int32_t& Ticket::getValueOfProjectId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
-    if(project_)
-        return *project_;
+    if(projectId_)
+        return *projectId_;
     return defaultValue;
 }
 
-const std::shared_ptr<int32_t>& Ticket::getProject() const noexcept
+const std::shared_ptr<int32_t>& Ticket::getProjectId() const noexcept
 {
-    return project_;
+    return projectId_;
 }
 
-void Ticket::setProject(const int32_t& pProject) noexcept
+void Ticket::setProjectId(const int32_t& pProjectId) noexcept
 {
-    project_ = std::make_shared<int32_t>(pProject);
+    projectId_ = std::make_shared<int32_t>(pProjectId);
     dirtyFlag_[8] = true;
 }
 
@@ -699,13 +699,13 @@ const std::vector<std::string>& Ticket::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "title",
-        "descr",
-        "ticket_status",
+        "descrption",
+        "status",
         "severity",
         "created_date",
         "resolved_date",
-        "assigned",
-        "project"
+        "assigned_id",
+        "project_id"
     };
     return inCols;
 }
@@ -719,14 +719,14 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getDescr() )
-            binder << getValueOfDescr();
+        if(getDescrption() )
+            binder << getValueOfDescrption();
         else
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getTicketStatus() )
-            binder << getValueOfTicketStatus();
+        if(getStatus() )
+            binder << getValueOfStatus();
         else
             binder << nullptr;
     }
@@ -749,14 +749,14 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[7]) {
-        if(getAssigned() )
-            binder << getValueOfAssigned();
+        if(getAssignedId() )
+            binder << getValueOfAssignedId();
         else
             binder << nullptr;
     }
     if(dirtyFlag_[8]) {
-        if(getProject() )
-            binder << getValueOfProject();
+        if(getProjectId() )
+            binder << getValueOfProjectId();
         else
             binder << nullptr;
     }
@@ -793,14 +793,14 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getDescr() )
-            binder << getValueOfDescr();
+        if(getDescrption() )
+            binder << getValueOfDescrption();
         else
             binder << nullptr;
     }
     if(dirtyFlag_[3]) {
-        if(getTicketStatus() )
-            binder << getValueOfTicketStatus();
+        if(getStatus() )
+            binder << getValueOfStatus();
         else
             binder << nullptr;
     }
@@ -823,14 +823,14 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[7]) {
-        if(getAssigned() )
-            binder << getValueOfAssigned();
+        if(getAssignedId() )
+            binder << getValueOfAssignedId();
         else
             binder << nullptr;
     }
     if(dirtyFlag_[8]) {
-        if(getProject() )
-            binder << getValueOfProject();
+        if(getProjectId() )
+            binder << getValueOfProjectId();
         else
             binder << nullptr;
     }
@@ -847,14 +847,14 @@ Json::Value Ticket::toJson() const
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
-    if(getDescr() )
-        ret["descr"]=getValueOfDescr();
+    if(getDescrption() )
+        ret["descrption"]=getValueOfDescrption();
     else
-        ret["descr"]=Json::Value();
-    if(getTicketStatus() )
-        ret["ticket_status"]=getValueOfTicketStatus();
+        ret["descrption"]=Json::Value();
+    if(getStatus() )
+        ret["status"]=getValueOfStatus();
     else
-        ret["ticket_status"]=Json::Value();
+        ret["status"]=Json::Value();
     if(getSeverity() )
         ret["severity"]=getValueOfSeverity();
     else
@@ -867,14 +867,14 @@ Json::Value Ticket::toJson() const
         ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
     else
         ret["resolved_date"]=Json::Value();
-    if(getAssigned() )
-        ret["assigned"]=getValueOfAssigned();
+    if(getAssignedId() )
+        ret["assigned_id"]=getValueOfAssignedId();
     else
-        ret["assigned"]=Json::Value();
-    if(getProject() )
-        ret["project"]=getValueOfProject();
+        ret["assigned_id"]=Json::Value();
+    if(getProjectId() )
+        ret["project_id"]=getValueOfProjectId();
     else
-        ret["project"]=Json::Value();
+        ret["project_id"]=Json::Value();
     return ret;
 }
 
@@ -896,14 +896,14 @@ Json::Value Ticket::toMasqueradedJson(
                 ret[pMasqueradingVector[1]]=Json::Value();
         }
         if(!pMasqueradingVector[2].empty() ) {
-            if(getDescr() )
-                ret[pMasqueradingVector[2]]=getValueOfDescr();
+            if(getDescrption() )
+                ret[pMasqueradingVector[2]]=getValueOfDescrption();
             else
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
         if(!pMasqueradingVector[3].empty() ) {
-            if(getTicketStatus() )
-                ret[pMasqueradingVector[3]]=getValueOfTicketStatus();
+            if(getStatus() )
+                ret[pMasqueradingVector[3]]=getValueOfStatus();
             else
                 ret[pMasqueradingVector[3]]=Json::Value();
         }
@@ -926,14 +926,14 @@ Json::Value Ticket::toMasqueradedJson(
                 ret[pMasqueradingVector[6]]=Json::Value();
         }
         if(!pMasqueradingVector[7].empty() ) {
-            if(getAssigned() )
-                ret[pMasqueradingVector[7]]=getValueOfAssigned();
+            if(getAssignedId() )
+                ret[pMasqueradingVector[7]]=getValueOfAssignedId();
             else
                 ret[pMasqueradingVector[7]]=Json::Value();
         }
         if(!pMasqueradingVector[8].empty() ) {
-            if(getProject() )
-                ret[pMasqueradingVector[8]]=getValueOfProject();
+            if(getProjectId() )
+                ret[pMasqueradingVector[8]]=getValueOfProjectId();
             else
                 ret[pMasqueradingVector[8]]=Json::Value();
         }
@@ -948,14 +948,14 @@ Json::Value Ticket::toMasqueradedJson(
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
-    if(getDescr() )
-        ret["descr"]=getValueOfDescr();
+    if(getDescrption() )
+        ret["descrption"]=getValueOfDescrption();
     else
-        ret["descr"]=Json::Value();
-    if(getTicketStatus() )
-        ret["ticket_status"]=getValueOfTicketStatus();
+        ret["descrption"]=Json::Value();
+    if(getStatus() )
+        ret["status"]=getValueOfStatus();
     else
-        ret["ticket_status"]=Json::Value();
+        ret["status"]=Json::Value();
     if(getSeverity() )
         ret["severity"]=getValueOfSeverity();
     else
@@ -968,14 +968,14 @@ Json::Value Ticket::toMasqueradedJson(
         ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
     else
         ret["resolved_date"]=Json::Value();
-    if(getAssigned() )
-        ret["assigned"]=getValueOfAssigned();
+    if(getAssignedId() )
+        ret["assigned_id"]=getValueOfAssignedId();
     else
-        ret["assigned"]=Json::Value();
-    if(getProject() )
-        ret["project"]=getValueOfProject();
+        ret["assigned_id"]=Json::Value();
+    if(getProjectId() )
+        ret["project_id"]=getValueOfProjectId();
     else
-        ret["project"]=Json::Value();
+        ret["project_id"]=Json::Value();
     return ret;
 }
 
@@ -992,18 +992,18 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         err="The title column cannot be null";
         return false;
     }
-    if(pJson.isMember("descr") ) {
-        if(!validJsonOfField(2, "descr", pJson["descr"], err, true) )
+    if(pJson.isMember("descrption") ) {
+        if(!validJsonOfField(2, "descrption", pJson["descrption"], err, true) )
             return false;
     } else {
-        err="The descr column cannot be null";
+        err="The descrption column cannot be null";
         return false;
     }
-    if(pJson.isMember("ticket_status") ) {
-        if(!validJsonOfField(3, "ticket_status", pJson["ticket_status"], err, true) )
+    if(pJson.isMember("status") ) {
+        if(!validJsonOfField(3, "status", pJson["status"], err, true) )
             return false;
     } else {
-        err="The ticket_status column cannot be null";
+        err="The status column cannot be null";
         return false;
     }
     if(pJson.isMember("severity") ) {
@@ -1024,15 +1024,15 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, true) )
             return false;
     }
-    if(pJson.isMember("assigned") ) {
-        if(!validJsonOfField(7, "assigned", pJson["assigned"], err, true) )
+    if(pJson.isMember("assigned_id") ) {
+        if(!validJsonOfField(7, "assigned_id", pJson["assigned_id"], err, true) )
             return false;
     }
-    if(pJson.isMember("project") ) {
-        if(!validJsonOfField(8, "project", pJson["project"], err, true) )
+    if(pJson.isMember("project_id") ) {
+        if(!validJsonOfField(8, "project_id", pJson["project_id"], err, true) )
             return false;
     } else {
-        err="The project column cannot be null";
+        err="The project_id column cannot be null";
         return false;
     }
     return true;
@@ -1140,12 +1140,12 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(1, "title", pJson["title"], err, false) )
             return false;
     }
-    if(pJson.isMember("descr") ) {
-        if(!validJsonOfField(2, "descr", pJson["descr"], err, false) )
+    if(pJson.isMember("descrption") ) {
+        if(!validJsonOfField(2, "descrption", pJson["descrption"], err, false) )
             return false;
     }
-    if(pJson.isMember("ticket_status") ) {
-        if(!validJsonOfField(3, "ticket_status", pJson["ticket_status"], err, false) )
+    if(pJson.isMember("status") ) {
+        if(!validJsonOfField(3, "status", pJson["status"], err, false) )
             return false;
     }
     if(pJson.isMember("severity") ) {
@@ -1160,12 +1160,12 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, false) )
             return false;
     }
-    if(pJson.isMember("assigned") ) {
-        if(!validJsonOfField(7, "assigned", pJson["assigned"], err, false) )
+    if(pJson.isMember("assigned_id") ) {
+        if(!validJsonOfField(7, "assigned_id", pJson["assigned_id"], err, false) )
             return false;
     }
-    if(pJson.isMember("project") ) {
-        if(!validJsonOfField(8, "project", pJson["project"], err, false) )
+    if(pJson.isMember("project_id") ) {
+        if(!validJsonOfField(8, "project_id", pJson["project_id"], err, false) )
             return false;
     }
     return true;

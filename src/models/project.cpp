@@ -9,7 +9,7 @@ using namespace drogon;
 using namespace drogon_model::bug_tracker;
 
 const std::string Project::Cols::_id = "id";
-const std::string Project::Cols::_project_name = "project_name";
+const std::string Project::Cols::_title = "title";
 const std::string Project::Cols::_manager_id = "manager_id";
 const std::string Project::primaryKeyName = "id";
 const bool Project::hasPrimaryKey = true;
@@ -17,7 +17,7 @@ const std::string Project::tableName = "project";
 
 const std::vector<typename Project::MetaData> Project::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
-    {"project_name", "std::string", "text", 0, false, false, true},
+    {"title", "std::string", "text", 0, false, false, true},
     {"manager_id", "int32_t", "integer", 4, false, false, false}
 };
 const std::string& Project::getColumnName(size_t index) noexcept(false)
@@ -31,11 +31,11 @@ Project::Project(const Row& r, const ssize_t indexOffset) noexcept
     if(indexOffset < 0) {
         if(!r["id"].isNull() )
             id_=std::make_shared<int32_t>(r["id"].as<int32_t>() );
-        if(!r["project_name"].isNull() )
-            projectName_=std::make_shared<std::string>(r["project_name"].as<std::string>() );
+        if(!r["title"].isNull() )
+            title_=std::make_shared<std::string>(r["title"].as<std::string>() );
         if(!r["manager_id"].isNull() )
             managerId_=std::make_shared<int32_t>(r["manager_id"].as<int32_t>() );
-    } else  {
+    } else {
         size_t offset = static_cast<size_t>(indexOffset);
         if(offset + 3 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
@@ -47,7 +47,7 @@ Project::Project(const Row& r, const ssize_t indexOffset) noexcept
             id_=std::make_shared<int32_t>(r[index].as<int32_t>() );
         index = offset + 1;
         if(!r[index].isNull() )
-            projectName_=std::make_shared<std::string>(r[index].as<std::string>() );
+            title_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 2;
         if(!r[index].isNull() )
             managerId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
@@ -63,18 +63,17 @@ Project::Project(const Json::Value& pJson, const std::vector<std::string>& pMasq
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64()) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull() ) {
-            projectName_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString() );
-        }
+        if(!pJson[pMasqueradingVector[1]].isNull() )
+            title_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString() );
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64()) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
     }
 }
 
@@ -83,17 +82,17 @@ Project::Project(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("id") ) {
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64()) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
-    if(pJson.isMember("project_name") ) {
+    if(pJson.isMember("title") ) {
         dirtyFlag_[1]=true;
-        if(!pJson["project_name"].isNull() )
-            projectName_=std::make_shared<std::string>(pJson["project_name"].asString() );
+        if(!pJson["title"].isNull() )
+            title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
     if(pJson.isMember("manager_id") ) {
         dirtyFlag_[2]=true;
         if(!pJson["manager_id"].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64()) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
     }
 }
 
@@ -106,17 +105,17 @@ void Project::updateByMasqueradedJson(const Json::Value& pJson,
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64()) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull() )
-            projectName_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString() );
+            title_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString() );
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64()) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
     }
 }
 
@@ -124,17 +123,17 @@ void Project::updateByJson(const Json::Value& pJson) noexcept(false)
 {
     if(pJson.isMember("id") ) {
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64()) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
-    if(pJson.isMember("project_name") ) {
+    if(pJson.isMember("title") ) {
         dirtyFlag_[1] = true;
-        if(!pJson["project_name"].isNull() )
-            projectName_=std::make_shared<std::string>(pJson["project_name"].asString() );
+        if(!pJson["title"].isNull() )
+            title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
     if(pJson.isMember("manager_id") ) {
         dirtyFlag_[2] = true;
         if(!pJson["manager_id"].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64()) );
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
     }
 }
 
@@ -163,28 +162,28 @@ const typename Project::PrimaryKeyType& Project::getPrimaryKey() const
     return *id_;
 }
 
-const std::string& Project::getValueOfProjectName() const noexcept
+const std::string& Project::getValueOfTitle() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(projectName_)
-        return *projectName_;
+    if(title_)
+        return *title_;
     return defaultValue;
 }
 
-const std::shared_ptr<std::string>& Project::getProjectName() const noexcept
+const std::shared_ptr<std::string>& Project::getTitle() const noexcept
 {
-    return projectName_;
+    return title_;
 }
 
-void Project::setProjectName(const std::string& pProjectName) noexcept
+void Project::setTitle(const std::string& pTitle) noexcept
 {
-    projectName_ = std::make_shared<std::string>(pProjectName);
+    title_ = std::make_shared<std::string>(pTitle);
     dirtyFlag_[1] = true;
 }
 
-void Project::setProjectName(std::string&& pProjectName) noexcept
+void Project::setTitle(std::string&& pTitle) noexcept
 {
-    projectName_ = std::make_shared<std::string>(std::move(pProjectName) );
+    title_ = std::make_shared<std::string>(std::move(pTitle) );
     dirtyFlag_[1] = true;
 }
 
@@ -219,7 +218,7 @@ void Project::updateId(const uint64_t id)
 const std::vector<std::string>& Project::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "project_name",
+        "title",
         "manager_id"
     };
     return inCols;
@@ -228,8 +227,8 @@ const std::vector<std::string>& Project::insertColumns() noexcept
 void Project::outputArgs(drogon::orm::internal::SqlBinder& binder) const
 {
     if(dirtyFlag_[1]) {
-        if(getProjectName() )
-            binder << getValueOfProjectName();
+        if(getTitle() )
+            binder << getValueOfTitle();
         else
             binder << nullptr;
     }
@@ -254,8 +253,8 @@ const std::vector<std::string> Project::updateColumns() const
 void Project::updateArgs(drogon::orm::internal::SqlBinder& binder) const
 {
     if(dirtyFlag_[1]) {
-        if(getProjectName() )
-            binder << getValueOfProjectName();
+        if(getTitle() )
+            binder << getValueOfTitle();
         else
             binder << nullptr;
     }
@@ -274,10 +273,10 @@ Json::Value Project::toJson() const
         ret["id"]=getValueOfId();
     else
         ret["id"]=Json::Value();
-    if(getProjectName() )
-        ret["project_name"]=getValueOfProjectName();
+    if(getTitle() )
+        ret["title"]=getValueOfTitle();
     else
-        ret["project_name"]=Json::Value();
+        ret["title"]=Json::Value();
     if(getManagerId() )
         ret["manager_id"]=getValueOfManagerId();
     else
@@ -297,8 +296,8 @@ Json::Value Project::toMasqueradedJson(
                 ret[pMasqueradingVector[0]]=Json::Value();
         }
         if(!pMasqueradingVector[1].empty() ) {
-            if(getProjectName() )
-                ret[pMasqueradingVector[1]]=getValueOfProjectName();
+            if(getTitle() )
+                ret[pMasqueradingVector[1]]=getValueOfTitle();
             else
                 ret[pMasqueradingVector[1]]=Json::Value();
         }
@@ -315,10 +314,10 @@ Json::Value Project::toMasqueradedJson(
         ret["id"]=getValueOfId();
     else
         ret["id"]=Json::Value();
-    if(getProjectName() )
-        ret["project_name"]=getValueOfProjectName();
+    if(getTitle() )
+        ret["title"]=getValueOfTitle();
     else
-        ret["project_name"]=Json::Value();
+        ret["title"]=Json::Value();
     if(getManagerId() )
         ret["manager_id"]=getValueOfManagerId();
     else
@@ -332,11 +331,11 @@ bool Project::validateJsonForCreation(const Json::Value& pJson, std::string& err
         if(!validJsonOfField(0, "id", pJson["id"], err, true) )
             return false;
     }
-    if(pJson.isMember("project_name") ) {
-        if(!validJsonOfField(1, "project_name", pJson["project_name"], err, true) )
+    if(pJson.isMember("title") ) {
+        if(!validJsonOfField(1, "title", pJson["title"], err, true) )
             return false;
-    } else  {
-        err="The project_name column cannot be null";
+    } else {
+        err="The title column cannot be null";
         return false;
     }
     if(pJson.isMember("manager_id") ) {
@@ -365,7 +364,7 @@ bool Project::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[1] + " column cannot be null";
                 return false;
             }
@@ -389,12 +388,12 @@ bool Project::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("id") ) {
         if(!validJsonOfField(0, "id", pJson["id"], err, false) )
             return false;
-    } else  {
+    } else {
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("project_name") ) {
-        if(!validJsonOfField(1, "project_name", pJson["project_name"], err, false) )
+    if(pJson.isMember("title") ) {
+        if(!validJsonOfField(1, "title", pJson["title"], err, false) )
             return false;
     }
     if(pJson.isMember("manager_id") ) {
@@ -416,7 +415,7 @@ bool Project::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false) )
                 return false;
-        } else    {
+        } else {
             err = "The value of primary key must be set in the json object for update";
             return false;
         }

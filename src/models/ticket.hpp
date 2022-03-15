@@ -55,13 +55,13 @@ public:
     struct Cols{
         static const std::string _id;
         static const std::string _title;
-        static const std::string _descr;
-        static const std::string _ticket_status;
+        static const std::string _descrption;
+        static const std::string _status;
         static const std::string _severity;
         static const std::string _created_date;
         static const std::string _resolved_date;
-        static const std::string _assigned;
-        static const std::string _project;
+        static const std::string _assigned_id;
+        static const std::string _project_id;
     };
 
     const static int primaryKeyNumber;
@@ -134,26 +134,26 @@ public:
     void setTitle(std::string&& pTitle) noexcept;
 
 
-    /**  For column descr  */
-    ///Get the value of the column descr, returns the default value if the column is null
-    const std::string& getValueOfDescr() const noexcept;
+    /**  For column descrption  */
+    ///Get the value of the column descrption, returns the default value if the column is null
+    const std::string& getValueOfDescrption() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getDescr() const noexcept;
+    const std::shared_ptr<std::string>& getDescrption() const noexcept;
 
-    ///Set the value of the column descr
-    void setDescr(const std::string& pDescr) noexcept;
-    void setDescr(std::string&& pDescr) noexcept;
+    ///Set the value of the column descrption
+    void setDescrption(const std::string& pDescrption) noexcept;
+    void setDescrption(std::string&& pDescrption) noexcept;
 
 
-    /**  For column ticket_status  */
-    ///Get the value of the column ticket_status, returns the default value if the column is null
-    const std::string& getValueOfTicketStatus() const noexcept;
+    /**  For column status  */
+    ///Get the value of the column status, returns the default value if the column is null
+    const std::string& getValueOfStatus() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getTicketStatus() const noexcept;
+    const std::shared_ptr<std::string>& getStatus() const noexcept;
 
-    ///Set the value of the column ticket_status
-    void setTicketStatus(const std::string& pTicketStatus) noexcept;
-    void setTicketStatus(std::string&& pTicketStatus) noexcept;
+    ///Set the value of the column status
+    void setStatus(const std::string& pStatus) noexcept;
+    void setStatus(std::string&& pStatus) noexcept;
 
 
     /**  For column severity  */
@@ -188,25 +188,25 @@ public:
     void setResolvedDateToNull() noexcept;
 
 
-    /**  For column assigned  */
-    ///Get the value of the column assigned, returns the default value if the column is null
-    const int32_t& getValueOfAssigned() const noexcept;
+    /**  For column assigned_id  */
+    ///Get the value of the column assigned_id, returns the default value if the column is null
+    const int32_t& getValueOfAssignedId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t>& getAssigned() const noexcept;
+    const std::shared_ptr<int32_t>& getAssignedId() const noexcept;
 
-    ///Set the value of the column assigned
-    void setAssigned(const int32_t& pAssigned) noexcept;
-    void setAssignedToNull() noexcept;
+    ///Set the value of the column assigned_id
+    void setAssignedId(const int32_t& pAssignedId) noexcept;
+    void setAssignedIdToNull() noexcept;
 
 
-    /**  For column project  */
-    ///Get the value of the column project, returns the default value if the column is null
-    const int32_t& getValueOfProject() const noexcept;
+    /**  For column project_id  */
+    ///Get the value of the column project_id, returns the default value if the column is null
+    const int32_t& getValueOfProjectId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t>& getProject() const noexcept;
+    const std::shared_ptr<int32_t>& getProjectId() const noexcept;
 
-    ///Set the value of the column project
-    void setProject(const int32_t& pProject) noexcept;
+    ///Set the value of the column project_id
+    void setProjectId(const int32_t& pProjectId) noexcept;
 
 
 
@@ -233,13 +233,13 @@ private:
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> title_;
-    std::shared_ptr<std::string> descr_;
-    std::shared_ptr<std::string> ticketStatus_;
+    std::shared_ptr<std::string> descrption_;
+    std::shared_ptr<std::string> status_;
     std::shared_ptr<std::string> severity_;
     std::shared_ptr<trantor::Date> createdDate_;
     std::shared_ptr<trantor::Date> resolvedDate_;
-    std::shared_ptr<int32_t> assigned_;
-    std::shared_ptr<int32_t> project_;
+    std::shared_ptr<int32_t> assignedId_;
+    std::shared_ptr<int32_t> projectId_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -277,11 +277,11 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[2]) {
-            sql += "descr,";
+            sql += "descrption,";
             ++parametersCount;
         }
         if(dirtyFlag_[3]) {
-            sql += "ticket_status,";
+            sql += "status,";
             ++parametersCount;
         }
         if(dirtyFlag_[4]) {
@@ -297,11 +297,11 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[7]) {
-            sql += "assigned,";
+            sql += "assigned_id,";
             ++parametersCount;
         }
         if(dirtyFlag_[8]) {
-            sql += "project,";
+            sql += "project_id,";
             ++parametersCount;
         }
         needSelection=true;

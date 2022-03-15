@@ -10,7 +10,7 @@ CREATE TABLE Account(
 
 CREATE TABLE Project(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_name TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL UNIQUE,
     manager_id INTEGER REFERENCES Account(id) ON DELETE CASCADE
 );
 
@@ -20,13 +20,13 @@ CREATE TYPE SeverityType AS ENUM ('low', 'medium', 'high');
 CREATE TABLE Ticket(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title TEXT NOT NULL,
-    descr TEXT NOT NULL,
-    ticket_status StatusType NOT NULL,
+    descrption TEXT NOT NULL,
+    status StatusType NOT NULL,
     severity SeverityType NOT NULL,
     created_date TIMESTAMP NOT NULL,
     resolved_date TIMESTAMP,
-    assigned INTEGER REFERENCES Account(id) ON DELETE SET NULL,
-    project INTEGER NOT NULL REFERENCES Project(id) ON DELETE CASCADE
+    assigned_id INTEGER REFERENCES Account(id) ON DELETE SET NULL,
+    project_id INTEGER NOT NULL REFERENCES Project(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Staff(
@@ -39,5 +39,5 @@ CREATE TABLE Comment(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     post TEXT NOT NULL,
     created_date TIMESTAMP NOT NULL,
-    project INTEGER NOT NULL REFERENCES Ticket(id) ON DELETE CASCADE
+    ticket_id INTEGER NOT NULL REFERENCES Ticket(id) ON DELETE CASCADE
 );

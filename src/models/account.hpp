@@ -154,7 +154,7 @@ private:
     friend Mapper<Account>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Account>;
-#endif // ifdef __cpp_impl_coroutine
+#endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -208,7 +208,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else   {
+        } else {
             sql += ") values (";
         }
 

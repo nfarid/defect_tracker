@@ -56,7 +56,7 @@ public:
         static const std::string _id;
         static const std::string _post;
         static const std::string _created_date;
-        static const std::string _project;
+        static const std::string _ticket_id;
     };
 
     const static int primaryKeyNumber;
@@ -139,14 +139,14 @@ public:
     void setCreatedDate(const trantor::Date& pCreatedDate) noexcept;
 
 
-    /**  For column project  */
-    ///Get the value of the column project, returns the default value if the column is null
-    const int32_t& getValueOfProject() const noexcept;
+    /**  For column ticket_id  */
+    ///Get the value of the column ticket_id, returns the default value if the column is null
+    const int32_t& getValueOfTicketId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t>& getProject() const noexcept;
+    const std::shared_ptr<int32_t>& getTicketId() const noexcept;
 
-    ///Set the value of the column project
-    void setProject(const int32_t& pProject) noexcept;
+    ///Set the value of the column ticket_id
+    void setTicketId(const int32_t& pTicketId) noexcept;
 
 
 
@@ -174,7 +174,7 @@ private:
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> post_;
     std::shared_ptr<trantor::Date> createdDate_;
-    std::shared_ptr<int32_t> project_;
+    std::shared_ptr<int32_t> ticketId_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -216,7 +216,7 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[3]) {
-            sql += "project,";
+            sql += "ticket_id,";
             ++parametersCount;
         }
         needSelection=true;

@@ -37,7 +37,7 @@ void Comment::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t 
     return cb(HttpResponse::newHttpViewResponse("comment_form.csp", data) );
 }
 
-void Comment::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t ticketId) {
+void Comment::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t  /*ticketId*/) {
     const auto& postParams = req->parameters();
     try {
         Model::Comment newComment{};
