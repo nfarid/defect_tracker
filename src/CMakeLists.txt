@@ -22,6 +22,7 @@ set(APP_SRC
     "app.cpp"
 
     "controllers/auxiliary.cpp"
+    "controllers/comment.cpp"
     "controllers/home.cpp"
     "controllers/project.cpp"
     "controllers/ticket.cpp"

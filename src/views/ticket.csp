@@ -29,6 +29,9 @@
     </ul>
 <%c++ } %>
 
+<%c++ const auto ticketId = ticket["id"].asInt(); %>
+<a href="/ticket/{%ticketId%}/comment">New comment</a>
+
 
 <%view _footer.csp %>
 
