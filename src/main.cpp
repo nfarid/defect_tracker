@@ -12,9 +12,9 @@ int main(int argc, char** argv) {
     // Parse command line arguments
     // E.g. if arguments are ./app  --port 5000;   then set portStr to 5000
     for(int i=1; i+1<argc; ++i) {
-        if(!strcmp(argv[i], "--port") )
+        if(!std::strcmp(argv[i], "--port") )
             portStr = argv[i+1];
-        if(!strcmp(argv[i], "--db") )
+        if(!std::strcmp(argv[i], "--db") )
             dbUrl = argv[i+1];
     }
 

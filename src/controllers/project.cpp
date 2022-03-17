@@ -73,11 +73,11 @@ void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb){
             query.pop_back();
 
         const auto projectLst = mDB->execSqlSync(
-            "SELECT * FROM project WHERE to_tsvector(project_name) @@ to_tsquery($1)", query);
+            "SELECT * FROM project WHERE to_tsvector(title) @@ to_tsquery($1)", query);
         Json::Value projectLstJson{};
         for(const auto& project : projectLst) {
             Json::Value projectJson{};
-            projectJson["name"] = project["project_name"].c_str();
+            projectJson["name"] = project["title"].c_str();
             projectJson["id"] = project["id"].c_str();
             projectLstJson.append(std::move(projectJson) );
         }
