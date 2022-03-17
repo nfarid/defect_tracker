@@ -60,6 +60,7 @@ public:
         static const std::string _severity;
         static const std::string _created_date;
         static const std::string _resolved_date;
+        static const std::string _reporter_id;
         static const std::string _assigned_id;
         static const std::string _project_id;
     };
@@ -188,6 +189,16 @@ public:
     void setResolvedDateToNull() noexcept;
 
 
+    /**  For column reporter_id  */
+    ///Get the value of the column reporter_id, returns the default value if the column is null
+    const int32_t& getValueOfReporterId() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t>& getReporterId() const noexcept;
+
+    ///Set the value of the column reporter_id
+    void setReporterId(const int32_t& pReporterId) noexcept;
+
+
     /**  For column assigned_id  */
     ///Get the value of the column assigned_id, returns the default value if the column is null
     const int32_t& getValueOfAssignedId() const noexcept;
@@ -211,7 +222,7 @@ public:
 
 
     static size_t getColumnNumber() noexcept {
-        return 9;
+        return 10;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -238,6 +249,7 @@ private:
     std::shared_ptr<std::string> severity_;
     std::shared_ptr<trantor::Date> createdDate_;
     std::shared_ptr<trantor::Date> resolvedDate_;
+    std::shared_ptr<int32_t> reporterId_;
     std::shared_ptr<int32_t> assignedId_;
     std::shared_ptr<int32_t> projectId_;
     struct MetaData{
@@ -250,7 +262,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[9]={ false};
+    bool dirtyFlag_[10]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -297,10 +309,14 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[7]) {
-            sql += "assigned_id,";
+            sql += "reporter_id,";
             ++parametersCount;
         }
         if(dirtyFlag_[8]) {
+            sql += "assigned_id,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[9]) {
             sql += "project_id,";
             ++parametersCount;
         }
@@ -345,6 +361,10 @@ public:
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[8]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[9]) {
             n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }

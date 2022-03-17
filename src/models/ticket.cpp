@@ -15,6 +15,7 @@ const std::string Ticket::Cols::_status = "status";
 const std::string Ticket::Cols::_severity = "severity";
 const std::string Ticket::Cols::_created_date = "created_date";
 const std::string Ticket::Cols::_resolved_date = "resolved_date";
+const std::string Ticket::Cols::_reporter_id = "reporter_id";
 const std::string Ticket::Cols::_assigned_id = "assigned_id";
 const std::string Ticket::Cols::_project_id = "project_id";
 const std::string Ticket::primaryKeyName = "id";
@@ -29,6 +30,7 @@ const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"severity", "std::string", "USER-DEFINED", 0, false, false, true},
     {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
     {"resolved_date", "trantor::Date", "timestamp without time zone", 0, false, false, false},
+    {"reporter_id", "int32_t", "integer", 4, false, false, true},
     {"assigned_id", "int32_t", "integer", 4, false, false, false},
     {"project_id", "int32_t", "integer", 4, false, false, true}
 };
@@ -85,13 +87,15 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
                 resolvedDate_=std::make_shared<trantor::Date>(t*1000000+decimalNum);
             }
         }
+        if(!r["reporter_id"].isNull() )
+            reporterId_=std::make_shared<int32_t>(r["reporter_id"].as<int32_t>() );
         if(!r["assigned_id"].isNull() )
             assignedId_=std::make_shared<int32_t>(r["assigned_id"].as<int32_t>() );
         if(!r["project_id"].isNull() )
             projectId_=std::make_shared<int32_t>(r["project_id"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
-        if(offset + 9 > r.size() ) {
+        if(offset + 10 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
@@ -149,8 +153,11 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
         }
         index = offset + 7;
         if(!r[index].isNull() )
-            assignedId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+            reporterId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
         index = offset + 8;
+        if(!r[index].isNull() )
+            assignedId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+        index = offset + 9;
         if(!r[index].isNull() )
             projectId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
@@ -158,14 +165,14 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
 
 Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 9) {
+    if(pMasqueradingVector.size() != 10) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
@@ -230,12 +237,17 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            reporterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull() )
-            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]) ) {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull() )
+            projectId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[9]].asInt64() ) );
     }
 }
 
@@ -244,7 +256,7 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
     if(pJson.isMember("id") ) {
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
     if(pJson.isMember("title") ) {
         dirtyFlag_[1]=true;
@@ -306,28 +318,33 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("assigned_id") ) {
+    if(pJson.isMember("reporter_id") ) {
         dirtyFlag_[7]=true;
+        if(!pJson["reporter_id"].isNull() )
+            reporterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["reporter_id"].asInt64() ) );
+    }
+    if(pJson.isMember("assigned_id") ) {
+        dirtyFlag_[8]=true;
         if(!pJson["assigned_id"].isNull() )
-            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
     }
     if(pJson.isMember("project_id") ) {
-        dirtyFlag_[8]=true;
+        dirtyFlag_[9]=true;
         if(!pJson["project_id"].isNull() )
-            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["project_id"].asInt64() ) );
+            projectId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project_id"].asInt64() ) );
     }
 }
 
 void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 9) {
+    if(pMasqueradingVector.size() != 10) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
         if(!pJson[pMasqueradingVector[0]].isNull() )
-            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[0]].asInt64() ) );
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]) ) {
         dirtyFlag_[1] = true;
@@ -392,12 +409,17 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]) ) {
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull() )
-            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
+            reporterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[7]].asInt64() ) );
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull() )
-            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[8]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]) ) {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull() )
+            projectId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[9]].asInt64() ) );
     }
 }
 
@@ -405,7 +427,7 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
 {
     if(pJson.isMember("id") ) {
         if(!pJson["id"].isNull() )
-            id_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["id"].asInt64() ) );
+            id_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["id"].asInt64() ) );
     }
     if(pJson.isMember("title") ) {
         dirtyFlag_[1] = true;
@@ -467,15 +489,20 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("assigned_id") ) {
+    if(pJson.isMember("reporter_id") ) {
         dirtyFlag_[7] = true;
+        if(!pJson["reporter_id"].isNull() )
+            reporterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["reporter_id"].asInt64() ) );
+    }
+    if(pJson.isMember("assigned_id") ) {
+        dirtyFlag_[8] = true;
         if(!pJson["assigned_id"].isNull() )
-            assignedId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
+            assignedId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["assigned_id"].asInt64() ) );
     }
     if(pJson.isMember("project_id") ) {
-        dirtyFlag_[8] = true;
+        dirtyFlag_[9] = true;
         if(!pJson["project_id"].isNull() )
-            projectId_=std::make_shared<int32_t>(static_cast<int32_t>(pJson["project_id"].asInt64() ) );
+            projectId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["project_id"].asInt64() ) );
     }
 }
 
@@ -648,6 +675,25 @@ void Ticket::setResolvedDateToNull() noexcept
     dirtyFlag_[6] = true;
 }
 
+const int32_t& Ticket::getValueOfReporterId() const noexcept
+{
+    const static int32_t defaultValue = int32_t();
+    if(reporterId_)
+        return *reporterId_;
+    return defaultValue;
+}
+
+const std::shared_ptr<int32_t>& Ticket::getReporterId() const noexcept
+{
+    return reporterId_;
+}
+
+void Ticket::setReporterId(const int32_t& pReporterId) noexcept
+{
+    reporterId_ = std::make_shared<int32_t>(pReporterId);
+    dirtyFlag_[7] = true;
+}
+
 const int32_t& Ticket::getValueOfAssignedId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
@@ -664,13 +710,13 @@ const std::shared_ptr<int32_t>& Ticket::getAssignedId() const noexcept
 void Ticket::setAssignedId(const int32_t& pAssignedId) noexcept
 {
     assignedId_ = std::make_shared<int32_t>(pAssignedId);
-    dirtyFlag_[7] = true;
+    dirtyFlag_[8] = true;
 }
 
 void Ticket::setAssignedIdToNull() noexcept
 {
     assignedId_.reset();
-    dirtyFlag_[7] = true;
+    dirtyFlag_[8] = true;
 }
 
 const int32_t& Ticket::getValueOfProjectId() const noexcept
@@ -689,7 +735,7 @@ const std::shared_ptr<int32_t>& Ticket::getProjectId() const noexcept
 void Ticket::setProjectId(const int32_t& pProjectId) noexcept
 {
     projectId_ = std::make_shared<int32_t>(pProjectId);
-    dirtyFlag_[8] = true;
+    dirtyFlag_[9] = true;
 }
 
 void Ticket::updateId(const uint64_t id)
@@ -704,6 +750,7 @@ const std::vector<std::string>& Ticket::insertColumns() noexcept
         "severity",
         "created_date",
         "resolved_date",
+        "reporter_id",
         "assigned_id",
         "project_id"
     };
@@ -749,12 +796,18 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[7]) {
+        if(getReporterId() )
+            binder << getValueOfReporterId();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[8]) {
         if(getAssignedId() )
             binder << getValueOfAssignedId();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[8]) {
+    if(dirtyFlag_[9]) {
         if(getProjectId() )
             binder << getValueOfProjectId();
         else
@@ -781,6 +834,8 @@ const std::vector<std::string> Ticket::updateColumns() const
         ret.push_back(getColumnName(7) );
     if(dirtyFlag_[8])
         ret.push_back(getColumnName(8) );
+    if(dirtyFlag_[9])
+        ret.push_back(getColumnName(9) );
     return ret;
 }
 
@@ -823,12 +878,18 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[7]) {
+        if(getReporterId() )
+            binder << getValueOfReporterId();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[8]) {
         if(getAssignedId() )
             binder << getValueOfAssignedId();
         else
             binder << nullptr;
     }
-    if(dirtyFlag_[8]) {
+    if(dirtyFlag_[9]) {
         if(getProjectId() )
             binder << getValueOfProjectId();
         else
@@ -867,6 +928,10 @@ Json::Value Ticket::toJson() const
         ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
     else
         ret["resolved_date"]=Json::Value();
+    if(getReporterId() )
+        ret["reporter_id"]=getValueOfReporterId();
+    else
+        ret["reporter_id"]=Json::Value();
     if(getAssignedId() )
         ret["assigned_id"]=getValueOfAssignedId();
     else
@@ -882,7 +947,7 @@ Json::Value Ticket::toMasqueradedJson(
     const std::vector<std::string>& pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 9) {
+    if(pMasqueradingVector.size() == 10) {
         if(!pMasqueradingVector[0].empty() ) {
             if(getId() )
                 ret[pMasqueradingVector[0]]=getValueOfId();
@@ -926,16 +991,22 @@ Json::Value Ticket::toMasqueradedJson(
                 ret[pMasqueradingVector[6]]=Json::Value();
         }
         if(!pMasqueradingVector[7].empty() ) {
-            if(getAssignedId() )
-                ret[pMasqueradingVector[7]]=getValueOfAssignedId();
+            if(getReporterId() )
+                ret[pMasqueradingVector[7]]=getValueOfReporterId();
             else
                 ret[pMasqueradingVector[7]]=Json::Value();
         }
         if(!pMasqueradingVector[8].empty() ) {
-            if(getProjectId() )
-                ret[pMasqueradingVector[8]]=getValueOfProjectId();
+            if(getAssignedId() )
+                ret[pMasqueradingVector[8]]=getValueOfAssignedId();
             else
                 ret[pMasqueradingVector[8]]=Json::Value();
+        }
+        if(!pMasqueradingVector[9].empty() ) {
+            if(getProjectId() )
+                ret[pMasqueradingVector[9]]=getValueOfProjectId();
+            else
+                ret[pMasqueradingVector[9]]=Json::Value();
         }
         return ret;
     }
@@ -968,6 +1039,10 @@ Json::Value Ticket::toMasqueradedJson(
         ret["resolved_date"]=getResolvedDate()->toDbStringLocal();
     else
         ret["resolved_date"]=Json::Value();
+    if(getReporterId() )
+        ret["reporter_id"]=getValueOfReporterId();
+    else
+        ret["reporter_id"]=Json::Value();
     if(getAssignedId() )
         ret["assigned_id"]=getValueOfAssignedId();
     else
@@ -1024,12 +1099,19 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, true) )
             return false;
     }
+    if(pJson.isMember("reporter_id") ) {
+        if(!validJsonOfField(7, "reporter_id", pJson["reporter_id"], err, true) )
+            return false;
+    } else {
+        err="The reporter_id column cannot be null";
+        return false;
+    }
     if(pJson.isMember("assigned_id") ) {
-        if(!validJsonOfField(7, "assigned_id", pJson["assigned_id"], err, true) )
+        if(!validJsonOfField(8, "assigned_id", pJson["assigned_id"], err, true) )
             return false;
     }
     if(pJson.isMember("project_id") ) {
-        if(!validJsonOfField(8, "project_id", pJson["project_id"], err, true) )
+        if(!validJsonOfField(9, "project_id", pJson["project_id"], err, true) )
             return false;
     } else {
         err="The project_id column cannot be null";
@@ -1042,7 +1124,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 9) {
+    if(pMasqueradingVector.size() != 10) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -1108,14 +1190,23 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[7]) ) {
                 if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true) )
                     return false;
+            } else {
+                err="The " + pMasqueradingVector[7] + " column cannot be null";
+                return false;
             }
         }
         if(!pMasqueradingVector[8].empty() ) {
             if(pJson.isMember(pMasqueradingVector[8]) ) {
                 if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true) )
                     return false;
+            }
+        }
+        if(!pMasqueradingVector[9].empty() ) {
+            if(pJson.isMember(pMasqueradingVector[9]) ) {
+                if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, true) )
+                    return false;
             } else {
-                err="The " + pMasqueradingVector[8] + " column cannot be null";
+                err="The " + pMasqueradingVector[9] + " column cannot be null";
                 return false;
             }
         }
@@ -1160,12 +1251,16 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(6, "resolved_date", pJson["resolved_date"], err, false) )
             return false;
     }
+    if(pJson.isMember("reporter_id") ) {
+        if(!validJsonOfField(7, "reporter_id", pJson["reporter_id"], err, false) )
+            return false;
+    }
     if(pJson.isMember("assigned_id") ) {
-        if(!validJsonOfField(7, "assigned_id", pJson["assigned_id"], err, false) )
+        if(!validJsonOfField(8, "assigned_id", pJson["assigned_id"], err, false) )
             return false;
     }
     if(pJson.isMember("project_id") ) {
-        if(!validJsonOfField(8, "project_id", pJson["project_id"], err, false) )
+        if(!validJsonOfField(9, "project_id", pJson["project_id"], err, false) )
             return false;
     }
     return true;
@@ -1175,7 +1270,7 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 9) {
+    if(pMasqueradingVector.size() != 10) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -1217,6 +1312,10 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         }
         if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]) ) {
             if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false) )
+                return false;
+        }
+        if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]) ) {
+            if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, false) )
                 return false;
         }
     }catch(const Json::LogicError& e)
@@ -1271,6 +1370,16 @@ bool Ticket::validJsonOfField(size_t index,
         }
         break;
     case 7:
+        if(pJson.isNull() ) {
+            err="The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if(!pJson.isInt() ) {
+            err="Type error in the "+fieldName+" field";
+            return false;
+        }
+        break;
+    case 8:
         if(pJson.isNull() )
             return true;
         if(!pJson.isInt() ) {
@@ -1278,7 +1387,7 @@ bool Ticket::validJsonOfField(size_t index,
             return false;
         }
         break;
-    case 8:
+    case 9:
         if(pJson.isNull() ) {
             err="The " + fieldName + " column cannot be null";
             return false;

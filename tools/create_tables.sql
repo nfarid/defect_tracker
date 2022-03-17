@@ -25,6 +25,7 @@ CREATE TABLE Ticket(
     severity SeverityType NOT NULL,
     created_date TIMESTAMP NOT NULL,
     resolved_date TIMESTAMP,
+    reporter_id INTEGER NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
     assigned_id INTEGER REFERENCES Account(id) ON DELETE SET NULL,
     project_id INTEGER NOT NULL REFERENCES Project(id) ON DELETE CASCADE
 );
@@ -39,5 +40,6 @@ CREATE TABLE Comment(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     post TEXT NOT NULL,
     created_date TIMESTAMP NOT NULL,
-    ticket_id INTEGER NOT NULL REFERENCES Ticket(id) ON DELETE CASCADE
+    ticket_id INTEGER NOT NULL REFERENCES Ticket(id) ON DELETE CASCADE,
+    poster_id INTEGER NOT NULL REFERENCES Account(id) ON DELETE CASCADE
 );

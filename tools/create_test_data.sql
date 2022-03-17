@@ -23,14 +23,14 @@ INSERT INTO Project(title, manager_id) VALUES
     ('example_project_1', (SELECT id FROM Account WHERE username='example_manager') ),
     ('example_project_2', (SELECT id FROM Account WHERE username='example_manager') );
 
-INSERT INTO Ticket(title, descrption, status, severity, created_date, assigned_id, project_id) VALUES
-    ('ticket', 'description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='project') ),
-    ('example_ticket_1', 'example_description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='example_project_1') ),
-    ('example_ticket_2', 'another_description', 'confirmed', 'high', CURRENT_TIMESTAMP, (SELECT id FROM Account WHERE username='example_staff_1'), (SELECT id FROM Project WHERE title='example_project_1') );
+INSERT INTO Ticket(title, descrption, status, severity, created_date, assigned_id, project_id, reporter_id) VALUES
+    ('ticket', 'description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='project'), (SELECT id FROM Account WHERE username='example_user') ),
+    ('example_ticket_1', 'example_description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_user') ),
+    ('example_ticket_2', 'another_description', 'confirmed', 'high', CURRENT_TIMESTAMP, (SELECT id FROM Account WHERE username='example_staff_1'), (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_user') );
 
 
 INSERT INTO Staff(project_id, staff_id) VALUES
     ( (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_1') );
 
-INSERT INTO Comment(post, created_date, ticket_id) VALUES
-    ('This is an example post', CURRENT_TIMESTAMP, (SELECT id FROM Ticket WHERE title='example_ticket_1') );
+INSERT INTO Comment(post, created_date, ticket_id, poster_id) VALUES
+    ('This is an example post', CURRENT_TIMESTAMP, (SELECT id FROM Ticket WHERE title='example_ticket_1'), (SELECT id FROM Account WHERE username='username') );

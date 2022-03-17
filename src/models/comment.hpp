@@ -57,6 +57,7 @@ public:
         static const std::string _post;
         static const std::string _created_date;
         static const std::string _ticket_id;
+        static const std::string _poster_id;
     };
 
     const static int primaryKeyNumber;
@@ -149,9 +150,19 @@ public:
     void setTicketId(const int32_t& pTicketId) noexcept;
 
 
+    /**  For column poster_id  */
+    ///Get the value of the column poster_id, returns the default value if the column is null
+    const int32_t& getValueOfPosterId() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t>& getPosterId() const noexcept;
+
+    ///Set the value of the column poster_id
+    void setPosterId(const int32_t& pPosterId) noexcept;
+
+
 
     static size_t getColumnNumber() noexcept {
-        return 4;
+        return 5;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -164,7 +175,7 @@ private:
     friend Mapper<Comment>;
 #ifdef __cpp_impl_coroutine
     friend CoroMapper<Comment>;
-#endif  // ifdef __cpp_impl_coroutine
+#endif // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -175,6 +186,7 @@ private:
     std::shared_ptr<std::string> post_;
     std::shared_ptr<trantor::Date> createdDate_;
     std::shared_ptr<int32_t> ticketId_;
+    std::shared_ptr<int32_t> posterId_;
     struct MetaData{
         const std::string colName_;
         const std::string colType_;
@@ -185,7 +197,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[4]={ false};
+    bool dirtyFlag_[5]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -219,11 +231,15 @@ public:
             sql += "ticket_id,";
             ++parametersCount;
         }
+        if(dirtyFlag_[4]) {
+            sql += "poster_id,";
+            ++parametersCount;
+        }
         needSelection=true;
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else {
+        } else   {
             sql += ") values (";
         }
 
@@ -240,6 +256,10 @@ public:
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[3]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[4]) {
             n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }

@@ -12,6 +12,7 @@ const std::string Comment::Cols::_id = "id";
 const std::string Comment::Cols::_post = "post";
 const std::string Comment::Cols::_created_date = "created_date";
 const std::string Comment::Cols::_ticket_id = "ticket_id";
+const std::string Comment::Cols::_poster_id = "poster_id";
 const std::string Comment::primaryKeyName = "id";
 const bool Comment::hasPrimaryKey = true;
 const std::string Comment::tableName = "comment";
@@ -20,7 +21,8 @@ const std::vector<typename Comment::MetaData> Comment::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"post", "std::string", "text", 0, false, false, true},
     {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
-    {"ticket_id", "int32_t", "integer", 4, false, false, true}
+    {"ticket_id", "int32_t", "integer", 4, false, false, true},
+    {"poster_id", "int32_t", "integer", 4, false, false, true}
 };
 const std::string& Comment::getColumnName(size_t index) noexcept(false)
 {
@@ -54,9 +56,11 @@ Comment::Comment(const Row& r, const ssize_t indexOffset) noexcept
         }
         if(!r["ticket_id"].isNull() )
             ticketId_=std::make_shared<int32_t>(r["ticket_id"].as<int32_t>() );
+        if(!r["poster_id"].isNull() )
+            posterId_=std::make_shared<int32_t>(r["poster_id"].as<int32_t>() );
     } else {
         size_t offset = static_cast<size_t>(indexOffset);
-        if(offset + 4 > r.size() ) {
+        if(offset + 5 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
@@ -88,12 +92,15 @@ Comment::Comment(const Row& r, const ssize_t indexOffset) noexcept
         index = offset + 3;
         if(!r[index].isNull() )
             ticketId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
+        index = offset + 4;
+        if(!r[index].isNull() )
+            posterId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
 }
 
 Comment::Comment(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4) {
+    if(pMasqueradingVector.size() != 5) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -131,6 +138,11 @@ Comment::Comment(const Json::Value& pJson, const std::vector<std::string>& pMasq
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
             ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull() )
+            posterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[4]].asInt64() ) );
     }
 }
 
@@ -171,12 +183,17 @@ Comment::Comment(const Json::Value& pJson) noexcept(false)
         if(!pJson["ticket_id"].isNull() )
             ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["ticket_id"].asInt64() ) );
     }
+    if(pJson.isMember("poster_id") ) {
+        dirtyFlag_[4]=true;
+        if(!pJson["poster_id"].isNull() )
+            posterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["poster_id"].asInt64() ) );
+    }
 }
 
 void Comment::updateByMasqueradedJson(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4) {
+    if(pMasqueradingVector.size() != 5) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -213,6 +230,11 @@ void Comment::updateByMasqueradedJson(const Json::Value& pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull() )
             ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull() )
+            posterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[4]].asInt64() ) );
     }
 }
 
@@ -251,6 +273,11 @@ void Comment::updateByJson(const Json::Value& pJson) noexcept(false)
         dirtyFlag_[3] = true;
         if(!pJson["ticket_id"].isNull() )
             ticketId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["ticket_id"].asInt64() ) );
+    }
+    if(pJson.isMember("poster_id") ) {
+        dirtyFlag_[4] = true;
+        if(!pJson["poster_id"].isNull() )
+            posterId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["poster_id"].asInt64() ) );
     }
 }
 
@@ -342,6 +369,25 @@ void Comment::setTicketId(const int32_t& pTicketId) noexcept
     dirtyFlag_[3] = true;
 }
 
+const int32_t& Comment::getValueOfPosterId() const noexcept
+{
+    const static int32_t defaultValue = int32_t();
+    if(posterId_)
+        return *posterId_;
+    return defaultValue;
+}
+
+const std::shared_ptr<int32_t>& Comment::getPosterId() const noexcept
+{
+    return posterId_;
+}
+
+void Comment::setPosterId(const int32_t& pPosterId) noexcept
+{
+    posterId_ = std::make_shared<int32_t>(pPosterId);
+    dirtyFlag_[4] = true;
+}
+
 void Comment::updateId(const uint64_t id)
 {}
 
@@ -350,7 +396,8 @@ const std::vector<std::string>& Comment::insertColumns() noexcept
     static const std::vector<std::string> inCols={
         "post",
         "created_date",
-        "ticket_id"
+        "ticket_id",
+        "poster_id"
     };
     return inCols;
 }
@@ -375,6 +422,12 @@ void Comment::outputArgs(drogon::orm::internal::SqlBinder& binder) const
         else
             binder << nullptr;
     }
+    if(dirtyFlag_[4]) {
+        if(getPosterId() )
+            binder << getValueOfPosterId();
+        else
+            binder << nullptr;
+    }
 }
 
 const std::vector<std::string> Comment::updateColumns() const
@@ -386,6 +439,8 @@ const std::vector<std::string> Comment::updateColumns() const
         ret.push_back(getColumnName(2) );
     if(dirtyFlag_[3])
         ret.push_back(getColumnName(3) );
+    if(dirtyFlag_[4])
+        ret.push_back(getColumnName(4) );
     return ret;
 }
 
@@ -406,6 +461,12 @@ void Comment::updateArgs(drogon::orm::internal::SqlBinder& binder) const
     if(dirtyFlag_[3]) {
         if(getTicketId() )
             binder << getValueOfTicketId();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[4]) {
+        if(getPosterId() )
+            binder << getValueOfPosterId();
         else
             binder << nullptr;
     }
@@ -430,6 +491,10 @@ Json::Value Comment::toJson() const
         ret["ticket_id"]=getValueOfTicketId();
     else
         ret["ticket_id"]=Json::Value();
+    if(getPosterId() )
+        ret["poster_id"]=getValueOfPosterId();
+    else
+        ret["poster_id"]=Json::Value();
     return ret;
 }
 
@@ -437,7 +502,7 @@ Json::Value Comment::toMasqueradedJson(
     const std::vector<std::string>& pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 4) {
+    if(pMasqueradingVector.size() == 5) {
         if(!pMasqueradingVector[0].empty() ) {
             if(getId() )
                 ret[pMasqueradingVector[0]]=getValueOfId();
@@ -462,6 +527,12 @@ Json::Value Comment::toMasqueradedJson(
             else
                 ret[pMasqueradingVector[3]]=Json::Value();
         }
+        if(!pMasqueradingVector[4].empty() ) {
+            if(getPosterId() )
+                ret[pMasqueradingVector[4]]=getValueOfPosterId();
+            else
+                ret[pMasqueradingVector[4]]=Json::Value();
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -481,6 +552,10 @@ Json::Value Comment::toMasqueradedJson(
         ret["ticket_id"]=getValueOfTicketId();
     else
         ret["ticket_id"]=Json::Value();
+    if(getPosterId() )
+        ret["poster_id"]=getValueOfPosterId();
+    else
+        ret["poster_id"]=Json::Value();
     return ret;
 }
 
@@ -511,6 +586,13 @@ bool Comment::validateJsonForCreation(const Json::Value& pJson, std::string& err
         err="The ticket_id column cannot be null";
         return false;
     }
+    if(pJson.isMember("poster_id") ) {
+        if(!validJsonOfField(4, "poster_id", pJson["poster_id"], err, true) )
+            return false;
+    } else {
+        err="The poster_id column cannot be null";
+        return false;
+    }
     return true;
 }
 
@@ -518,7 +600,7 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 4) {
+    if(pMasqueradingVector.size() != 5) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -556,6 +638,15 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
                 return false;
             }
         }
+        if(!pMasqueradingVector[4].empty() ) {
+            if(pJson.isMember(pMasqueradingVector[4]) ) {
+                if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true) )
+                    return false;
+            } else {
+                err="The " + pMasqueradingVector[4] + " column cannot be null";
+                return false;
+            }
+        }
     }catch(const Json::LogicError& e)
     {
         err = e.what();
@@ -585,6 +676,10 @@ bool Comment::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(3, "ticket_id", pJson["ticket_id"], err, false) )
             return false;
     }
+    if(pJson.isMember("poster_id") ) {
+        if(!validJsonOfField(4, "poster_id", pJson["poster_id"], err, false) )
+            return false;
+    }
     return true;
 }
 
@@ -592,7 +687,7 @@ bool Comment::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 4) {
+    if(pMasqueradingVector.size() != 5) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -614,6 +709,10 @@ bool Comment::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         }
         if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
             if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false) )
+                return false;
+        }
+        if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]) ) {
+            if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false) )
                 return false;
         }
     }catch(const Json::LogicError& e)
@@ -657,6 +756,7 @@ bool Comment::validJsonOfField(size_t index,
         }
         break;
     case 3:
+    case 4:
         if(pJson.isNull() ) {
             err="The " + fieldName + " column cannot be null";
             return false;
