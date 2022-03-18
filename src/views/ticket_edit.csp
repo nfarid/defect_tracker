@@ -1,0 +1,28 @@
+
+<%inc #include <json/value.h> %>
+
+<%view _header.csp %>
+
+<%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto ticketId = @@.get<std::string>("ticketId"); %>
+<%c++ const auto ticketTitle = @@.get<std::string>("ticketTitle"); %>
+<%c++ const auto ticketDescription = @@.get<std::string>("ticketDescription"); %>
+<%c++ const auto canEdit = @@.get<bool>("canEdit"); %>
+<%c++ const auto canAssign = @@.get<bool>("canAssign"); %>
+
+<h1>Edit {%ticketTitle%} </h1>
+
+<form action="/ticket/{%ticketId%}/edit" method="POST">
+    <%c++ if(canEdit) { %>
+        <label>
+            Description:
+            <textarea id="ticketDescription" name="ticketDescription" rows="4" cols="50">{%ticketDescription%}</textarea>
+        </label>
+    <%c++ } else { %>
+        <p>{%ticketDescription%}</p>
+    <%c++ } %>
+
+    <input type="submit" value="submit">
+</form>
+
+<%view _footer.csp %>

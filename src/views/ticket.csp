@@ -9,8 +9,8 @@
 
 <h1>{%title%}</h1>
 
-<%c++ const auto ticket_desc = ticket["desc"].asString(); %>
-<p>{%ticket_desc;%}</p>
+<%c++ const auto ticketDescription = ticket["descrption"].asString(); %>
+<p>{%ticketDescription%}</p>
 
 <%c++ const auto projectId = ticket["project"].asInt(); %>
 <%c++ const auto projectName = ticket["project_name"].asString(); %>
@@ -31,6 +31,9 @@
 
 <%c++ const auto ticketId = ticket["id"].asInt(); %>
 <a href="/ticket/{%ticketId%}/comment">New comment</a>
+<br/>
+
+<a href="/ticket/{%ticketId%}/edit">Edit Ticket</a>
 
 
 <%view _footer.csp %>
