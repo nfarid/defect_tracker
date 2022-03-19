@@ -1,6 +1,7 @@
 
 #include "./auxiliary.hpp"
 #include "../models/account.hpp"
+#include "../models/auxiliary.hpp"
 #include "../util/core.hpp"
 #include "../util/hash.hpp"
 
@@ -52,65 +53,47 @@ void UserSession::newForm(const HttpRequestPtr& req, std::function<void(const Ht
 
 void UserSession::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const auto& postParams = req->parameters();
-    HttpViewData data = getViewData("Login", *getSession(req) );
 
-    // Check if the username and password has been entered
-    const auto usernameIter = postParams.find("form_username");
-    if(usernameIter == end(postParams) ) {
-        data.insert("form_error", "Username has not been entered"s);
+    // The data for the signup view
+    // If an error occurs then the user will have to retry the login
+    HttpViewData data = getViewData("Login", *getSession(req) );
+    data.insert("form_action", "/login"s);
+
+    // Obtain the username & password
+    std::string username;
+    std::string password;
+    try {
+        username = postParams.at("form_username");
+        password = postParams.at("form_password");
+    }  catch(const std::exception& ex) {
+        data.insert("form_error", "Some of the required input has not been entered");
         auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
         resp->setStatusCode(k401Unauthorized);
         return cb(resp);
     }
-    const std::string& username = usernameIter->second;
-    const auto passwordIter = postParams.find("form_password");
-    if(passwordIter == end(postParams) ) {
-        data.insert("form_username", username);
-        data.insert("form_error", "Password has not been entered"s);
-        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-        resp->setStatusCode(k401Unauthorized);
-        return cb(resp);
-    }
-    const std::string& password = passwordIter->second;
 
     // Check if the username & password is correct
-
-    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
-    auto userFuture = mAccountOrm.findFutureBy(userCriteria);
-
-    const auto passwordHash = Util::hash(password);
-
+    Model::Account user;
     try {
-        const auto& foundUserLst = userFuture.get();
-        if(foundUserLst.empty() ) {
-            // No user with that name is in the datbase i.e. incorrect username
-            data.insert("form_error", "Incorrect username"s);
-            auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-            resp->setStatusCode(k401Unauthorized);
-            return cb(resp);
-        }
-        const auto& user = foundUserLst.front();
-
-        if(!Util::verifyHash(user.getValueOfPasswordHash(), password) ) {
-            // Incorrect password
-            data.insert("form_error", "Incorrect password"s);
-            data.insert("form_username", username);
-            auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-            resp->setStatusCode(k401Unauthorized);
-            return cb(resp);
-        }
-
-        // Everything is correct, so the user can login
-        SessionPtr session = getSession(req);
-        session->insert("user_id", user.getValueOfId() );
-        session->insert("username", user.getValueOfUsername() );
-        return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
-    } catch(std::exception& ex) {
-        // TODO: Better error handling
-        std::cerr<<ex.what()<<std::endl;
-        std::abort();
+        user = findByUsername(username, mAccountOrm);
+    }  catch(const std::exception& ex) {
+        data.insert("form_error", "Incorrect username"s);
+        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
+        resp->setStatusCode(k401Unauthorized);
+        return cb(resp);
     }
-    UTIL_UNREACHABLE();
+    if(!Util::verifyHash(user.getValueOfPasswordHash(), password) ) {
+        // Incorrect password
+        data.insert("form_error", "Incorrect password"s);
+        data.insert("form_username", username);
+        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
+        resp->setStatusCode(k401Unauthorized);
+        return cb(resp);
+    }
+
+    // Everything is correct, so the user can login
+    logIn(*getSession(req), user.getValueOfId(), username);
+    return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
 }
 
 void UserSession::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)

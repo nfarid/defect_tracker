@@ -34,6 +34,13 @@ inline Model::Account createAccount(const std::string& username, const std::stri
     return newAccount;
 }
 
+// Finds a User that has the username
+// Throws UnexpectedRows if none is found
+inline Model::Account findByUsername(const std::string& username, Mapper<Model::Account>& orm) {
+    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
+    return orm.findOne(userCriteria);
+}
+
 const std::array statusLst = {"new"s, "confirmed"s, "unreproducible"s, "resolved"s, "reopened"s};
 // Returns a list of statuses{"new","confirmed","unreproducible","resolved","reopened"} as a json
 inline Json::Value statusLstJson() {
