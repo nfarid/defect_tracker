@@ -4,11 +4,11 @@
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto ticketId = @@.get<std::string>("ticketId"); %>
-<%c++ const auto ticketTitle = @@.get<std::string>("ticketTitle"); %>
-<%c++ const auto ticketDescription = @@.get<std::string>("ticketDescription"); %>
-<%c++ const auto canEdit = @@.get<bool>("canEdit"); %>
-<%c++ const auto canAssign = @@.get<bool>("canAssign"); %>
+<%c++ const auto ticketId = @@.get<std::string>("ticket_id"); %>
+<%c++ const auto ticketTitle = @@.get<std::string>("ticket_title"); %>
+<%c++ const auto ticketDescription = @@.get<std::string>("ticket_description"); %>
+<%c++ const auto canEdit = @@.get<bool>("can_edit"); %>
+<%c++ const auto canAssign = @@.get<bool>("can_assign"); %>
 
 <h1>Edit {%ticketTitle%} </h1>
 
@@ -16,7 +16,7 @@
     <%c++ if(canEdit) { %>
         <label>
             Description:
-            <textarea id="ticketDescription" name="ticketDescription" rows="4" cols="50">{%ticketDescription%}</textarea>
+            <textarea id="ticket-description" name="ticket-description" rows="4" cols="50">{%ticketDescription%}</textarea>
         </label>
     <%c++ } else { %>
         <p>{%ticketDescription%}</p>

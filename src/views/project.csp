@@ -4,11 +4,9 @@
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto managerName = @@.get<std::string>("managerName"); %>
-<%c++ const auto projectId = @@.get<std::string>("projectId"); %>
-
-<%c++ /*Every ticket in ticketLst contains an id and a title*/ %>
-<%c++ const auto ticketLst = @@.get<Json::Value>("ticketLst"); %>
+<%c++ const auto managerName = @@.get<std::string>("manager_name"); %>
+<%c++ const auto projectId = @@.get<std::string>("project_id"); %>
+<%c++ const auto ticketLst = @@.get<Json::Value>("ticket_lst"); %>
 
 
 <h1>Project:{%title%}</h1>

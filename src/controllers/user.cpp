@@ -87,8 +87,8 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     std::string username;
     std::string passwordHash;
     try {
-        username = postParams.at("form_username");
-        passwordHash = Util::hash(postParams.at("form_password") );
+        username = postParams.at("form-username");
+        passwordHash = Util::hash(postParams.at("form-password") );
     }  catch(const std::exception& ex) {
         data.insert("form_error", "Some of the required input has not been entered");
         return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );

@@ -34,9 +34,9 @@ public:
     /*YES-FORMAT*/
 
     void show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
-    void newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
+    void newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId);
     void edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
-    void create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
+    void create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId);
     void update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
 
 private:
@@ -73,7 +73,7 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         // Send the data to the ticket view
         auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
         data.insert("ticket", std::move(ticketJson) );
-        data.insert("commentLst", std::move(commentLstJson) );
+        data.insert("comment_lst", std::move(commentLstJson) );
         return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
     } catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -81,14 +81,14 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
     }
 }
 
-void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId) {
     try {
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(id);
+        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(projectId);
 
         auto data = getViewData("New Ticket", *getSession(req) );
         const auto project = projectFuture.get();
         data.insert("project", project.toJson() );
-        data.insert("severityLst", severityLstJson() );
+        data.insert("severity_lst", severityLstJson() );
 
         return cb(HttpResponse::newHttpViewResponse("ticket_form.csp", data) );
     }  catch(const std::exception& ex) {
@@ -105,22 +105,22 @@ void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
 
         auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
         auto data = getViewData("Edit Ticket", *session);
-        data.insert("ticketId", std::to_string(id) );
+        data.insert("ticket_id", std::to_string(id) );
 
         const auto ticket = ticketFuture.get();
         auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
-        data.insert("ticketTitle", ticket.getValueOfTitle() );
-        data.insert("ticketDescription", ticket.getValueOfDescrption() );
+        data.insert("ticket_title", ticket.getValueOfTitle() );
+        data.insert("ticket_description", ticket.getValueOfDescrption() );
         const bool isAssigned = !!ticket.getAssignedId();
         if(isAssigned)
-            data.insert("ticketAssigned", std::to_string(ticket.getValueOfAssignedId() ) );
+            data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
 
         bool authorised = false;
         const auto userId = session->get<int32_t>("user_id");
         // If the user was the original reporter, then they can edit the ticket
         if(userId == ticket.getValueOfReporterId() ) {
             authorised = true;
-            data.insert("canEdit", true);
+            data.insert("can_edit", true);
         }
 
         const auto project = projectFuture.get();
@@ -129,12 +129,12 @@ void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         // If the user was project manager, then they can assign to a staff member
         if(userId == project.getValueOfManagerId() ) {
             authorised = true;
-            data.insert("canAssign", true);
+            data.insert("can_assign", true);
 
             Json::Value staffLstJson;
             for(const auto& staff : staffLst)
                 staffLstJson.append(staff.toJson() );
-            data.insert("staffLst", staffLstJson);
+            data.insert("staff_lst", staffLstJson);
         }         // TODO: Allow staff to self assign
 
         // If the user is not authorised to edit any parts of the ticket
@@ -153,12 +153,12 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         const auto& postParams = req->parameters();
         const Model::Project project = mProjectOrm.findByPrimaryKey(projectId);
         HttpViewData data = getViewData("New Ticket", *getSession(req) );
-        data.insert("severityLst", severityLstJson() );
+        data.insert("severity_lst", severityLstJson() );
         data.insert("project", project.toJson() );
 
         // Check if the form data has been entered
         // TODO: Refactor this
-        const auto titleIter = postParams.find("form_title");
+        const auto titleIter = postParams.find("form-title");
         if(titleIter == end(postParams) ) {
             data.insert("form_error", "Title has not been entered"s);
             auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
@@ -167,7 +167,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         }
         const std::string& title = titleIter->second;
         data.insert("form_title", title);
-        const auto descriptionIter = postParams.find("form_description");
+        const auto descriptionIter = postParams.find("form-description");
         if(descriptionIter == end(postParams) ) {
             data.insert("form_error", "Description has not been entered"s);
             auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
@@ -176,7 +176,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         }
         const std::string& description = descriptionIter->second;
         data.insert("form_descrption", description);
-        const auto severityIter = postParams.find("form_severity");
+        const auto severityIter = postParams.find("form-severity");
         if(descriptionIter == end(postParams) ) {
             data.insert("form_error", "Severity has not been entered"s);
             auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);

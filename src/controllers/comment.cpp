@@ -34,7 +34,7 @@ private:
 
 void Comment::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t ticketId) {
     auto data = getViewData("Post Comment", *getSession(req) );
-    data.insert("ticketId", std::to_string(ticketId) );
+    data.insert("ticket_id", std::to_string(ticketId) );
     return cb(HttpResponse::newHttpViewResponse("comment_form.csp", data) );
 }
 
@@ -42,7 +42,7 @@ void Comment::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t  
     const auto& postParams = req->parameters();
     try {
         Model::Comment newComment{};
-        newComment.setPost(postParams.at("form_post") );
+        newComment.setPost(postParams.at("form-post") );
         newComment.setCreatedDate(trantor::Date::now() );
         newComment.setTicketId(ticketId);
         mCommentOrm.insert(newComment);

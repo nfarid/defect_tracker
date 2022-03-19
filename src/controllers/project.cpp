@@ -50,9 +50,9 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
             ticketLstJson.append(ticket.toJson() );
 
         HttpViewData data = getViewData(project.getValueOfTitle(), *getSession(req) );
-        data.insert("managerName", manager.getValueOfUsername() );
-        data.insert("ticketLst", ticketLstJson);
-        data.insert("projectId", std::to_string(id) );
+        data.insert("manager_name", manager.getValueOfUsername() );
+        data.insert("ticket_lst", ticketLstJson);
+        data.insert("project_id", std::to_string(id) );
         return cb(HttpResponse::newHttpViewResponse("project.csp", data) );
     } catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -63,7 +63,7 @@ void Project::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id)
 void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb){
     try {
         // action would be /search?search_project=param
-        const std::string& param = req->parameters().at("search_project");
+        const std::string& param = req->parameters().at("search-project");
 
         // TODO: Make this more robust (e.g. trim string)
         // query would be like the get param, but with the spaces replaced with '|', allowing searching by token
@@ -83,7 +83,7 @@ void Project::search(const HttpRequestPtr& req, ResponseCallback&& cb){
         }
 
         HttpViewData data = getViewData("project_search", *getSession(req) );
-        data.insert("projectLst", projectLstJson);
+        data.insert("project_lst", projectLstJson);
         return cb(HttpResponse::newHttpViewResponse("search.csp", data) );
     }  catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;

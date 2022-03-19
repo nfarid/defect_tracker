@@ -3,15 +3,15 @@
 
 <%view _header.csp %>
 
-<%c++ const auto projectLst = @@.get<Json::Value>("projectLst"); %>
+<%c++ const auto projectLst = @@.get<Json::Value>("project_lst"); %>
 
 <h1>Project Search</h1>
 
 <ul>
     <%c++ for(const auto& project : projectLst) { %>
-        <%c++ const auto project_name = project["name"].asString(); %>
-        <%c++ const auto project_id = project["id"].asString(); %>
-        <li><a href="/project/{%project_id%}">{%project_name%}</a></li>
+        <%c++ const auto projectName = project["name"].asString(); %>
+        <%c++ const auto projectId = project["id"].asString(); %>
+        <li><a href="/project/{%projectId%}">{%projectName%}</a></li>
     <%c++ } %>
 </ul>
 

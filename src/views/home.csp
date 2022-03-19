@@ -1,10 +1,10 @@
 
 <%view _header.csp %>
 
-<%c++ const auto session_username = @@.get<std::string>("session_username"); %>
+<%c++ const auto sessionUsername = @@.get<std::string>("session_username"); %>
 
-<%c++ if(!session_username.empty()) { %>
-    <h1>Welcome {%session_username%}</h1>
+<%c++ if(!sessionUsername.empty() ) { %>
+    <h1>Welcome {%sessionUsername%}</h1>
 <%c++ } else { %>
     <h1>Guest welcome.</h1>
 <%c++ } %>

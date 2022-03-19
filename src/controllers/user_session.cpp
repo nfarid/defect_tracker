@@ -63,9 +63,10 @@ void UserSession::create(const HttpRequestPtr& req, std::function<void(const Htt
     std::string username;
     std::string password;
     try {
-        username = postParams.at("form_username");
-        password = postParams.at("form_password");
+        username = postParams.at("form-username");
+        password = postParams.at("form-password");
     }  catch(const std::exception& ex) {
+        std::cerr<<ex.what()<<std::endl;
         data.insert("form_error", "Some of the required input has not been entered");
         auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
         resp->setStatusCode(k401Unauthorized);

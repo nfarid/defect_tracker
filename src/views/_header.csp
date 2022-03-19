@@ -1,6 +1,6 @@
 
-<%c++ const auto title=@@.get<std::string>("title"); %>
-<%c++ const auto session_user_id = @@.get<std::string>("session_user_id"); %>
+<%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto userId = @@.get<std::string>("session_user_id"); %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +15,7 @@
     <nav>
         <ul>
             <li><a href="/">Home</a></li>
-            <%c++ if(!session_user_id.empty() ) { %>
+            <%c++ if(!userId.empty() ) { %>
                 <li>
                     <form action="/logout" method="POST">
                         <input type="submit" value="Logout">
@@ -29,7 +29,7 @@
     </nav>
 
     <form action="/search" method="GET">
-        <input type="text" id="search_project" name="search_project"/>
+        <input type="text" id="search-project" name="search-project"/>
         <input type="submit" value="Search Project">
     </form>
 </header>
