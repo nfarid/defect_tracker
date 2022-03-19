@@ -10,7 +10,7 @@ using namespace drogon_model::bug_tracker;
 
 const std::string Ticket::Cols::_id = "id";
 const std::string Ticket::Cols::_title = "title";
-const std::string Ticket::Cols::_descrption = "descrption";
+const std::string Ticket::Cols::_description = "description";
 const std::string Ticket::Cols::_status = "status";
 const std::string Ticket::Cols::_severity = "severity";
 const std::string Ticket::Cols::_created_date = "created_date";
@@ -25,7 +25,7 @@ const std::string Ticket::tableName = "ticket";
 const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"title", "std::string", "text", 0, false, false, true},
-    {"descrption", "std::string", "text", 0, false, false, true},
+    {"description", "std::string", "text", 0, false, false, true},
     {"status", "std::string", "USER-DEFINED", 0, false, false, true},
     {"severity", "std::string", "USER-DEFINED", 0, false, false, true},
     {"created_date", "trantor::Date", "timestamp without time zone", 0, false, false, true},
@@ -47,8 +47,8 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             id_=std::make_shared<int32_t>(r["id"].as<int32_t>() );
         if(!r["title"].isNull() )
             title_=std::make_shared<std::string>(r["title"].as<std::string>() );
-        if(!r["descrption"].isNull() )
-            descrption_=std::make_shared<std::string>(r["descrption"].as<std::string>() );
+        if(!r["description"].isNull() )
+            description_=std::make_shared<std::string>(r["description"].as<std::string>() );
         if(!r["status"].isNull() )
             status_=std::make_shared<std::string>(r["status"].as<std::string>() );
         if(!r["severity"].isNull() )
@@ -108,7 +108,7 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             title_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 2;
         if(!r[index].isNull() )
-            descrption_=std::make_shared<std::string>(r[index].as<std::string>() );
+            description_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 3;
         if(!r[index].isNull() )
             status_=std::make_shared<std::string>(r[index].as<std::string>() );
@@ -182,7 +182,7 @@ Ticket::Ticket(const Json::Value& pJson, const std::vector<std::string>& pMasque
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            descrption_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            description_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
@@ -263,10 +263,10 @@ Ticket::Ticket(const Json::Value& pJson) noexcept(false)
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("descrption") ) {
+    if(pJson.isMember("description") ) {
         dirtyFlag_[2]=true;
-        if(!pJson["descrption"].isNull() )
-            descrption_=std::make_shared<std::string>(pJson["descrption"].asString() );
+        if(!pJson["description"].isNull() )
+            description_=std::make_shared<std::string>(pJson["description"].asString() );
     }
     if(pJson.isMember("status") ) {
         dirtyFlag_[3]=true;
@@ -354,7 +354,7 @@ void Ticket::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            descrption_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+            description_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
         dirtyFlag_[3] = true;
@@ -434,10 +434,10 @@ void Ticket::updateByJson(const Json::Value& pJson) noexcept(false)
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("descrption") ) {
+    if(pJson.isMember("description") ) {
         dirtyFlag_[2] = true;
-        if(!pJson["descrption"].isNull() )
-            descrption_=std::make_shared<std::string>(pJson["descrption"].asString() );
+        if(!pJson["description"].isNull() )
+            description_=std::make_shared<std::string>(pJson["description"].asString() );
     }
     if(pJson.isMember("status") ) {
         dirtyFlag_[3] = true;
@@ -556,28 +556,28 @@ void Ticket::setTitle(std::string&& pTitle) noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string& Ticket::getValueOfDescrption() const noexcept
+const std::string& Ticket::getValueOfDescription() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(descrption_)
-        return *descrption_;
+    if(description_)
+        return *description_;
     return defaultValue;
 }
 
-const std::shared_ptr<std::string>& Ticket::getDescrption() const noexcept
+const std::shared_ptr<std::string>& Ticket::getDescription() const noexcept
 {
-    return descrption_;
+    return description_;
 }
 
-void Ticket::setDescrption(const std::string& pDescrption) noexcept
+void Ticket::setDescription(const std::string& pDescription) noexcept
 {
-    descrption_ = std::make_shared<std::string>(pDescrption);
+    description_ = std::make_shared<std::string>(pDescription);
     dirtyFlag_[2] = true;
 }
 
-void Ticket::setDescrption(std::string&& pDescrption) noexcept
+void Ticket::setDescription(std::string&& pDescription) noexcept
 {
-    descrption_ = std::make_shared<std::string>(std::move(pDescrption) );
+    description_ = std::make_shared<std::string>(std::move(pDescription) );
     dirtyFlag_[2] = true;
 }
 
@@ -745,7 +745,7 @@ const std::vector<std::string>& Ticket::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "title",
-        "descrption",
+        "description",
         "status",
         "severity",
         "created_date",
@@ -766,8 +766,8 @@ void Ticket::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getDescrption() )
-            binder << getValueOfDescrption();
+        if(getDescription() )
+            binder << getValueOfDescription();
         else
             binder << nullptr;
     }
@@ -848,8 +848,8 @@ void Ticket::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
-        if(getDescrption() )
-            binder << getValueOfDescrption();
+        if(getDescription() )
+            binder << getValueOfDescription();
         else
             binder << nullptr;
     }
@@ -908,10 +908,10 @@ Json::Value Ticket::toJson() const
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
-    if(getDescrption() )
-        ret["descrption"]=getValueOfDescrption();
+    if(getDescription() )
+        ret["description"]=getValueOfDescription();
     else
-        ret["descrption"]=Json::Value();
+        ret["description"]=Json::Value();
     if(getStatus() )
         ret["status"]=getValueOfStatus();
     else
@@ -961,8 +961,8 @@ Json::Value Ticket::toMasqueradedJson(
                 ret[pMasqueradingVector[1]]=Json::Value();
         }
         if(!pMasqueradingVector[2].empty() ) {
-            if(getDescrption() )
-                ret[pMasqueradingVector[2]]=getValueOfDescrption();
+            if(getDescription() )
+                ret[pMasqueradingVector[2]]=getValueOfDescription();
             else
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
@@ -1019,10 +1019,10 @@ Json::Value Ticket::toMasqueradedJson(
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
-    if(getDescrption() )
-        ret["descrption"]=getValueOfDescrption();
+    if(getDescription() )
+        ret["description"]=getValueOfDescription();
     else
-        ret["descrption"]=Json::Value();
+        ret["description"]=Json::Value();
     if(getStatus() )
         ret["status"]=getValueOfStatus();
     else
@@ -1067,11 +1067,11 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
         err="The title column cannot be null";
         return false;
     }
-    if(pJson.isMember("descrption") ) {
-        if(!validJsonOfField(2, "descrption", pJson["descrption"], err, true) )
+    if(pJson.isMember("description") ) {
+        if(!validJsonOfField(2, "description", pJson["description"], err, true) )
             return false;
     } else {
-        err="The descrption column cannot be null";
+        err="The description column cannot be null";
         return false;
     }
     if(pJson.isMember("status") ) {
@@ -1231,8 +1231,8 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(1, "title", pJson["title"], err, false) )
             return false;
     }
-    if(pJson.isMember("descrption") ) {
-        if(!validJsonOfField(2, "descrption", pJson["descrption"], err, false) )
+    if(pJson.isMember("description") ) {
+        if(!validJsonOfField(2, "description", pJson["description"], err, false) )
             return false;
     }
     if(pJson.isMember("status") ) {

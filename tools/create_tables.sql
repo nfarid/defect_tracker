@@ -20,7 +20,7 @@ CREATE TYPE SeverityType AS ENUM ('low', 'medium', 'high');
 CREATE TABLE Ticket(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title TEXT NOT NULL,
-    descrption TEXT NOT NULL,
+    description TEXT NOT NULL,
     status StatusType NOT NULL,
     severity SeverityType NOT NULL,
     created_date TIMESTAMP NOT NULL,

@@ -110,7 +110,7 @@ void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         const auto ticket = ticketFuture.get();
         auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
         data.insert("ticket_title", ticket.getValueOfTitle() );
-        data.insert("ticket_description", ticket.getValueOfDescrption() );
+        data.insert("ticket_description", ticket.getValueOfDescription() );
         const bool isAssigned = !!ticket.getAssignedId();
         if(isAssigned)
             data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
@@ -175,7 +175,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
             return cb(resp);
         }
         const std::string& description = descriptionIter->second;
-        data.insert("form_descrption", description);
+        data.insert("form_description", description);
         const auto severityIter = postParams.find("form-severity");
         if(descriptionIter == end(postParams) ) {
             data.insert("form_error", "Severity has not been entered"s);
@@ -198,7 +198,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         // Insert the new ticket into the database
         Model::Ticket newTicket;
         newTicket.setTitle(title);
-        newTicket.setDescrption(description);
+        newTicket.setDescription(description);
         newTicket.setSeverity(severity);
         newTicket.setStatus("new");
         newTicket.setCreatedDate(trantor::Date::now() );
@@ -224,7 +224,7 @@ void Ticket::update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id
         const int32_t userId = session->get<int32_t>("user_id");
         // The ticket's reporter can edit the ticket
         if(userId == ticket.getValueOfReporterId() ) {
-            ticket.setDescrption(postParams.at("ticketDescription") );
+            ticket.setDescription(postParams.at("ticketDescription") );
             mTicketOrm.update(ticket);
         }
 

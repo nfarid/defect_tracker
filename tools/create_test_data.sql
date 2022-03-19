@@ -23,7 +23,7 @@ INSERT INTO Project(title, manager_id) VALUES
     ('example_project_1', (SELECT id FROM Account WHERE username='example_manager') ),
     ('example_project_2', (SELECT id FROM Account WHERE username='example_manager') );
 
-INSERT INTO Ticket(title, descrption, status, severity, created_date, assigned_id, project_id, reporter_id) VALUES
+INSERT INTO Ticket(title, description, status, severity, created_date, assigned_id, project_id, reporter_id) VALUES
     ('ticket', 'description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='project'), (SELECT id FROM Account WHERE username='example_user') ),
     ('example_ticket_1', 'example_description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_user') ),
     ('example_ticket_2', 'another_description', 'confirmed', 'high', CURRENT_TIMESTAMP, (SELECT id FROM Account WHERE username='example_staff_1'), (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_user') );

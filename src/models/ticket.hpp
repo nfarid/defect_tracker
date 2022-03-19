@@ -55,7 +55,7 @@ public:
     struct Cols{
         static const std::string _id;
         static const std::string _title;
-        static const std::string _descrption;
+        static const std::string _description;
         static const std::string _status;
         static const std::string _severity;
         static const std::string _created_date;
@@ -135,15 +135,15 @@ public:
     void setTitle(std::string&& pTitle) noexcept;
 
 
-    /**  For column descrption  */
-    ///Get the value of the column descrption, returns the default value if the column is null
-    const std::string& getValueOfDescrption() const noexcept;
+    /**  For column description  */
+    ///Get the value of the column description, returns the default value if the column is null
+    const std::string& getValueOfDescription() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string>& getDescrption() const noexcept;
+    const std::shared_ptr<std::string>& getDescription() const noexcept;
 
-    ///Set the value of the column descrption
-    void setDescrption(const std::string& pDescrption) noexcept;
-    void setDescrption(std::string&& pDescrption) noexcept;
+    ///Set the value of the column description
+    void setDescription(const std::string& pDescription) noexcept;
+    void setDescription(std::string&& pDescription) noexcept;
 
 
     /**  For column status  */
@@ -244,7 +244,7 @@ private:
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> title_;
-    std::shared_ptr<std::string> descrption_;
+    std::shared_ptr<std::string> description_;
     std::shared_ptr<std::string> status_;
     std::shared_ptr<std::string> severity_;
     std::shared_ptr<trantor::Date> createdDate_;
@@ -289,7 +289,7 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[2]) {
-            sql += "descrption,";
+            sql += "description,";
             ++parametersCount;
         }
         if(dirtyFlag_[3]) {
