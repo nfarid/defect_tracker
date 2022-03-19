@@ -40,6 +40,11 @@ bool isLoggedIn(const Session& session) {
     return userId.has_value();
 }
 
+void logIn(drogon::Session& session, int32_t userId, const std::string& username) {
+    session.insert("user_id", userId);
+    session.insert("username", username);
+}
+
 
 }  // namespace Aux
 

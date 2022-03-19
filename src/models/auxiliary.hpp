@@ -2,6 +2,9 @@
 #ifndef HPP_MODELS_AUXILIARY
 #define HPP_MODELS_AUXILIARY
 
+#include "./account.hpp"
+
+#include <drogon/orm/Mapper.h>
 #include <json/value.h>
 
 #include <array>
@@ -14,6 +17,22 @@ namespace Aux
 
 
 using std::string_literals::operator""s;
+using namespace drogon::orm;
+
+// Checks if the specified username already exist in the account table of database
+inline bool isUsernameExist(const std::string& username, Mapper<Model::Account>& orm) {
+    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
+    return orm.count(userCriteria) > 0;
+}
+
+inline Model::Account createAccount(const std::string& username, const std::string& hash, Mapper<Model::Account>& orm)
+{
+    Model::Account newAccount;
+    newAccount.setUsername(username);
+    newAccount.setPasswordHash(hash);
+    orm.insert(newAccount);  // This will also set the id for newAccount
+    return newAccount;
+}
 
 const std::array statusLst = {"new"s, "confirmed"s, "unreproducible"s, "resolved"s, "reopened"s};
 // Returns a list of statuses{"new","confirmed","unreproducible","resolved","reopened"} as a json

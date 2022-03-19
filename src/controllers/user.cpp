@@ -1,6 +1,7 @@
 
 #include "./auxiliary.hpp"
 #include "../models/account.hpp"
+#include "../models/auxiliary.hpp"
 #include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>
@@ -78,42 +79,33 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     const auto& postParams = req->parameters();
 
     // The data for the signup view
+    // If an error occurs then the user will have to retry the signup
     HttpViewData data = getViewData("Sign Up"s, *getSession(req) );
     data.insert("form_action", "/signup"s);
 
-    // Check if the username and password has been entered
-    const auto usernameIter = postParams.find("form_username");
-    if(usernameIter == end(postParams) ) {
-        data.insert("form_error", "Username has not been entered"s);
+    // Obtain the username and password from the POST parameters
+    std::string username;
+    std::string passwordHash;
+    try {
+        username = postParams.at("form_username");
+        passwordHash = Util::hash(postParams.at("form_password") );
+    }  catch(const std::exception& ex) {
+        data.insert("form_error", "Some of the required input has not been entered");
         return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
     }
-    const auto& username = usernameIter->second;
-    const auto passwordIter = postParams.find("form_password");
-    if(passwordIter == end(postParams) ) {
-        data.insert("form_error", "Password has not been entered"s);
-        return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
-    }
-    const auto passwordHash = Util::hash(passwordIter->second);
 
-    // TODO: Add some requirements for the username and password here (e.g. no special characters)
+    // TODO: Add some requirements for the username and password here
 
     // Check that the username is not in the database
-    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
-    const auto userCount = mAccountOrm.count(userCriteria);
-    if(userCount > 0) {
+    if(isUsernameExist(username, mAccountOrm) ) {
         data.insert("form_error", "That username already exist, try another username"s);
         return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
     }
 
-    // Create a new account (and then redirect to the home page)
-    Model::Account newAccount;
-    newAccount.setUsername(username);
-    newAccount.setPasswordHash(passwordHash);
+    // Create a new account, and login (and then redirect to the home page)
     try {
-        mAccountOrm.insert(newAccount);  // This will also set the id for newAccount
-        SessionPtr session = getSession(req);
-        session->insert("user_id", newAccount.getValueOfId() );
-        session->insert("username", newAccount.getValueOfUsername() );
+        const Model::Account newAccount = createAccount(username, passwordHash, mAccountOrm);
+        logIn(*getSession(req), newAccount.getValueOfId(), username);
         return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
     }catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;

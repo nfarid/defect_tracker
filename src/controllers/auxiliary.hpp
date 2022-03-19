@@ -36,6 +36,11 @@ drogon::HttpViewData getViewData(const std::string& title, const drogon::Session
  */
 bool isLoggedIn(const drogon::Session& session);
 
+/**
+ * \brief Creates the session when the user logs in
+ */
+void logIn(drogon::Session& session, int32_t userId, const std::string& username);
+
 
 // A drogon callback function object that takes a http response from the controller
 using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;
