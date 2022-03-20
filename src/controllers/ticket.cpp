@@ -57,16 +57,12 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         // Convert these values to json
         Json::Value commentLstJson;
         const auto commentLst = commentLstFuture.get();
-        for(const auto& comment : commentLst) {
-            auto commentJson = comment.toJson();
-            commentJson["created_date"] = comment.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
-            commentLstJson.append(std::move(commentJson) );
-        }
+        for(const auto& comment : commentLst)
+            commentLstJson.append(comment.toJson() );
 
         const auto ticket = ticketFuture.get();
         auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
         auto ticketJson = ticket.toJson();
-        ticketJson["created_date"] = ticket.getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
         const auto project = projectFuture.get();
         ticketJson["project_name"] = project.getValueOfTitle();
 
