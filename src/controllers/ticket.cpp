@@ -48,28 +48,19 @@ private:
 
 void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
     try {
-        // Obtain ticket, project and comment models
-        auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
+        const Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
+        const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
 
-        const Criteria commentCriteria{Model::Comment::Cols::_ticket_id, CompareOperator::EQ, id};
-        auto commentLstFuture = mCommentOrm.findFutureBy(commentCriteria);
-
-        // Convert these values to json
+        // Get a json list of comments
         Json::Value commentLstJson;
-        const auto commentLst = commentLstFuture.get();
-        for(const auto& comment : commentLst)
+        for(const auto& comment : getTicketComments(id, mCommentOrm) )
             commentLstJson.append(comment.toJson() );
-
-        const auto ticket = ticketFuture.get();
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
-        auto ticketJson = ticket.toJson();
-        const auto project = projectFuture.get();
-        ticketJson["project_name"] = project.getValueOfTitle();
 
         // Send the data to the ticket view
         auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
-        data.insert("ticket", std::move(ticketJson) );
+        data.insert("ticket", ticket.toJson() );
         data.insert("comment_lst", std::move(commentLstJson) );
+        data.insert("project_name", project.getValueOfTitle() );
         return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
     } catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;

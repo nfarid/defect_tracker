@@ -3,6 +3,7 @@
 #define HPP_MODELS_AUXILIARY
 
 #include "./account.hpp"
+#include "./comment.hpp"
 
 #include <drogon/orm/Mapper.h>
 #include <json/value.h>
@@ -18,6 +19,14 @@ namespace Aux
 
 using std::string_literals::operator""s;
 using namespace drogon::orm;
+
+// Finds all the comments that belong to a ticket with a specific id
+// Throws
+inline std::vector<Model::Comment> getTicketComments(int32_t ticketId, Mapper<Model::Comment>& orm)
+{
+    const Criteria commentCriteria{Model::Comment::Cols::_ticket_id, CompareOperator::EQ, ticketId};
+    return orm.findBy(commentCriteria);
+}
 
 // Checks if the specified username already exist in the account table of database
 inline bool isUsernameExist(const std::string& username, Mapper<Model::Account>& orm) {

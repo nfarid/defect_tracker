@@ -6,6 +6,7 @@
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
 <%c++ const auto commentLst = @@.get<Json::Value>("comment_lst"); %>
+<%c++ const auto projectName = @@.get<std::string>("project_name"); %>
 
 <h1>{%title%}</h1>
 
@@ -13,7 +14,6 @@
 <p>{%ticketDescription%}</p>
 
 <%c++ const auto projectId = ticket["project_id"].asInt(); %>
-<%c++ const auto projectName = ticket["project_name"].asString(); %>
 <a href="/project/{%projectId%}">{%projectName%}</a>
 
 <%c++ const auto ticketCreatedDate = ticket["created_date"].asString(); %>
