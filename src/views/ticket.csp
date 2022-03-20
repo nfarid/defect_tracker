@@ -7,6 +7,7 @@
 <%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
 <%c++ const auto commentLst = @@.get<Json::Value>("comment_lst"); %>
 <%c++ const auto projectName = @@.get<std::string>("project_name"); %>
+<%c++ const auto reporterUsername = @@.get<std::string>("reporter_username"); %>
 
 <h1>{%title%}</h1>
 
@@ -18,6 +19,8 @@
 
 <%c++ const auto ticketCreatedDate = ticket["created_date"].asString(); %>
 <p>Creation date: {%ticketCreatedDate%}</p>
+
+<p>Reported by: {%reporterUsername%}</p>
 
 <%c++ if(!commentLst.empty() ) { %>
     <p>Comments: </p>

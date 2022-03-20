@@ -40,15 +40,17 @@ public:
     void update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
 
 private:
+    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
+    Mapper<Model::Comment> mCommentOrm = Mapper<Model::Comment>(app().getDbClient("db") );
     Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(app().getDbClient("db") );
     Mapper<Model::Staff> mStaffOrm  = Mapper<Model::Staff>(app().getDbClient("db") );
     Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
-    Mapper<Model::Comment> mCommentOrm = Mapper<Model::Comment>(app().getDbClient("db") );
 };
 
 void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
     try {
         const Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
+        const Model::Account reporter = mAccountOrm.findByPrimaryKey(ticket.getValueOfReporterId() );
         const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
 
         // Get a json list of comments
@@ -61,6 +63,7 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         data.insert("ticket", ticket.toJson() );
         data.insert("comment_lst", std::move(commentLstJson) );
         data.insert("project_name", project.getValueOfTitle() );
+        data.insert("reporter_username", reporter.getValueOfUsername() );
         return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
     } catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -69,10 +72,14 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
 }
 
 void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId) {
+    const SessionPtr session = getSession(req);
+    if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in
+        return cb(HttpResponse::newRedirectionResponse("/") );
+
     try {
         auto projectFuture = mProjectOrm.findFutureByPrimaryKey(projectId);
 
-        auto data = getViewData("New Ticket", *getSession(req) );
+        auto data = getViewData("New Ticket", *session);
         const auto project = projectFuture.get();
         data.insert("project", project.toJson() );
         data.insert("severity_lst", severityLstJson() );
@@ -88,7 +95,7 @@ void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
     try {
         const auto session = getSession(req);
         if(!isLoggedIn(*session) )
-            return cb(HttpResponse::newNotFoundResponse() );
+            return cb(HttpResponse::newRedirectionResponse("/") );
 
         auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
         auto data = getViewData("Edit Ticket", *session);
