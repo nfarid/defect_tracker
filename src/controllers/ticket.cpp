@@ -143,40 +143,28 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         data.insert("severity_lst", severityLstJson() );
         data.insert("project", project.toJson() );
 
-        // Check if the form data has been entered
-        // TODO: Refactor this
-        const auto titleIter = postParams.find("form-title");
-        if(titleIter == end(postParams) ) {
-            data.insert("form_error", "Title has not been entered"s);
+        // Obtain the form data
+        std::string title;
+        std::string description;
+        std::string severity;
+        try {
+            title = postParams.at("form-title");
+            data.insert("form_title", title);
+            description = postParams.at("form-description");
+            data.insert("form_description", description);
+            severity = postParams.at("form-severity");
+        }  catch(const std::exception& ex) {
+            data.insert("form_error", "Some required data is missing"s);
             auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
             resp->setStatusCode(k422UnprocessableEntity);
             return cb(resp);
         }
-        const std::string& title = titleIter->second;
-        data.insert("form_title", title);
-        const auto descriptionIter = postParams.find("form-description");
-        if(descriptionIter == end(postParams) ) {
-            data.insert("form_error", "Description has not been entered"s);
-            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
-            resp->setStatusCode(k422UnprocessableEntity);
-            return cb(resp);
-        }
-        const std::string& description = descriptionIter->second;
-        data.insert("form_description", description);
-        const auto severityIter = postParams.find("form-severity");
-        if(descriptionIter == end(postParams) ) {
-            data.insert("form_error", "Severity has not been entered"s);
-            auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
-            resp->setStatusCode(k422UnprocessableEntity);
-            return cb(resp);
-        }
-        const std::string& severity = severityIter->second;
 
         // Verify form data
         // TODO: Add more checks
         // Check if severity is valid (i.e it's in severityLst)
         if(std::find(begin(severityLst), end(severityLst), severity) == end(severityLst) ) {
-            data.insert("form_error", "Severity has not been entered correctly"s);
+            data.insert("form_error", "Severity is not valid"s);
             auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
             resp->setStatusCode(k422UnprocessableEntity);
             return cb(resp);
