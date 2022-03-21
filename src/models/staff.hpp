@@ -47,9 +47,6 @@ namespace bug_tracker
 {
 
 
-using namespace drogon::orm;
-
-
 class Staff{
 public:
     struct Cols{
@@ -73,7 +70,7 @@ public:
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit Staff(const Row& r, const ssize_t indexOffset = 0) noexcept;
+    explicit Staff(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
@@ -112,30 +109,24 @@ public:
     const int32_t& getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getId() const noexcept;
-
     ///Set the value of the column id
     void setId(const int32_t& pId) noexcept;
-
 
     /**  For column project_id  */
     ///Get the value of the column project_id, returns the default value if the column is null
     const int32_t& getValueOfProjectId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getProjectId() const noexcept;
-
     ///Set the value of the column project_id
     void setProjectId(const int32_t& pProjectId) noexcept;
-
 
     /**  For column staff_id  */
     ///Get the value of the column staff_id, returns the default value if the column is null
     const int32_t& getValueOfStaffId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getStaffId() const noexcept;
-
     ///Set the value of the column staff_id
     void setStaffId(const int32_t& pStaffId) noexcept;
-
 
 
     static size_t getColumnNumber() noexcept {
@@ -149,9 +140,9 @@ public:
     /// Relationship interfaces
 
 private:
-    friend Mapper<Staff>;
+    friend drogon::orm::Mapper<Staff>;
 #ifdef __cpp_impl_coroutine
-    friend CoroMapper<Staff>;
+    friend drogon::orm::CoroMapper<Staff>;
 #endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;

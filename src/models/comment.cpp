@@ -3,10 +3,13 @@
 
 #include "./comment.hpp"
 #include "../constants.hpp"
+#include "./account.hpp"
+#include "./ticket.hpp"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
 using namespace drogon;
+using namespace drogon::orm;
 using namespace drogon_model::bug_tracker;
 
 const std::string Comment::Cols::_id = "id";
@@ -389,7 +392,7 @@ void Comment::setPosterId(const int32_t& pPosterId) noexcept
     dirtyFlag_[4] = true;
 }
 
-void Comment::updateId(const uint64_t id)
+void Comment::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Comment::insertColumns() noexcept
@@ -485,7 +488,7 @@ Json::Value Comment::toJson() const
     else
         ret["post"]=Json::Value();
     if(getCreatedDate() )
-        ret["created_date"]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+        ret["created_date"]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["created_date"]=Json::Value();
     if(getTicketId() )
@@ -518,7 +521,7 @@ Json::Value Comment::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty() ) {
             if(getCreatedDate() )
-                ret[pMasqueradingVector[2]]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+                ret[pMasqueradingVector[2]]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
             else
                 ret[pMasqueradingVector[2]]=Json::Value();
         }
@@ -546,7 +549,7 @@ Json::Value Comment::toMasqueradedJson(
     else
         ret["post"]=Json::Value();
     if(getCreatedDate() )
-        ret["created_date"]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+        ret["created_date"]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["created_date"]=Json::Value();
     if(getTicketId() )
@@ -767,11 +770,46 @@ bool Comment::validJsonOfField(size_t index,
             return false;
         }
         break;
-
     default:
         err="Internal error in the server";
         return false;
         break;
     }
     return true;
+}
+
+void Comment::getTicket(const DbClientPtr& clientPtr,
+        const std::function<void(Ticket)>& rcb,
+        const ExceptionCallback& ecb) const
+{
+    const static std::string sql = "select * from ticket where id = $1";
+    *clientPtr << sql
+               << *posterId_
+        >>[rcb = rcb, ecb](const Result& r){
+        if(r.empty() )
+            ecb(UnexpectedRows("0 rows found") );
+        else if(r.size() > 1)
+            ecb(UnexpectedRows("Found more than one row") );
+        else
+            rcb(Ticket(r[0]) );
+        }
+        >> ecb;
+}
+
+void Comment::getPoster(const DbClientPtr& clientPtr,
+        const std::function<void(Account)>& rcb,
+        const ExceptionCallback& ecb) const
+{
+    const static std::string sql = "select * from account where id = $1";
+    *clientPtr << sql
+               << *posterId_
+        >>[rcb = rcb, ecb](const Result& r){
+        if(r.empty() )
+            ecb(UnexpectedRows("0 rows found") );
+        else if(r.size() > 1)
+            ecb(UnexpectedRows("Found more than one row") );
+        else
+            rcb(Account(r[0]) );
+        }
+        >> ecb;
 }

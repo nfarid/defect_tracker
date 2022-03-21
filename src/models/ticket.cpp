@@ -3,10 +3,14 @@
 
 #include "./ticket.hpp"
 #include "../constants.hpp"
+#include "./account.hpp"
+#include "./comment.hpp"
+#include "./project.hpp"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
 using namespace drogon;
+using namespace drogon::orm;
 using namespace drogon_model::bug_tracker;
 
 const std::string Ticket::Cols::_id = "id";
@@ -739,7 +743,7 @@ void Ticket::setProjectId(const int32_t& pProjectId) noexcept
     dirtyFlag_[9] = true;
 }
 
-void Ticket::updateId(const uint64_t id)
+void Ticket::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Ticket::insertColumns() noexcept
@@ -922,11 +926,11 @@ Json::Value Ticket::toJson() const
     else
         ret["severity"]=Json::Value();
     if(getCreatedDate() )
-        ret["created_date"]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+        ret["created_date"]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["created_date"]=Json::Value();
     if(getResolvedDate() )
-        ret["resolved_date"]=getResolvedDate()->toCustomedFormattedString(dateFormat);
+        ret["resolved_date"]=getResolvedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["resolved_date"]=Json::Value();
     if(getReporterId() )
@@ -981,13 +985,13 @@ Json::Value Ticket::toMasqueradedJson(
         }
         if(!pMasqueradingVector[5].empty() ) {
             if(getCreatedDate() )
-                ret[pMasqueradingVector[5]]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+                ret[pMasqueradingVector[5]]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
             else
                 ret[pMasqueradingVector[5]]=Json::Value();
         }
         if(!pMasqueradingVector[6].empty() ) {
             if(getResolvedDate() )
-                ret[pMasqueradingVector[6]]=getResolvedDate()->toCustomedFormattedString(dateFormat);
+                ret[pMasqueradingVector[6]]=getResolvedDate()->toCustomedFormattedStringLocal(dateFormat);
             else
                 ret[pMasqueradingVector[6]]=Json::Value();
         }
@@ -1033,11 +1037,11 @@ Json::Value Ticket::toMasqueradedJson(
     else
         ret["severity"]=Json::Value();
     if(getCreatedDate() )
-        ret["created_date"]=getCreatedDate()->toCustomedFormattedString(dateFormat);
+        ret["created_date"]=getCreatedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["created_date"]=Json::Value();
     if(getResolvedDate() )
-        ret["resolved_date"]=getResolvedDate()->toCustomedFormattedString(dateFormat);
+        ret["resolved_date"]=getResolvedDate()->toCustomedFormattedStringLocal(dateFormat);
     else
         ret["resolved_date"]=Json::Value();
     if(getReporterId() )
@@ -1398,11 +1402,63 @@ bool Ticket::validJsonOfField(size_t index,
             return false;
         }
         break;
-
     default:
         err="Internal error in the server";
         return false;
         break;
     }
     return true;
+}
+
+void Ticket::getProject(const DbClientPtr& clientPtr,
+        const std::function<void(Project)>& rcb,
+        const ExceptionCallback& ecb) const
+{
+    const static std::string sql = "select * from project where id = $1";
+    *clientPtr << sql
+               << *projectId_
+        >>[rcb = rcb, ecb](const Result& r){
+        if(r.empty() )
+            ecb(UnexpectedRows("0 rows found") );
+        else if(r.size() > 1)
+            ecb(UnexpectedRows("Found more than one row") );
+        else
+            rcb(Project(r[0]) );
+        }
+        >> ecb;
+}
+
+void Ticket::getComments(const DbClientPtr& clientPtr,
+        const std::function<void(std::vector<Comment>)>& rcb,
+        const ExceptionCallback& ecb) const
+{
+    const static std::string sql = "select * from comment where poster_id = $1";
+    *clientPtr << sql
+               << *id_
+        >>[rcb = rcb](const Result& r){
+        std::vector<Comment> ret;
+        ret.reserve(r.size() );
+        for(auto const& row : r)
+            ret.emplace_back(Comment(row) );
+        rcb(ret);
+        }
+        >> ecb;
+}
+
+void Ticket::getReporter(const DbClientPtr& clientPtr,
+        const std::function<void(Account)>& rcb,
+        const ExceptionCallback& ecb) const
+{
+    const static std::string sql = "select * from account where id = $1";
+    *clientPtr << sql
+               << *reporterId_
+        >>[rcb = rcb, ecb](const Result& r){
+        if(r.empty() )
+            ecb(UnexpectedRows("0 rows found") );
+        else if(r.size() > 1)
+            ecb(UnexpectedRows("Found more than one row") );
+        else
+            rcb(Account(r[0]) );
+        }
+        >> ecb;
 }

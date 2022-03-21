@@ -47,8 +47,8 @@ namespace bug_tracker
 {
 
 
-using namespace drogon::orm;
-
+class Account;
+class Ticket;
 
 class Comment{
 public:
@@ -75,7 +75,7 @@ public:
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit Comment(const Row& r, const ssize_t indexOffset = 0) noexcept;
+    explicit Comment(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
@@ -114,51 +114,41 @@ public:
     const int32_t& getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getId() const noexcept;
-
     ///Set the value of the column id
     void setId(const int32_t& pId) noexcept;
-
 
     /**  For column post  */
     ///Get the value of the column post, returns the default value if the column is null
     const std::string& getValueOfPost() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getPost() const noexcept;
-
     ///Set the value of the column post
     void setPost(const std::string& pPost) noexcept;
     void setPost(std::string&& pPost) noexcept;
-
 
     /**  For column created_date  */
     ///Get the value of the column created_date, returns the default value if the column is null
     const trantor::Date& getValueOfCreatedDate() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<trantor::Date>& getCreatedDate() const noexcept;
-
     ///Set the value of the column created_date
     void setCreatedDate(const trantor::Date& pCreatedDate) noexcept;
-
 
     /**  For column ticket_id  */
     ///Get the value of the column ticket_id, returns the default value if the column is null
     const int32_t& getValueOfTicketId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getTicketId() const noexcept;
-
     ///Set the value of the column ticket_id
     void setTicketId(const int32_t& pTicketId) noexcept;
-
 
     /**  For column poster_id  */
     ///Get the value of the column poster_id, returns the default value if the column is null
     const int32_t& getValueOfPosterId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getPosterId() const noexcept;
-
     ///Set the value of the column poster_id
     void setPosterId(const int32_t& pPosterId) noexcept;
-
 
 
     static size_t getColumnNumber() noexcept {
@@ -170,12 +160,18 @@ public:
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string>& pMasqueradingVector) const;
     /// Relationship interfaces
+    void getTicket(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(Ticket)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getPoster(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(Account)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
 
 private:
-    friend Mapper<Comment>;
+    friend drogon::orm::Mapper<Comment>;
 #ifdef __cpp_impl_coroutine
-    friend CoroMapper<Comment>;
-#endif // ifdef __cpp_impl_coroutine
+    friend drogon::orm::CoroMapper<Comment>;
+#endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -239,7 +235,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else   {
+        } else {
             sql += ") values (";
         }
 

@@ -6,6 +6,7 @@
 #include <string>
 
 using namespace drogon;
+using namespace drogon::orm;
 using namespace drogon_model::bug_tracker;
 
 const std::string Staff::Cols::_id = "id";
@@ -200,7 +201,7 @@ void Staff::setStaffId(const int32_t& pStaffId) noexcept
     dirtyFlag_[2] = true;
 }
 
-void Staff::updateId(const uint64_t id)
+void Staff::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Staff::insertColumns() noexcept
@@ -461,7 +462,6 @@ bool Staff::validJsonOfField(size_t index,
             return false;
         }
         break;
-
     default:
         err="Internal error in the server";
         return false;

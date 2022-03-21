@@ -47,8 +47,9 @@ namespace bug_tracker
 {
 
 
-using namespace drogon::orm;
-
+class Account;
+class Comment;
+class Project;
 
 class Ticket{
 public:
@@ -80,7 +81,7 @@ public:
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit Ticket(const Row& r, const ssize_t indexOffset = 0) noexcept;
+    explicit Ticket(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
@@ -119,106 +120,86 @@ public:
     const int32_t& getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getId() const noexcept;
-
     ///Set the value of the column id
     void setId(const int32_t& pId) noexcept;
-
 
     /**  For column title  */
     ///Get the value of the column title, returns the default value if the column is null
     const std::string& getValueOfTitle() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getTitle() const noexcept;
-
     ///Set the value of the column title
     void setTitle(const std::string& pTitle) noexcept;
     void setTitle(std::string&& pTitle) noexcept;
-
 
     /**  For column description  */
     ///Get the value of the column description, returns the default value if the column is null
     const std::string& getValueOfDescription() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getDescription() const noexcept;
-
     ///Set the value of the column description
     void setDescription(const std::string& pDescription) noexcept;
     void setDescription(std::string&& pDescription) noexcept;
-
 
     /**  For column status  */
     ///Get the value of the column status, returns the default value if the column is null
     const std::string& getValueOfStatus() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getStatus() const noexcept;
-
     ///Set the value of the column status
     void setStatus(const std::string& pStatus) noexcept;
     void setStatus(std::string&& pStatus) noexcept;
-
 
     /**  For column severity  */
     ///Get the value of the column severity, returns the default value if the column is null
     const std::string& getValueOfSeverity() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getSeverity() const noexcept;
-
     ///Set the value of the column severity
     void setSeverity(const std::string& pSeverity) noexcept;
     void setSeverity(std::string&& pSeverity) noexcept;
-
 
     /**  For column created_date  */
     ///Get the value of the column created_date, returns the default value if the column is null
     const trantor::Date& getValueOfCreatedDate() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<trantor::Date>& getCreatedDate() const noexcept;
-
     ///Set the value of the column created_date
     void setCreatedDate(const trantor::Date& pCreatedDate) noexcept;
-
 
     /**  For column resolved_date  */
     ///Get the value of the column resolved_date, returns the default value if the column is null
     const trantor::Date& getValueOfResolvedDate() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<trantor::Date>& getResolvedDate() const noexcept;
-
     ///Set the value of the column resolved_date
     void setResolvedDate(const trantor::Date& pResolvedDate) noexcept;
     void setResolvedDateToNull() noexcept;
-
 
     /**  For column reporter_id  */
     ///Get the value of the column reporter_id, returns the default value if the column is null
     const int32_t& getValueOfReporterId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getReporterId() const noexcept;
-
     ///Set the value of the column reporter_id
     void setReporterId(const int32_t& pReporterId) noexcept;
-
 
     /**  For column assigned_id  */
     ///Get the value of the column assigned_id, returns the default value if the column is null
     const int32_t& getValueOfAssignedId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getAssignedId() const noexcept;
-
     ///Set the value of the column assigned_id
     void setAssignedId(const int32_t& pAssignedId) noexcept;
     void setAssignedIdToNull() noexcept;
-
 
     /**  For column project_id  */
     ///Get the value of the column project_id, returns the default value if the column is null
     const int32_t& getValueOfProjectId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getProjectId() const noexcept;
-
     ///Set the value of the column project_id
     void setProjectId(const int32_t& pProjectId) noexcept;
-
 
 
     static size_t getColumnNumber() noexcept {
@@ -230,12 +211,21 @@ public:
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string>& pMasqueradingVector) const;
     /// Relationship interfaces
+    void getProject(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(Project)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getComments(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(std::vector<Comment>)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getReporter(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(Account)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
 
 private:
-    friend Mapper<Ticket>;
+    friend drogon::orm::Mapper<Ticket>;
 #ifdef __cpp_impl_coroutine
-    friend CoroMapper<Ticket>;
-#endif // ifdef __cpp_impl_coroutine
+    friend drogon::orm::CoroMapper<Ticket>;
+#endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -324,7 +314,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else   {
+        } else {
             sql += ") values (";
         }
 

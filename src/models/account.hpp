@@ -47,8 +47,10 @@ namespace bug_tracker
 {
 
 
-using namespace drogon::orm;
-
+class Comment;
+class Project;
+class Staff;
+class Ticket;
 
 class Account{
 public:
@@ -73,7 +75,7 @@ public:
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit Account(const Row& r, const ssize_t indexOffset = 0) noexcept;
+    explicit Account(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
@@ -112,32 +114,26 @@ public:
     const int32_t& getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<int32_t>& getId() const noexcept;
-
     ///Set the value of the column id
     void setId(const int32_t& pId) noexcept;
-
 
     /**  For column username  */
     ///Get the value of the column username, returns the default value if the column is null
     const std::string& getValueOfUsername() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getUsername() const noexcept;
-
     ///Set the value of the column username
     void setUsername(const std::string& pUsername) noexcept;
     void setUsername(std::string&& pUsername) noexcept;
-
 
     /**  For column password_hash  */
     ///Get the value of the column password_hash, returns the default value if the column is null
     const std::string& getValueOfPasswordHash() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
     const std::shared_ptr<std::string>& getPasswordHash() const noexcept;
-
     ///Set the value of the column password_hash
     void setPasswordHash(const std::string& pPasswordHash) noexcept;
     void setPasswordHash(std::string&& pPasswordHash) noexcept;
-
 
 
     static size_t getColumnNumber() noexcept {
@@ -149,11 +145,23 @@ public:
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string>& pMasqueradingVector) const;
     /// Relationship interfaces
+    void getProjects(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(std::vector<Project>)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getTickets(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(std::vector<Ticket>)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getComments(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(std::vector<Comment>)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
+    void getProjects(const drogon::orm::DbClientPtr& clientPtr,
+            const std::function<void(std::vector<std::pair<Project, Staff> >)>& rcb,
+            const drogon::orm::ExceptionCallback& ecb) const;
 
 private:
-    friend Mapper<Account>;
+    friend drogon::orm::Mapper<Account>;
 #ifdef __cpp_impl_coroutine
-    friend CoroMapper<Account>;
+    friend drogon::orm::CoroMapper<Account>;
 #endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
