@@ -102,48 +102,25 @@ void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t p
 }
 
 void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+    const auto session = getSession(req);
+    if(!isLoggedIn(*session) ) // cannot edit if not authenticated
+        return cb(HttpResponse::newRedirectionResponse("/") );
+    const int32_t userId = session->get<int32_t>("user_id");
+
     try {
-        const auto session = getSession(req);
-        if(!isLoggedIn(*session) )
+        const Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
+        if(!canEdit(userId, ticket) ) // cannot edit if not authorised
             return cb(HttpResponse::newRedirectionResponse("/") );
 
-        auto ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
-        auto data = getViewData("Edit Ticket", *session);
+        HttpViewData data = getViewData("Edit Ticket", *session);
         data.insert("ticket_id", std::to_string(id) );
-
-        const auto ticket = ticketFuture.get();
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(ticket.getValueOfProjectId() );
         data.insert("ticket_title", ticket.getValueOfTitle() );
         data.insert("ticket_description", ticket.getValueOfDescription() );
-        const bool isAssigned = !!ticket.getAssignedId();
-        if(isAssigned)
+        if(ticket.getAssignedId() )
             data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
 
-        bool authorised = false;
-        const auto userId = session->get<int32_t>("user_id");
-        // If the user was the original reporter, then they can edit the ticket
-        if(userId == ticket.getValueOfReporterId() ) {
-            authorised = true;
-            data.insert("can_edit", true);
-        }
-
-        const auto project = projectFuture.get();
-        const Criteria staffCriteria{Model::Staff::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
-        const auto staffLst = mStaffOrm.findBy(staffCriteria);
-        // If the user was project manager, then they can assign to a staff member
-        if(userId == project.getValueOfManagerId() ) {
-            authorised = true;
-            data.insert("can_assign", true);
-
-            Json::Value staffLstJson;
-            for(const auto& staff : staffLst)
-                staffLstJson.append(staff.toJson() );
-            data.insert("staff_lst", staffLstJson);
-        }         // TODO: Allow staff to self assign
-
-        // If the user is not authorised to edit any parts of the ticket
-        if(!authorised)
-            return cb(HttpResponse::newNotFoundResponse() );
+        data.insert("assignable_lst", getAssignables(userId, ticket) );
+        data.insert("is_reporter", isReporter(userId, ticket) );
 
         return cb(HttpResponse::newHttpViewResponse("ticket_edit.csp", data) );
     } catch(const std::exception& ex) {
