@@ -45,6 +45,12 @@ private:
     Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(app().getDbClient("db") );
     Mapper<Model::Staff> mStaffOrm  = Mapper<Model::Staff>(app().getDbClient("db") );
     Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
+
+    // Some utiliy functions (TODO: move to ticket model)
+    bool canEdit(int32_t userId, const Model::Ticket& ticket);
+    static bool isReporter(int32_t userId, const Model::Ticket& ticket);
+    bool isProjectStaff(int32_t userId, const Model::Ticket& ticket);
+    Json::Value getAssignables(int32_t userId, const Model::Ticket& ticket);
 };
 
 void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
@@ -58,12 +64,16 @@ void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         for(const auto& comment : getTicketComments(id, mCommentOrm) )
             commentLstJson.append(comment.toJson() );
 
+        const SessionPtr session = getSession(req);
+        const int32_t userId = session->get<int32_t>("user_id");
+
         // Send the data to the ticket view
         auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
         data.insert("ticket", ticket.toJson() );
         data.insert("comment_lst", std::move(commentLstJson) );
         data.insert("project_name", project.getValueOfTitle() );
         data.insert("reporter_username", reporter.getValueOfUsername() );
+        data.insert("can_edit", canEdit(userId, ticket) );
         return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
     } catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
@@ -222,6 +232,68 @@ void Ticket::update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id
     }  catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
         return cb(HttpResponse::newNotFoundResponse() );
+    }
+}
+
+bool Ticket::canEdit(int32_t userId, const Model::Ticket& ticket) {
+    return isReporter(userId, ticket) || isProjectStaff(userId, ticket);
+}
+
+bool Ticket::isReporter(int32_t userId, const Model::Ticket& ticket) {
+    return userId == ticket.getValueOfReporterId();
+}
+
+bool Ticket::isProjectStaff(int32_t userId, const Model::Ticket& ticket) {
+    const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
+    const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
+
+    if(manager.getValueOfId() )
+        return true;
+
+    const Criteria staffCriteria{Model::Staff::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
+    const std::vector staffLst = mStaffOrm.findBy(staffCriteria);
+    for(const auto& staff : staffLst) {
+        if(staff.getValueOfStaffId() == userId)
+            return true;
+    }
+    return false;
+}
+
+Json::Value Ticket::getAssignables(int32_t userId, const Model::Ticket& ticket) {
+    const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
+    const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
+    // Only the manager can reassign an assigned ticket
+    if( (manager.getValueOfId() != userId)&& ticket.getAssignedId() ) {
+        return {};
+    }
+
+    const Criteria staffCriteria{Model::Staff::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
+    const std::vector staffLst = mStaffOrm.findBy(staffCriteria);
+    if(manager.getValueOfId() == userId) {  // If the user is the manager then they can assign to any staff
+        std::vector<std::future<Model::Account> > staffFutureLst;
+        staffFutureLst.reserve(staffLst.size() );
+        for(const Model::Staff& staff : staffLst)
+            staffFutureLst.push_back(mAccountOrm.findFutureByPrimaryKey(staff.getValueOfStaffId() ) );
+        Json::Value staffLstJson;
+        for(std::future<Model::Account>& staffFuture : staffFutureLst) {
+            Json::Value staffJson;
+            const Model::Account staff = staffFuture.get();
+            staffJson["id"] = staff.getValueOfId();
+            staffJson["username"] = staff.getValueOfUsername();
+            staffLstJson.append(std::move(staffJson) );
+        }
+        return staffLstJson;
+    } else {
+        for(const auto& staffModel : staffLst) {  // If the user is a staff, they can self assign
+            if(staffModel.getValueOfStaffId() == userId) {
+                const Model::Account staff = mAccountOrm.findByPrimaryKey(staffModel.getValueOfStaffId() );
+                Json::Value staffJson;
+                staffJson["username"] = staff.getValueOfUsername();
+                staffJson["id"] = staff.getValueOfId();
+                return staffJson;
+            }
+        }
+        return {};  // If they're neither, they cannot assign
     }
 }
 

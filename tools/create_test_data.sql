@@ -30,7 +30,10 @@ INSERT INTO Ticket(title, description, status, severity, created_date, assigned_
 
 
 INSERT INTO Staff(project_id, staff_id) VALUES
-    ( (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_1') );
+    ( (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_1') ),
+    ( (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_2') ),
+    ( (SELECT id FROM Project WHERE title='example_project_1'), (SELECT id FROM Account WHERE username='example_staff_3') ),
+    ( (SELECT id FROM Project WHERE title='example_project_2'), (SELECT id FROM Account WHERE username='example_staff_1') );
 
 INSERT INTO Comment(post, created_date, ticket_id, poster_id) VALUES
     ('This is an example post', CURRENT_TIMESTAMP, (SELECT id FROM Ticket WHERE title='example_ticket_1'), (SELECT id FROM Account WHERE username='username') );
