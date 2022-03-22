@@ -6,6 +6,7 @@
 #include "../models/project.hpp"
 #include "../models/staff.hpp"
 #include "../models/ticket.hpp"
+#include "../util/misc.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -187,23 +188,31 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
 }
 
 void Ticket::update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+    const auto session = getSession(req);
+    if(!isLoggedIn(*session) ) // cannot edit if not authenticated
+        return cb(HttpResponse::newRedirectionResponse("/") );
+    const int32_t userId = session->get<int32_t>("user_id");
+
     try {
-        std::future ticketFuture = mTicketOrm.findFutureByPrimaryKey(id);
-        const auto session = req->session();
+        Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
+        if(!canEdit(userId, ticket) ) // cannot edit if not authorised
+            return cb(HttpResponse::newRedirectionResponse("/") );
+
         const auto& postParams = req->parameters();
-        Model::Ticket ticket = ticketFuture.get();
 
-        if(!isLoggedIn(*session) )
-            return cb(HttpResponse::newNotFoundResponse() );
-
-        const int32_t userId = session->get<int32_t>("user_id");
         // The ticket's reporter can edit the ticket
-        if(userId == ticket.getValueOfReporterId() ) {
-            ticket.setDescription(postParams.at("ticketDescription") );
-            mTicketOrm.update(ticket);
+        if(isReporter(userId, ticket) )
+            ticket.setDescription(postParams.at("form-description") );
+
+        // Can only assign to people in the assingableLst
+        const auto assingableLst = getAssignables(userId, ticket);
+        const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
+        for(const auto& staff : assingableLst) {
+            if(staff["id"] == assignedId)
+                ticket.setAssignedId(assignedId);
         }
 
-        // TODO: Manager can assign
+        mTicketOrm.update(ticket);
 
         return cb(HttpResponse::newRedirectionResponse("/") );
     }  catch(const std::exception& ex) {
