@@ -32,15 +32,17 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-
-#Setting up for different platforms
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(WARNING
+        "Clang (clang++) does not have full coroutine support yet, which this project needs."
+        "Please use GCC (g++) instead."
+    )
+endif()
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
-endif()
-if(WIN32)
-    set(WINDOWS TRUE)
+else()
+    message(WARNING "This project is intended to be used in a linux environment.")
 endif()
 
 get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

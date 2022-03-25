@@ -70,12 +70,10 @@ target_include_directories("${APP_NAME}"
 
 find_package("Drogon" CONFIG REQUIRED)
 find_package("unofficial-sodium" CONFIG REQUIRED)
-find_package("ICU" REQUIRED COMPONENTS "uc")
 set(LIBRARIES
     "Drogon::Drogon"
     "unofficial-sodium::sodium"
     "unofficial-sodium::sodium_config_public"
-    "ICU::uc"
 )
 target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
 
