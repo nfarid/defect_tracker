@@ -32,11 +32,11 @@ public:
     /*YES-FORMAT*/
 
     static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
-    void create(const HttpRequestPtr& req, ResponseCallback&& cb);
+    Task<HttpResponsePtr> create(HttpRequestPtr req);
     static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
 
 private:
-    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
+    CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
 };
 
 
@@ -51,50 +51,21 @@ void UserSession::newForm(const HttpRequestPtr& req, std::function<void(const Ht
     cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
 }
 
-void UserSession::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+Task<HttpResponsePtr> UserSession::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
-    // The data for the signup view
-    // If an error occurs then the user will have to retry the login
-    HttpViewData data = getViewData("Login", *getSession(req) );
-    data.insert("form_action", "/login"s);
-
-    // Obtain the username & password
-    std::string username;
-    std::string password;
     try {
-        username = postParams.at("form-username");
-        password = postParams.at("form-password");
+        const auto user = co_await Model::Account::verifyLogin(mAccountOrm, postParams);
+        // Everything is correct, so the user can login
+        logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
+        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     }  catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        data.insert("form_error", "Some of the required input has not been entered");
-        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-        resp->setStatusCode(k401Unauthorized);
-        return cb(resp);
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        HttpViewData data = getViewData("Login", *getSession(req) );
+        data.insert("form_action", "/login"s);
+        data.insert("form_error", "There seems to be an error. Try again."s);
+        co_return HttpResponse::newHttpViewResponse("user_form.csp", data);
     }
-
-    // Check if the username & password is correct
-    Model::Account user;
-    try {
-        user = findByUsername(username, mAccountOrm);
-    }  catch(const std::exception& ex) {
-        data.insert("form_error", "Incorrect username"s);
-        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-        resp->setStatusCode(k401Unauthorized);
-        return cb(resp);
-    }
-    if(!Util::verifyHash(user.getValueOfPasswordHash(), password) ) {
-        // Incorrect password
-        data.insert("form_error", "Incorrect password"s);
-        data.insert("form_username", username);
-        auto resp = HttpResponse::newHttpViewResponse("user_form.csp", data);
-        resp->setStatusCode(k401Unauthorized);
-        return cb(resp);
-    }
-
-    // Everything is correct, so the user can login
-    logIn(*getSession(req), user.getValueOfId(), username);
-    return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
 }
 
 void UserSession::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)

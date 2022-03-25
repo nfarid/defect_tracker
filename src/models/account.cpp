@@ -6,7 +6,11 @@
 #include "./project.hpp"
 #include "./staff.hpp"
 #include "./ticket.hpp"
+
+#include "../util/hash.hpp"
+
 #include <drogon/utils/Utilities.h>
+
 #include <string>
 
 using namespace drogon;
@@ -25,6 +29,22 @@ const std::vector<typename Account::MetaData> Account::metaData_={
     {"username", "std::string", "text", 0, false, false, true},
     {"password_hash", "std::string", "text", 0, false, false, true}
 };
+
+Task<Account> Account::verifyLogin(CoroMapper<Account>& orm,
+        const std::unordered_map<std::string, std::string>& postParams)
+{
+    const std::string username = postParams.at("form-username");
+    const std::string password = postParams.at("form-password");
+
+    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
+    const Model::Account user = co_await orm.findOne(userCriteria);
+
+    if(!Util::verifyHash(user.getValueOfPasswordHash(), password) )
+        throw std::runtime_error("Form Error: Invalid password");
+
+    co_return user;
+}
+
 const std::string& Account::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size() );

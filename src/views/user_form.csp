@@ -4,7 +4,6 @@
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto formAction = @@.get<std::string>("form_action"); %>
 <%c++ const auto formError = @@.get<std::string>("form_error"); %>
-<%c++ const auto formUsername = @@.get<std::string>("form_username"); %>
 
 <form action="{%formAction%}" method="POST">
     <fieldset>
@@ -15,7 +14,7 @@
         <br/>
         <label>
             Username:
-            <input type="text" id="form-username" name="form-username" value="{%formUsername%}"/>
+            <input type="text" id="form-username" name="form-username"/>
         </label>
         <br/>
         <label>
