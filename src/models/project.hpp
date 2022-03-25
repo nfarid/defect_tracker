@@ -57,6 +57,8 @@ class Ticket;
 
 class Project{
 public:  // Added functions
+    static drogon::Task<std::vector<Project> > searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery);
+
     drogon::Task<Account> getManager(drogon::orm::DbClientPtr db) const;
     drogon::Task<std::vector<Ticket> > getTickets(drogon::orm::DbClientPtr db) const;
 

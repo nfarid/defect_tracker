@@ -5,6 +5,8 @@
 #include "./account.hpp"
 #include "./staff.hpp"
 #include "./ticket.hpp"
+#include "../util/core.hpp"
+
 #include <drogon/utils/Utilities.h>
 #include <string>
 
@@ -24,6 +26,48 @@ const std::vector<typename Project::MetaData> Project::metaData_={
     {"title", "std::string", "text", 0, false, false, true},
     {"manager_id", "int32_t", "integer", 4, false, false, false}
 };
+
+UTIL_INTERNAL std::vector<std::string> split(std::string_view str, std::string_view delim) {
+    std::vector<std::string> tokens;
+    auto beginPos = str.find_first_not_of(delim, 0);
+    auto endPos = str.find_first_of(delim, beginPos);
+    while(std::string::npos != beginPos || std::string::npos != endPos) {
+        tokens.emplace_back(str.substr(beginPos, endPos - beginPos) );
+        beginPos = str.find_first_not_of(delim, endPos);
+        endPos = str.find_first_of(delim, beginPos);
+    }
+    return tokens;
+}
+
+UTIL_INTERNAL bool isalnum(std::string_view str) {
+    for(const char c : str) {
+        if(!isalnum(c) )
+            return false;
+    }
+    return true;
+}
+
+drogon::Task<std::vector<Project> > Project::searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery) {
+    std::string tsQuery{};
+    for(const auto& token : split(urlQuery, " ") ) {
+        if(isalnum(token) )
+            tsQuery.append(token).append("|");
+    }
+    if(tsQuery.empty() ) {
+        co_return{};
+    }
+    tsQuery.pop_back();
+
+    const Result res = co_await db->execSqlCoro(
+        "SELECT * FROM project WHERE to_tsvector(title) @@ to_tsquery($1)", tsQuery
+    );
+    std::vector<Project> projectLst;
+    projectLst.reserve(res.size() );
+    for(const auto& row : res)
+        projectLst.emplace_back(row);
+
+    co_return projectLst;
+}
 
 Task<Account> Project::getManager(DbClientPtr db) const {
     const static std::string query = "SELECT * FROM Account WHERE id = $1";

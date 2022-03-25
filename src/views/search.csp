@@ -7,13 +7,17 @@
 
 <h1>Project Search</h1>
 
-<ul>
-    <%c++ for(const auto& project : projectLst) { %>
-        <%c++ const auto projectName = project["name"].asString(); %>
-        <%c++ const auto projectId = project["id"].asString(); %>
-        <li><a href="/project/{%projectId%}">{%projectName%}</a></li>
-    <%c++ } %>
-</ul>
+<%c++ if(!projectLst.empty() ) { %>
+    <ul>
+        <%c++ for(const auto& project : projectLst) { %>
+            <%c++ const auto projectTitle = project["title"].asString(); %>
+            <%c++ const auto projectId = project["id"].asString(); %>
+            <li><a href="/project/{%projectId%}">{%projectTitle%}</a></li>
+        <%c++ } %>
+    </ul>
+<%c++ } else { %>
+    <p>No projects found</p>
+<%c++ } %>
 
 
 <%view _footer.csp %>
