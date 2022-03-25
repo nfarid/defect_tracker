@@ -25,8 +25,8 @@ drogon::SessionPtr getSession(const drogon::HttpRequestPtr& req);
 
 /**
  * \brief Obtain the data set to be sent to the view
- * @param title - the title of that the page should have
- * @param session - the session data
+ * \param title - the title of that the page should have
+ * \param session - the session data
  */
 drogon::HttpViewData getViewData(const std::string& title, const drogon::Session& session);
 
@@ -41,6 +41,17 @@ bool isLoggedIn(const drogon::Session& session);
  */
 void logIn(drogon::Session& session, int32_t userId, const std::string& username);
 
+
+/**
+ * \brief Turns an array of elements into its json equivalent
+ */
+template<typename T>
+Json::Value toJson(const std::vector<T>& lst) {
+    Json::Value json{};
+    for(const auto& elem : lst)
+        json.append(elem.toJson() );
+    return json;
+}
 
 // A drogon callback function object that takes a http response from the controller
 using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;

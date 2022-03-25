@@ -24,6 +24,27 @@ const std::vector<typename Project::MetaData> Project::metaData_={
     {"title", "std::string", "text", 0, false, false, true},
     {"manager_id", "int32_t", "integer", 4, false, false, false}
 };
+
+Task<Account> Project::getManager(DbClientPtr db) const {
+    const static std::string query = "SELECT * FROM Account WHERE id = $1";
+    const Result res = co_await db->execSqlCoro(query, *managerId_);
+    if(res.empty() )
+        throw UnexpectedRows("0 rows found");
+    if(res.size() > 1)
+        throw UnexpectedRows("Found more than one row");
+    co_return Account(res[0]);
+}
+
+drogon::Task<std::vector<Ticket> > Project::getTickets(drogon::orm::DbClientPtr db) const {
+    const static std::string query = "SELECT * FROM Ticket WHERE project_id = $1";
+    const Result res = co_await db->execSqlCoro(query, *id_);
+    std::vector<Ticket> ticketLst;
+    ticketLst.reserve(res.size() );
+    for(const auto& row : res)
+        ticketLst.emplace_back(row);
+    co_return ticketLst;
+}
+
 const std::string& Project::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size() );
