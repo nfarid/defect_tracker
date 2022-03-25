@@ -4,11 +4,11 @@
 
 <%c++ const auto user_username = @@.get<std::string>("user_username"); %>
 <%c++ const auto user_id = @@.get<std::string>("user_id"); %>
-<%c++ const auto user_delete = @@.get<std::string>("user_delete"); %>
+<%c++ const auto can_delete = @@.get<bool>("can_delete"); %>
 
 <h1>User: {%user_username%}</h1>
 
-<%c++ if(!user_delete.empty() ) { %>
+<%c++ if(can_delete) { %>
     <form action="/user/{%user_id%}/delete" method="POST">
         <input type="submit" value="Delete">
     </form>

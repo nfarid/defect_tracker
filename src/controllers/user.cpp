@@ -29,39 +29,38 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    void show(const HttpRequestPtr&, ResponseCallback&& cb, int32_t id);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
     static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
-    void create(const HttpRequestPtr& req, ResponseCallback&& cb);
-    void destroy(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
+    Task<HttpResponsePtr> create(HttpRequestPtr req);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
-    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
+    CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
 };
 
 
-void User::show(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
+Task<HttpResponsePtr> User::show(HttpRequestPtr req, int32_t id)
 {
     const SessionPtr session = getSession(req);
-
     try {
-        const auto user = mAccountOrm.findByPrimaryKey(id);
+        const Model::Account user = co_await mAccountOrm.findByPrimaryKey(id);
         const std::string& username = user.getValueOfUsername();
-
+        // Add the user's info to the ViewData to be sent to the view
         HttpViewData data = getViewData(username, *session);
-        const auto currentUserId = session->getOptional<int32_t>("user");
-        if(currentUserId && (*currentUserId == id) )
-            data.insert("user_delete", "allowed"s);
         data.insert("user_username", username);
         data.insert("user_id", std::to_string(id) );
+        const std::optional userIdOpt = session->getOptional<int32_t>("user");
+        if(userIdOpt && (*userIdOpt == id) ) // Only the user can delete their own account
+            data.insert("can_delete", true);
 
-        return cb(HttpResponse::newHttpViewResponse("user.csp", data) );
-    }  catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
+        co_return HttpResponse::newHttpViewResponse("user.csp", data);
+    }  catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
-void User::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void User::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the signup page
     if(isLoggedIn(*session) )
@@ -73,60 +72,35 @@ void User::newForm(const HttpRequestPtr& req, std::function<void(const HttpRespo
     cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
 }
 
-// This seems to work, would need refactoring and testing
-void User::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+Task<HttpResponsePtr> User::create(HttpRequestPtr req) {
     // Data from the HTTP POST request
     const auto& postParams = req->parameters();
 
-    // The data for the signup view
-    // If an error occurs then the user will have to retry the signup
-    HttpViewData data = getViewData("Sign Up"s, *getSession(req) );
-    data.insert("form_action", "/signup"s);
-
-    // Obtain the username and password from the POST parameters
-    std::string username;
-    std::string passwordHash;
     try {
-        username = postParams.at("form-username");
-        passwordHash = Util::hash(postParams.at("form-password") );
-    }  catch(const std::exception& ex) {
-        data.insert("form_error", "Some of the required input has not been entered");
-        return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
-    }
-
-    // TODO: Add some requirements for the username and password here
-
-    // Check that the username is not in the database
-    if(isUsernameExist(username, mAccountOrm) ) {
-        data.insert("form_error", "That username already exist, try another username"s);
-        return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
-    }
-
-    // Create a new account, and login (and then redirect to the home page)
-    try {
-        const Model::Account newAccount = createAccount(username, passwordHash, mAccountOrm);
-        logIn(*getSession(req), newAccount.getValueOfId(), username);
-        return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
-    }catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
+        const Model::Account account = co_await Model::Account::createAccount(mAccountOrm, postParams);
+        // If the form data is valid and the user can be created, then login
+        logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );
+        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+    } catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        // Form data is not valid, so show the signup page again with an error message
+        HttpViewData data = getViewData("Sign Up"s, *getSession(req) );
+        data.insert("form_action", "/signup"s);
         data.insert("form_error", "There seems to be an error"s);
-        return cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
+        co_return HttpResponse::newHttpViewResponse("user_form.csp", data);
     }
 }
 
-void User::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb, int32_t id)
+Task<HttpResponsePtr> User::destroy(HttpRequestPtr req, int32_t id)
 {
     SessionPtr session = getSession(req);
-
-    const auto userId = session->getOptional<int32_t>("user_id");
-    if(!userId || (*userId != id) ) {
-        // Should be http 403
-        return cb(HttpResponse::newNotFoundResponse() );
-    }
+    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
+    if(!userIdOpt || (*userIdOpt != id) ) // Only the user can delete their own account
+        co_return HttpResponse::newNotFoundResponse();// Should be http 403
 
     session->clear();
-    mAccountOrm.deleteByPrimaryKey(id);
-    cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
+    co_await mAccountOrm.deleteByPrimaryKey(id);
+    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 

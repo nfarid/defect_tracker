@@ -34,15 +34,6 @@ inline bool isUsernameExist(const std::string& username, Mapper<Model::Account>&
     return orm.count(userCriteria) > 0;
 }
 
-inline Model::Account createAccount(const std::string& username, const std::string& hash, Mapper<Model::Account>& orm)
-{
-    Model::Account newAccount;
-    newAccount.setUsername(username);
-    newAccount.setPasswordHash(hash);
-    orm.insert(newAccount);  // This will also set the id for newAccount
-    return newAccount;
-}
-
 // Finds a User that has the username
 // Throws UnexpectedRows if none is found
 inline Model::Account findByUsername(const std::string& username, Mapper<Model::Account>& orm) {
