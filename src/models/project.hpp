@@ -61,6 +61,9 @@ public:  // Added functions
 
     drogon::Task<Account> getManager(drogon::orm::DbClientPtr db) const;
     drogon::Task<std::vector<Ticket> > getTickets(drogon::orm::DbClientPtr db) const;
+    drogon::Task<std::vector<Account> > getStaff(drogon::orm::DbClientPtr db) const;
+
+    drogon::Task<bool> isStaff(drogon::orm::DbClientPtr db, int32_t userId) const;
 
 public:
     struct Cols{
@@ -160,7 +163,7 @@ public:
     void getManager(const drogon::orm::DbClientPtr& clientPtr,
             const std::function<void(Account)>& rcb,
             const drogon::orm::ExceptionCallback& ecb) const;
-    void getAccounts(const drogon::orm::DbClientPtr& clientPtr,
+    void getStaff(const drogon::orm::DbClientPtr& clientPtr,
             const std::function<void(std::vector<std::pair<Account, Staff> >)>& rcb,
             const drogon::orm::ExceptionCallback& ecb) const;
 

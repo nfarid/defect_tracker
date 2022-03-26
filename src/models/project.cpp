@@ -89,6 +89,27 @@ drogon::Task<std::vector<Ticket> > Project::getTickets(drogon::orm::DbClientPtr 
     co_return ticketLst;
 }
 
+drogon::Task<std::vector<Account> > Project::getStaff(drogon::orm::DbClientPtr db) const {
+    const static std::string sql =
+            "SELECT * FROM Account,Staff WHERE Staff.project_id = $1 AND Staff.staff_id = Account.id";
+    const Result res = co_await db->execSqlCoro(sql, *id_);
+    std::vector<Account> staffLst;
+    staffLst.reserve(res.size()+1);
+    for(const auto& row : res)
+        staffLst.emplace_back(row);
+    staffLst.push_back(co_await getManager(db) );
+    co_return staffLst;
+}
+
+drogon::Task<bool> Project::isStaff(drogon::orm::DbClientPtr db, int32_t userId) const {
+    const std::vector staffLst = co_await getStaff(db);
+    for(const auto& staff : staffLst) {
+        if(staff.getValueOfId() == userId)
+            co_return true;
+    }
+    co_return false;
+}
+
 const std::string& Project::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size() );
@@ -586,7 +607,7 @@ void Project::getManager(const DbClientPtr& clientPtr,
         >> ecb;
 }
 
-void Project::getAccounts(const DbClientPtr& clientPtr,
+void Project::getStaff(const DbClientPtr& clientPtr,
         const std::function<void(std::vector<std::pair<Account, Staff> >)>& rcb,
         const ExceptionCallback& ecb) const
 {

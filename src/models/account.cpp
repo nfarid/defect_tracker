@@ -319,10 +319,6 @@ Json::Value Account::toJson() const
         ret["username"]=getValueOfUsername();
     else
         ret["username"]=Json::Value();
-    if(getPasswordHash() )
-        ret["password_hash"]=getValueOfPasswordHash();
-    else
-        ret["password_hash"]=Json::Value();
     return ret;
 }
 
