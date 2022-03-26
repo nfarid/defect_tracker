@@ -1,7 +1,6 @@
 
 #include "./auxiliary.hpp"
 #include "../models/account.hpp"
-#include "../models/auxiliary.hpp"
 #include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>

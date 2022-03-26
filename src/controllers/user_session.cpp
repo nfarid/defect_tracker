@@ -1,7 +1,6 @@
 
 #include "./auxiliary.hpp"
 #include "../models/account.hpp"
-#include "../models/auxiliary.hpp"
 #include "../util/core.hpp"
 #include "../util/hash.hpp"
 
