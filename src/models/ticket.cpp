@@ -39,6 +39,67 @@ const std::vector<typename Ticket::MetaData> Ticket::metaData_={
     {"assigned_id", "int32_t", "integer", 4, false, false, false},
     {"project_id", "int32_t", "integer", 4, false, false, true}
 };
+
+drogon::Task<Account> Ticket::getReporter(DbClientPtr db) const {
+    const static std::string query = "SELECT * FROM Account WHERE id = $1";
+    const Result res = co_await db->execSqlCoro(query, *reporterId_);
+    if(res.empty() )
+        throw UnexpectedRows("0 rows found");
+    if(res.size() > 1)
+        throw UnexpectedRows("Found more than one row");
+    co_return Account{res.front()};
+}
+
+drogon::Task<Project> Ticket::getProject(DbClientPtr db) const {
+    const static std::string query = "SELECT * FROM Project WHERE id = $1";
+    const Result res = co_await db->execSqlCoro(query, *projectId_);
+    if(res.empty() )
+        throw UnexpectedRows("0 rows found");
+    if(res.size() > 1)
+        throw UnexpectedRows("Found more than one row");
+    co_return Project{res.front()};
+}
+
+drogon::Task<std::vector<Comment> > Ticket::getComments(DbClientPtr db) const {
+    const static std::string query = "SELECT * FROM Comment WHERE poster_id = $1";
+    const Result res = co_await db->execSqlCoro(query, *id_);
+    std::vector<Comment> commentLst;
+    commentLst.reserve(res.size() );
+    for(const auto& row : res)
+        commentLst.emplace_back(row);
+    co_return commentLst;
+}
+
+drogon::Task<bool> Ticket::canEdit(DbClientPtr db, int32_t userId) const {
+    if(isReporter(userId) )
+        co_return true;
+
+    const Model::Project project = co_await getProject(db);
+    co_return co_await project.isStaff(db, userId);
+}
+
+bool Ticket::isReporter(int32_t userId) const {
+    return userId == getValueOfReporterId();
+}
+
+drogon::Task<std::vector<Account> > Ticket::getAssignables(DbClientPtr db, int32_t userId) const {
+    const Model::Project project = co_await getProject(db);
+
+    // Manager can assign to any staff
+    if(project.getValueOfManagerId() == userId)
+        co_return co_await project.getStaff(db);
+
+    // If the ticket is not yet assigned, then a staff can self-assign
+    if(!getAssignedId() && co_await project.isStaff(db, userId) ) {
+        CoroMapper<Account> accountOrm{db};
+        const Account staff = co_await accountOrm.findByPrimaryKey(userId);
+        co_return{staff};
+    }
+
+    // Else the user cannot assign the ticket
+    co_return{};
+}
+
 const std::string& Ticket::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size() );

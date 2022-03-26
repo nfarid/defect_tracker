@@ -56,6 +56,15 @@ class Comment;
 class Project;
 
 class Ticket{
+public:  // Added functions
+    drogon::Task<Account> getReporter(drogon::orm::DbClientPtr db) const;
+    drogon::Task<Project> getProject(drogon::orm::DbClientPtr db) const;
+    drogon::Task<std::vector<Comment> > getComments(drogon::orm::DbClientPtr db) const;
+
+    drogon::Task<bool> canEdit(drogon::orm::DbClientPtr db, int32_t userId) const;
+    bool isReporter(int32_t userId) const;
+    drogon::Task<std::vector<Account> >getAssignables(drogon::orm::DbClientPtr db, int32_t userId) const;
+
 public:
     struct Cols{
         static const std::string _id;
