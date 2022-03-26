@@ -34,84 +34,74 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    void show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
-    void newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId);
-    void edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
-    void create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId);
-    void update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req, int32_t projectId);
+    Task<HttpResponsePtr> edit(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t projectId);
+    Task<HttpResponsePtr> update(HttpRequestPtr req, int32_t id);
 
 private:
-    Mapper<Model::Account> mAccountOrm = Mapper<Model::Account>(app().getDbClient("db") );
-    Mapper<Model::Comment> mCommentOrm = Mapper<Model::Comment>(app().getDbClient("db") );
-    Mapper<Model::Project> mProjectOrm = Mapper<Model::Project>(app().getDbClient("db") );
-    Mapper<Model::Staff> mStaffOrm  = Mapper<Model::Staff>(app().getDbClient("db") );
-    Mapper<Model::Ticket> mTicketOrm = Mapper<Model::Ticket>(app().getDbClient("db") );
+    DbClientPtr mDB = app().getDbClient("db");
 
-    // Some utiliy functions (TODO: move to ticket model)
-    bool canEdit(int32_t userId, const Model::Ticket& ticket);
-    static bool isReporter(int32_t userId, const Model::Ticket& ticket);
-    bool isProjectStaff(int32_t userId, const Model::Ticket& ticket);
-    Json::Value getAssignables(int32_t userId, const Model::Ticket& ticket);
+    CoroMapper<Model::Ticket> mTicketOrm{mDB};
+    CoroMapper<Model::Project> mProjectOrm{mDB};
 };
 
-void Ticket::show(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+Task<HttpResponsePtr> Ticket::show(HttpRequestPtr req, int32_t id) {
+    const SessionPtr session = getSession(req);
+
     try {
-        const Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
-        const Model::Account reporter = mAccountOrm.findByPrimaryKey(ticket.getValueOfReporterId() );
-        const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
+        const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        const Model::Account reporter = co_await ticket.getReporter(mDB);
+        const Model::Project project = co_await ticket.getProject(mDB);
+        const std::vector commentLst = co_await ticket.getComments(mDB);
 
-        // Get a json list of comments
-        Json::Value commentLstJson;
-        for(const auto& comment : getTicketComments(id, mCommentOrm) )
-            commentLstJson.append(comment.toJson() );
-
-        const SessionPtr session = getSession(req);
-        const int32_t userId = session->get<int32_t>("user_id");
-
-        // Send the data to the ticket view
-        auto data = getViewData(ticket.getValueOfTitle(), *getSession(req) );
+        HttpViewData data = getViewData(ticket.getValueOfTitle(), *session);
         data.insert("ticket", ticket.toJson() );
-        data.insert("comment_lst", std::move(commentLstJson) );
+        data.insert("comment_lst", toJson(commentLst) );
         data.insert("project_name", project.getValueOfTitle() );
         data.insert("reporter_username", reporter.getValueOfUsername() );
-        data.insert("can_edit", canEdit(userId, ticket) );
-        return cb(HttpResponse::newHttpViewResponse("ticket.csp", data) );
+        if(isLoggedIn(*session) ) {
+            const int32_t userId = session->get<int32_t>("user_id");
+            data.insert("can_edit", co_await ticket.canEdit(mDB, userId) );
+        }
+
+        co_return HttpResponse::newHttpViewResponse("ticket.csp", data);
     } catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
-void Ticket::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId) {
+Task<HttpResponsePtr> Ticket::newForm(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        co_return HttpResponse::newRedirectionResponse("/");
 
     try {
-        auto projectFuture = mProjectOrm.findFutureByPrimaryKey(projectId);
+        const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
 
         auto data = getViewData("New Ticket", *session);
-        const auto project = projectFuture.get();
         data.insert("project", project.toJson() );
         data.insert("severity_lst", severityLstJson() );
 
-        return cb(HttpResponse::newHttpViewResponse("ticket_form.csp", data) );
+        co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
     }  catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
-void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+Task<HttpResponsePtr> Ticket::edit(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = session->get<int32_t>("user_id");
 
     try {
-        const Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
-        if(!canEdit(userId, ticket) ) // cannot edit if not authorised
-            return cb(HttpResponse::newRedirectionResponse("/") );
+        const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        if(!co_await ticket.canEdit(mDB, userId) ) // cannot edit if not authorised
+            co_return HttpResponse::newRedirectionResponse("/");
 
         HttpViewData data = getViewData("Edit Ticket", *session);
         data.insert("ticket_id", std::to_string(id) );
@@ -119,23 +109,22 @@ void Ticket::edit(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) 
         data.insert("ticket_description", ticket.getValueOfDescription() );
         if(ticket.getAssignedId() )
             data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
+        data.insert("assignable_lst", co_await ticket.getAssignables(mDB, userId) );
+        data.insert("is_reporter", ticket.isReporter(userId) );
 
-        data.insert("assignable_lst", getAssignables(userId, ticket) );
-        data.insert("is_reporter", isReporter(userId, ticket) );
-
-        return cb(HttpResponse::newHttpViewResponse("ticket_edit.csp", data) );
+        co_return HttpResponse::newHttpViewResponse("ticket_edit.csp", data);
     } catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
-void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t projectId) {
+Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        co_return HttpResponse::newRedirectionResponse("/");
 
-    const Model::Project project = mProjectOrm.findByPrimaryKey(projectId);
+    const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
     HttpViewData data = getViewData("New Ticket", *session);
     data.insert("severity_lst", severityLstJson() );
     data.insert("project", project.toJson() );
@@ -156,7 +145,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         data.insert("form_error", "Some required data is missing"s);
         auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
         resp->setStatusCode(k422UnprocessableEntity);
-        return cb(resp);
+        co_return resp;
     }
 
     // Verify form data [TODO]: Add more checks
@@ -165,7 +154,7 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
         data.insert("form_error", "Severity is not valid"s);
         auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
         resp->setStatusCode(k422UnprocessableEntity);
-        return cb(resp);
+        co_return resp;
     }
 
     // Insert the new ticket into the database
@@ -178,108 +167,46 @@ void Ticket::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t pr
     newTicket.setProjectId(projectId);
     newTicket.setReporterId(session->get<int32_t>("user_id") );
     try {
-        mTicketOrm.insert(newTicket);
+        co_await mTicketOrm.insert(newTicket);
+        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
         data.insert("form_error", "There seems to be an error"s);
-        return cb(HttpResponse::newHttpViewResponse("ticket_form.csp", data) );
+        co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
     }
-    return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
 }
 
-void Ticket::update(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t id) {
+Task<HttpResponsePtr> Ticket::update(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = session->get<int32_t>("user_id");
 
     try {
-        Model::Ticket ticket = mTicketOrm.findByPrimaryKey(id);
-        if(!canEdit(userId, ticket) ) // cannot edit if not authorised
-            return cb(HttpResponse::newRedirectionResponse("/") );
+        Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        if(!co_await ticket.canEdit(mDB, userId) ) // cannot edit if not authorised
+            co_return HttpResponse::newRedirectionResponse("/");
 
         const auto& postParams = req->parameters();
 
         // The ticket's reporter can edit the ticket
-        if(isReporter(userId, ticket) )
+        if(ticket.isReporter(userId) )
             ticket.setDescription(postParams.at("form-description") );
 
         // Can only assign to people in the assingableLst
-        const auto assingableLst = getAssignables(userId, ticket);
+        const std::vector assingableLst = co_await ticket.getAssignables(mDB, userId);
         const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
-        for(const auto& staff : assingableLst) {
+        for(const auto& staff : toJson(assingableLst) ) {
             if(staff["id"] == assignedId)
                 ticket.setAssignedId(assignedId);
         }
 
-        mTicketOrm.update(ticket);
+        co_await mTicketOrm.update(ticket);
 
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        co_return HttpResponse::newRedirectionResponse("/");
     }  catch(const std::exception& ex) {
         std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
-    }
-}
-
-bool Ticket::canEdit(int32_t userId, const Model::Ticket& ticket) {
-    return isReporter(userId, ticket) || isProjectStaff(userId, ticket);
-}
-
-bool Ticket::isReporter(int32_t userId, const Model::Ticket& ticket) {
-    return userId == ticket.getValueOfReporterId();
-}
-
-bool Ticket::isProjectStaff(int32_t userId, const Model::Ticket& ticket) {
-    const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
-    const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
-
-    if(manager.getValueOfId() )
-        return true;
-
-    const Criteria staffCriteria{Model::Staff::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
-    const std::vector staffLst = mStaffOrm.findBy(staffCriteria);
-    for(const auto& staff : staffLst) {
-        if(staff.getValueOfStaffId() == userId)
-            return true;
-    }
-    return false;
-}
-
-Json::Value Ticket::getAssignables(int32_t userId, const Model::Ticket& ticket) {
-    const Model::Project project = mProjectOrm.findByPrimaryKey(ticket.getValueOfProjectId() );
-    const Model::Account manager = mAccountOrm.findByPrimaryKey(project.getValueOfManagerId() );
-    // Only the manager can reassign an assigned ticket
-    if( (manager.getValueOfId() != userId)&& ticket.getAssignedId() ) {
-        return {};
-    }
-
-    const Criteria staffCriteria{Model::Staff::Cols::_project_id, CompareOperator::EQ, project.getValueOfId()};
-    const std::vector staffLst = mStaffOrm.findBy(staffCriteria);
-    if(manager.getValueOfId() == userId) {  // If the user is the manager then they can assign to any staff
-        std::vector<std::future<Model::Account> > staffFutureLst;
-        staffFutureLst.reserve(staffLst.size() );
-        for(const Model::Staff& staff : staffLst)
-            staffFutureLst.push_back(mAccountOrm.findFutureByPrimaryKey(staff.getValueOfStaffId() ) );
-        Json::Value staffLstJson;
-        for(std::future<Model::Account>& staffFuture : staffFutureLst) {
-            Json::Value staffJson;
-            const Model::Account staff = staffFuture.get();
-            staffJson["id"] = staff.getValueOfId();
-            staffJson["username"] = staff.getValueOfUsername();
-            staffLstJson.append(std::move(staffJson) );
-        }
-        return staffLstJson;
-    } else {
-        for(const auto& staffModel : staffLst) {  // If the user is a staff, they can self assign
-            if(staffModel.getValueOfStaffId() == userId) {
-                const Model::Account staff = mAccountOrm.findByPrimaryKey(staffModel.getValueOfStaffId() );
-                Json::Value staffJson;
-                staffJson["username"] = staff.getValueOfUsername();
-                staffJson["id"] = staff.getValueOfId();
-                return staffJson;
-            }
-        }
-        return {};  // If they're neither, they cannot assign
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
