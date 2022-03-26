@@ -57,6 +57,11 @@ class Project;
 
 class Ticket{
 public:  // Added functions
+    static Json::Value getSeverityLst();
+    static Json::Value getStatusLst();
+    static bool isValidSeverity(const std::string& severity);
+    static bool isValidStatus(const std::string& status);
+
     drogon::Task<Account> getReporter(drogon::orm::DbClientPtr db) const;
     drogon::Task<Project> getProject(drogon::orm::DbClientPtr db) const;
     drogon::Task<std::vector<Comment> > getComments(drogon::orm::DbClientPtr db) const;
