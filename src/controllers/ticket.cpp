@@ -1,7 +1,7 @@
 
 #include "./auxiliary.hpp"
 #include "../constants.hpp"
-#include "../models/auxiliary.hpp"
+#include "../models/account.hpp"
 #include "../models/comment.hpp"
 #include "../models/project.hpp"
 #include "../models/staff.hpp"
@@ -20,6 +20,7 @@ namespace Ctrlr
 using namespace drogon;
 using namespace drogon::orm;
 using namespace Aux;
+using std::string_literals::operator""s;
 
 
 class Ticket : public HttpController<Ticket> {
@@ -83,7 +84,7 @@ Task<HttpResponsePtr> Ticket::newForm(HttpRequestPtr req, int32_t projectId) {
 
         auto data = getViewData("New Ticket", *session);
         data.insert("project", project.toJson() );
-        data.insert("severity_lst", severityLstJson() );
+        data.insert("severity_lst", Model::Ticket::getSeverityLst() );
 
         co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
     }  catch(const std::exception& ex) {
@@ -126,7 +127,7 @@ Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
 
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
     HttpViewData data = getViewData("New Ticket", *session);
-    data.insert("severity_lst", severityLstJson() );
+    data.insert("severity_lst", Model::Ticket::getSeverityLst() );
     data.insert("project", project.toJson() );
 
     // Obtain the form data
@@ -150,7 +151,8 @@ Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
 
     // Verify form data [TODO]: Add more checks
     // Check if severity is valid (i.e it's in severityLst)
-    if(std::find(begin(severityLst), end(severityLst), severity) == end(severityLst) ) {
+    const auto severityLst = Model::Ticket::getSeverityLst();
+    if(!Model::Ticket::isValidSeverity(severity) ) {
         data.insert("form_error", "Severity is not valid"s);
         auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
         resp->setStatusCode(k422UnprocessableEntity);
