@@ -1,5 +1,5 @@
 
-#include "./auxiliary.hpp"
+#include "auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../util/hash.hpp"
 

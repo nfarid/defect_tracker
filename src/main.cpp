@@ -1,6 +1,6 @@
 
-#include "./app.hpp"
-#include "./util/misc.hpp"
+#include "app.hpp"
+#include "util/misc.hpp"
 
 #include <cstring>
 #include <string_view>

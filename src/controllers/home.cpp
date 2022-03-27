@@ -1,5 +1,5 @@
 
-#include "./auxiliary.hpp"
+#include "auxiliary.hpp"
 #include "../models/account.hpp"
 
 #include <drogon/HttpController.h>

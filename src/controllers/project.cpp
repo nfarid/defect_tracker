@@ -1,5 +1,5 @@
 
-#include "./auxiliary.hpp"
+#include "auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../models/project.hpp"
 #include "../models/ticket.hpp"
