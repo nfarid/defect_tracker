@@ -7,7 +7,6 @@ out/
 #Hidden files
 .*
 !.gitignore
-!.clang-tidy
 !.astylerc
 !.clang-format
 !.uncrustify.cfg
