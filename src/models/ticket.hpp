@@ -57,10 +57,12 @@ class Project;
 
 class Ticket{
 public:  // Added functions
+    static drogon::Task<Ticket> createTicket(drogon::orm::CoroMapper<Ticket>& orm,
+            const std::unordered_map<std::string, std::string>& postParams,
+            int32_t reporterId, int32_t projectId);
+
     static Json::Value getSeverityLst();
     static Json::Value getStatusLst();
-    static bool isValidSeverity(const std::string& severity);
-    static bool isValidStatus(const std::string& status);
 
     drogon::Task<Account> getReporter(drogon::orm::DbClientPtr db) const;
     drogon::Task<Project> getProject(drogon::orm::DbClientPtr db) const;

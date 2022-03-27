@@ -82,7 +82,7 @@ Task<HttpResponsePtr> Ticket::newForm(HttpRequestPtr req, int32_t projectId) {
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
 
-        auto data = getViewData("New Ticket", *session);
+        HttpViewData data = getViewData("New Ticket", *session);
         data.insert("project", project.toJson() );
         data.insert("severity_lst", Model::Ticket::getSeverityLst() );
 
@@ -124,57 +124,16 @@ Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
-
-    const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
-    HttpViewData data = getViewData("New Ticket", *session);
-    data.insert("severity_lst", Model::Ticket::getSeverityLst() );
-    data.insert("project", project.toJson() );
-
-    // Obtain the form data
+    const int32_t userId = session->get<int32_t>("user_id");
     const auto& postParams = req->parameters();
-    std::string title;
-    std::string description;
-    std::string severity;
-    try {
-        title = postParams.at("form-title");
-        data.insert("form_title", title);
-        description = postParams.at("form-description");
-        data.insert("form_description", description);
-        severity = postParams.at("form-severity");
-    }  catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        data.insert("form_error", "Some required data is missing"s);
-        auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
-        resp->setStatusCode(k422UnprocessableEntity);
-        co_return resp;
-    }
 
-    // Verify form data [TODO]: Add more checks
-    // Check if severity is valid (i.e it's in severityLst)
-    const auto severityLst = Model::Ticket::getSeverityLst();
-    if(!Model::Ticket::isValidSeverity(severity) ) {
-        data.insert("form_error", "Severity is not valid"s);
-        auto resp = HttpResponse::newHttpViewResponse("ticket_form.csp", data);
-        resp->setStatusCode(k422UnprocessableEntity);
-        co_return resp;
-    }
-
-    // Insert the new ticket into the database
-    Model::Ticket newTicket;
-    newTicket.setTitle(title);
-    newTicket.setDescription(description);
-    newTicket.setSeverity(severity);
-    newTicket.setStatus("new");
-    newTicket.setCreatedDate(trantor::Date::now() );
-    newTicket.setProjectId(projectId);
-    newTicket.setReporterId(session->get<int32_t>("user_id") );
     try {
-        co_await mTicketOrm.insert(newTicket);
+        co_await Model::Ticket::createTicket(mTicketOrm, postParams, userId, projectId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
-    } catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        data.insert("form_error", "There seems to be an error"s);
-        co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+    }  catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        const std::string location = "/project/"s + std::to_string(projectId) + "/report";
+        co_return HttpResponse::newRedirectionResponse(location);
     }
 }
 

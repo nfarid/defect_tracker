@@ -54,6 +54,29 @@ UTIL_INTERNAL Json::Value lstToJson(const std::vector<std::string>& lst) {
     return json;
 }
 
+drogon::Task<Ticket> Ticket::createTicket(drogon::orm::CoroMapper<Ticket>& orm,
+        const std::unordered_map<std::string, std::string>& postParams, int32_t reporterId, int32_t projectId)
+{
+    const std::string title = postParams.at("form-title");
+    const std::string description = postParams.at("form-description");
+    const std::string severity = postParams.at("form-severity");
+
+    if(std::find(begin(severityLst), end(severityLst), severity) == end(severityLst) )
+        throw std::runtime_error("Form Error: Invalid severity");
+
+    Model::Ticket newTicket;
+    newTicket.setTitle(title);
+    newTicket.setDescription(description);
+    newTicket.setSeverity(severity);
+    newTicket.setStatus("new");
+    newTicket.setCreatedDate(trantor::Date::now() );
+    newTicket.setReporterId(reporterId);
+    newTicket.setProjectId(projectId);
+
+    co_await orm.insert(newTicket);
+    co_return newTicket;
+}
+
 Json::Value Ticket::getSeverityLst() {
     // Note: initialising static variables is thread safe
     const static Json::Value severityLstJson = lstToJson(severityLst);
@@ -64,14 +87,6 @@ Json::Value Ticket::getStatusLst() {
     // Note: initialising static variables is thread safe
     const static Json::Value statusLstJson = lstToJson(statusLst);
     return statusLstJson;
-}
-
-bool Ticket::isValidSeverity(const std::string& severity) {
-    return std::find(begin(severityLst), end(severityLst), severity) != end(severityLst);
-}
-
-bool Ticket::isValidStatus(const std::string& status) {
-    return std::find(begin(statusLst), end(statusLst), status) != end(statusLst);
 }
 
 drogon::Task<Account> Ticket::getReporter(DbClientPtr db) const {
