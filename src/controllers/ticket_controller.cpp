@@ -101,6 +101,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
 
     try {
         const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        const Model::Project project = co_await ticket.getProject(mDB);
         if(!co_await ticket.canEdit(mDB, userId) ) // cannot edit if not authorised
             co_return HttpResponse::newRedirectionResponse("/");
 
@@ -110,8 +111,11 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
         data.insert("ticket_description", ticket.getValueOfDescription() );
         if(ticket.getAssignedId() )
             data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
-        data.insert("assignable_lst", co_await ticket.getAssignables(mDB, userId) );
+        data.insert("assignable_lst",  toJson(co_await ticket.getAssignables(mDB, userId) ) );
         data.insert("is_reporter", ticket.isReporter(userId) );
+        data.insert("is_staff", co_await project.isStaff(mDB, userId) );
+        data.insert("status_lst", Model::Ticket::getStatusLst() );
+        data.insert("severity_lst", Model::Ticket::getSeverityLst() );
 
         co_return HttpResponse::newHttpViewResponse("ticket_edit.csp", data);
     } catch(const std::exception& ex) {
@@ -156,17 +160,25 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
         // Can only assign to people in the assingableLst
         const std::vector assingableLst = co_await ticket.getAssignables(mDB, userId);
-        const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
-        for(const auto& staff : toJson(assingableLst) ) {
-            if(staff["id"] == assignedId)
-                ticket.setAssignedId(assignedId);
+        if(!assingableLst.empty() ) {
+            const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
+            for(const auto& staff : toJson(assingableLst) ) {
+                if(staff["id"] == assignedId)
+                    ticket.setAssignedId(assignedId);
+            }
+        }
+
+        // Staff can edit severity and status
+        const Model::Project project  = co_await ticket.getProject(mDB);
+        if(co_await project.isStaff(mDB, userId) ) {
+            ticket.setSeverity( postParams.at("form-severity") );
+            ticket.setStatus( postParams.at("form-status") );
         }
 
         co_await mTicketOrm.update(ticket);
-
         co_return HttpResponse::newRedirectionResponse("/");
     }  catch(const std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
 }
