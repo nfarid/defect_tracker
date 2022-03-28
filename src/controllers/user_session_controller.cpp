@@ -20,13 +20,13 @@ using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
 
-class UserSession : public drogon::HttpController<UserSession> {
+class UserSessionController : public drogon::HttpController<UserSessionController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(UserSession::newForm, "/login", Get);
-        ADD_METHOD_TO(UserSession::create, "/login", Post);
-        ADD_METHOD_TO(UserSession::destroy, "/logout", Post);
+        ADD_METHOD_TO(UserSessionController::newForm, "/login", Get);
+        ADD_METHOD_TO(UserSessionController::create, "/login", Post);
+        ADD_METHOD_TO(UserSessionController::destroy, "/logout", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -39,7 +39,7 @@ private:
 };
 
 
-void UserSession::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void UserSessionController::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the login page.
     if(isLoggedIn(*session) )
@@ -50,7 +50,7 @@ void UserSession::newForm(const HttpRequestPtr& req, std::function<void(const Ht
     cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
 }
 
-Task<HttpResponsePtr> UserSession::create(HttpRequestPtr req) {
+Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
@@ -67,7 +67,7 @@ Task<HttpResponsePtr> UserSession::create(HttpRequestPtr req) {
     }
 }
 
-void UserSession::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)
+void UserSessionController::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)
 {
     const SessionPtr session = getSession(req);
     // There's no check if the user is logged in or not, since the result is the same either way

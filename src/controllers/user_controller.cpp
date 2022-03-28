@@ -17,14 +17,14 @@ using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
 
-class User : public drogon::HttpController<User> {
+class UserController : public drogon::HttpController<UserController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(User::show, "/user/{1}", Get);
-        ADD_METHOD_TO(User::newForm, "/signup", Get);
-        ADD_METHOD_TO(User::create, "/signup", Post);
-        ADD_METHOD_TO(User::destroy, "/user/{1}/delete", Post);
+        ADD_METHOD_TO(UserController::show, "/user/{1}", Get);
+        ADD_METHOD_TO(UserController::newForm, "/signup", Get);
+        ADD_METHOD_TO(UserController::create, "/signup", Post);
+        ADD_METHOD_TO(UserController::destroy, "/user/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -38,7 +38,7 @@ private:
 };
 
 
-Task<HttpResponsePtr> User::show(HttpRequestPtr req, int32_t id)
+Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, int32_t id)
 {
     const SessionPtr session = getSession(req);
     try {
@@ -59,7 +59,7 @@ Task<HttpResponsePtr> User::show(HttpRequestPtr req, int32_t id)
     }
 }
 
-void User::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
+void UserController::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the signup page
     if(isLoggedIn(*session) )
@@ -71,7 +71,7 @@ void User::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
     cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
 }
 
-Task<HttpResponsePtr> User::create(HttpRequestPtr req) {
+Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
     // Data from the HTTP POST request
     const auto& postParams = req->parameters();
 
@@ -90,7 +90,7 @@ Task<HttpResponsePtr> User::create(HttpRequestPtr req) {
     }
 }
 
-Task<HttpResponsePtr> User::destroy(HttpRequestPtr req, int32_t id)
+Task<HttpResponsePtr> UserController::destroy(HttpRequestPtr req, int32_t id)
 {
     SessionPtr session = getSession(req);
     const std::optional userIdOpt = session->getOptional<int32_t>("user_id");

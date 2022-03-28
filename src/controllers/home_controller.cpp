@@ -16,13 +16,13 @@ using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
 
-class Home : public HttpController<Home> {
+class HomeController : public HttpController<HomeController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(Home::index, "/", Get);
-        ADD_METHOD_TO(Home::index, "/index", Get);
-        ADD_METHOD_TO(Home::index, "/home", Get);
+        ADD_METHOD_TO(HomeController::index, "/", Get);
+        ADD_METHOD_TO(HomeController::index, "/index", Get);
+        ADD_METHOD_TO(HomeController::index, "/home", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -32,7 +32,7 @@ private:
 };
 
 
-void Home::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+void HomeController::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
     const SessionPtr session = getSession(req);
     HttpViewData data = getViewData("Home", *session);
     const auto response = HttpResponse::newHttpViewResponse("home.csp", data);

@@ -18,12 +18,12 @@ using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
 
-class Project : public HttpController<Project> {
+class ProjectController : public HttpController<ProjectController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(Project::show, "/project/{1}", Get);
-        ADD_METHOD_TO(Project::search, "/search", Get);
+        ADD_METHOD_TO(ProjectController::show, "/project/{1}", Get);
+        ADD_METHOD_TO(ProjectController::search, "/search", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -36,7 +36,7 @@ private:
     CoroMapper<Model::Project> mProjectOrm{mDB};
 };
 
-Task<HttpResponsePtr> Project::show(HttpRequestPtr req, int32_t id)
+Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
 {
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
@@ -54,7 +54,7 @@ Task<HttpResponsePtr> Project::show(HttpRequestPtr req, int32_t id)
     }
 }
 
-Task<HttpResponsePtr> Project::search(HttpRequestPtr req){
+Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     const std::string_view param = req->parameters().at("search-project");
     try{
         const std::vector projectLst = co_await Model::Project::searchProject(mDB, param);

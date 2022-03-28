@@ -23,15 +23,15 @@ using namespace Aux;
 using std::string_literals::operator""s;
 
 
-class Ticket : public HttpController<Ticket> {
+class TicketController : public HttpController<TicketController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(Ticket::show, "/ticket/{1}", Get);
-        ADD_METHOD_TO(Ticket::newForm, "/project/{1}/report", Get);
-        ADD_METHOD_TO(Ticket::edit, "/ticket/{1}/edit", Get);
-        ADD_METHOD_TO(Ticket::create, "/project/{1}/report", Post);
-        ADD_METHOD_TO(Ticket::update, "/ticket/{1}/edit", Post);
+        ADD_METHOD_TO(TicketController::show, "/ticket/{1}", Get);
+        ADD_METHOD_TO(TicketController::newForm, "/project/{1}/report", Get);
+        ADD_METHOD_TO(TicketController::edit, "/ticket/{1}/edit", Get);
+        ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post);
+        ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -48,7 +48,7 @@ private:
     CoroMapper<Model::Project> mProjectOrm{mDB};
 };
 
-Task<HttpResponsePtr> Ticket::show(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
     const SessionPtr session = getSession(req);
 
     try {
@@ -74,7 +74,7 @@ Task<HttpResponsePtr> Ticket::show(HttpRequestPtr req, int32_t id) {
     }
 }
 
-Task<HttpResponsePtr> Ticket::newForm(HttpRequestPtr req, int32_t projectId) {
+Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
@@ -93,7 +93,7 @@ Task<HttpResponsePtr> Ticket::newForm(HttpRequestPtr req, int32_t projectId) {
     }
 }
 
-Task<HttpResponsePtr> Ticket::edit(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
         co_return HttpResponse::newRedirectionResponse("/");
@@ -120,7 +120,7 @@ Task<HttpResponsePtr> Ticket::edit(HttpRequestPtr req, int32_t id) {
     }
 }
 
-Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
+Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
@@ -137,7 +137,7 @@ Task<HttpResponsePtr> Ticket::create(HttpRequestPtr req, int32_t projectId) {
     }
 }
 
-Task<HttpResponsePtr> Ticket::update(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
         co_return HttpResponse::newRedirectionResponse("/");

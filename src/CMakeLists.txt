@@ -22,12 +22,12 @@ set(APP_SRC
     "app.cpp"
 
     "controllers/auxiliary.cpp"
-    "controllers/comment.cpp"
-    "controllers/home.cpp"
-    "controllers/project.cpp"
-    "controllers/ticket.cpp"
-    "controllers/user.cpp"
-    "controllers/user_session.cpp"
+    "controllers/comment_controller.cpp"
+    "controllers/home_controller.cpp"
+    "controllers/project_controller.cpp"
+    "controllers/ticket_controller.cpp"
+    "controllers/user_controller.cpp"
+    "controllers/user_session_controller.cpp"
 
     "models/account.cpp"
     "models/comment.cpp"
