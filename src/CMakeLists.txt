@@ -31,6 +31,7 @@ set(APP_SRC
 
     "models/account.cpp"
     "models/comment.cpp"
+    "models/notification.cpp"
     "models/project.cpp"
     "models/staff.cpp"
     "models/ticket.cpp"
