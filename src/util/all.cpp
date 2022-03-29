@@ -1,11 +1,11 @@
 
 // All the basic utility headers
-#include "./core.hpp"
-#include "./cstring_view.hpp"
-#include "./hash.hpp"
-#include "./misc.hpp"
-#include "./size.hpp"
-#include "./span.hpp"
+#include "core.hpp"
+#include "cstring_view.hpp"
+#include "hash.hpp"
+#include "misc.hpp"
+#include "size.hpp"
+#include "span.hpp"
 
 #include <sodium.h>
 

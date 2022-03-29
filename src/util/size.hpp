@@ -2,7 +2,7 @@
 #ifndef HPP_UTIL_SIZE_
 #define HPP_UTIL_SIZE_
 
-#include "./core.hpp"
+#include "core.hpp"
 
 #include <cstddef>
 #include <iterator>

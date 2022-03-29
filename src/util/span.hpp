@@ -2,8 +2,8 @@
 #ifndef HPP_UTIL_SPAN_
 #define HPP_UTIL_SPAN_
 
-#include "./core.hpp"
-#include "./size.hpp"
+#include "core.hpp"
+#include "size.hpp"
 
 #include <array>
 #include <cassert>

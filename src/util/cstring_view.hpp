@@ -2,8 +2,8 @@
 #ifndef HPP_UTIL_CSTRING_VIEW_
 #define HPP_UTIL_CSTRING_VIEW_
 
-#include "./core.hpp"
-#include "./size.hpp"
+#include "core.hpp"
+#include "size.hpp"
 
 #include <cstring>
 #include <functional>

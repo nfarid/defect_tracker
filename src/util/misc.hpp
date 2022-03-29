@@ -2,8 +2,8 @@
 #ifndef HPP_UTIL_MISC_
 #define HPP_UTIL_MISC_
 
-#include "./core.hpp"
-#include "./cstring_view.hpp"
+#include "core.hpp"
+#include "cstring_view.hpp"
 
 #include <charconv>
 #include <stdexcept>

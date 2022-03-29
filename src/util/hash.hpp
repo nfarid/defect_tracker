@@ -2,8 +2,8 @@
 #ifndef HPP_UTIL_HASH
 #define HPP_UTIL_HASH
 
-#include "./core.hpp"
-#include "./cstring_view.hpp"
+#include "core.hpp"
+#include "cstring_view.hpp"
 
 #include <string>
 
