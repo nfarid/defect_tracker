@@ -3,6 +3,7 @@
 #include "core.hpp"
 #include "cstring_view.hpp"
 #include "hash.hpp"
+#include "form_error.hpp"
 #include "misc.hpp"
 #include "size.hpp"
 #include "span.hpp"
