@@ -18,10 +18,10 @@ INSERT INTO Account(username, password_hash) VALUES
     ('example_staff_3', '$argon2id$v=19$m=262144,t=3,p=1$6StGe1EqVL4n7g8cKNtl3g$zt2IXeni0yr2mF97dyHAWHJVb4gAs9QOHvEZ3iyoiME'),
     ('example_user', '$argon2id$v=19$m=262144,t=3,p=1$6StGe1EqVL4n7g8cKNtl3g$zt2IXeni0yr2mF97dyHAWHJVb4gAs9QOHvEZ3iyoiME');
 
-INSERT INTO Project(title, manager_id) VALUES
-    ('project', (SELECT id FROM Account WHERE username='username') ),
-    ('example_project_1', (SELECT id FROM Account WHERE username='example_manager') ),
-    ('example_project_2', (SELECT id FROM Account WHERE username='example_manager') );
+INSERT INTO Project(title, description, manager_id) VALUES
+    ('project', 'description', (SELECT id FROM Account WHERE username='username') ),
+    ('example_project_1', 'This is an example description.', (SELECT id FROM Account WHERE username='example_manager') ),
+    ('example_project_2', 'Another example description!', (SELECT id FROM Account WHERE username='example_manager') );
 
 INSERT INTO Ticket(title, description, status, severity, created_date, assigned_id, project_id, reporter_id) VALUES
     ('ticket', 'description', 'new', 'low', CURRENT_TIMESTAMP, NULL, (SELECT id FROM Project WHERE title='project'), (SELECT id FROM Account WHERE username='example_user') ),

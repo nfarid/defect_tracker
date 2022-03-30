@@ -18,6 +18,7 @@ using namespace drogon_model::bug_tracker;
 
 const std::string Project::Cols::_id = "id";
 const std::string Project::Cols::_title = "title";
+const std::string Project::Cols::_description = "description";
 const std::string Project::Cols::_manager_id = "manager_id";
 const std::string Project::primaryKeyName = "id";
 const bool Project::hasPrimaryKey = true;
@@ -26,6 +27,7 @@ const std::string Project::tableName = "project";
 const std::vector<typename Project::MetaData> Project::metaData_={
     {"id", "int32_t", "integer", 4, true, true, true},
     {"title", "std::string", "text", 0, false, false, true},
+    {"description", "std::string", "text", 0, false, false, true},
     {"manager_id", "int32_t", "integer", 4, false, false, false}
 };
 
@@ -125,11 +127,13 @@ Project::Project(const Row& r, const ssize_t indexOffset) noexcept
             id_=std::make_shared<int32_t>(r["id"].as<int32_t>() );
         if(!r["title"].isNull() )
             title_=std::make_shared<std::string>(r["title"].as<std::string>() );
+        if(!r["description"].isNull() )
+            description_=std::make_shared<std::string>(r["description"].as<std::string>() );
         if(!r["manager_id"].isNull() )
             managerId_=std::make_shared<int32_t>(r["manager_id"].as<int32_t>() );
     } else{
         size_t offset = static_cast<size_t>(indexOffset);
-        if(offset + 3 > r.size() ) {
+        if(offset + 4 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
@@ -142,13 +146,16 @@ Project::Project(const Row& r, const ssize_t indexOffset) noexcept
             title_=std::make_shared<std::string>(r[index].as<std::string>() );
         index = offset + 2;
         if(!r[index].isNull() )
+            description_=std::make_shared<std::string>(r[index].as<std::string>() );
+        index = offset + 3;
+        if(!r[index].isNull() )
             managerId_=std::make_shared<int32_t>(r[index].as<int32_t>() );
     }
 }
 
 Project::Project(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 3) {
+    if(pMasqueradingVector.size() != 4) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -165,7 +172,12 @@ Project::Project(const Json::Value& pJson, const std::vector<std::string>& pMasq
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
+            description_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+    }
+    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
+        dirtyFlag_[3] = true;
+        if(!pJson[pMasqueradingVector[3]].isNull() )
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
     }
 }
 
@@ -181,8 +193,13 @@ Project::Project(const Json::Value& pJson) noexcept(false)
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("manager_id") ) {
+    if(pJson.isMember("description") ) {
         dirtyFlag_[2]=true;
+        if(!pJson["description"].isNull() )
+            description_=std::make_shared<std::string>(pJson["description"].asString() );
+    }
+    if(pJson.isMember("manager_id") ) {
+        dirtyFlag_[3]=true;
         if(!pJson["manager_id"].isNull() )
             managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
     }
@@ -191,7 +208,7 @@ Project::Project(const Json::Value& pJson) noexcept(false)
 void Project::updateByMasqueradedJson(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 3) {
+    if(pMasqueradingVector.size() != 4) {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
@@ -207,7 +224,12 @@ void Project::updateByMasqueradedJson(const Json::Value& pJson,
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull() )
-            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[2]].asInt64() ) );
+            description_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString() );
+    }
+    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
+        dirtyFlag_[3] = true;
+        if(!pJson[pMasqueradingVector[3]].isNull() )
+            managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson[pMasqueradingVector[3]].asInt64() ) );
     }
 }
 
@@ -222,8 +244,13 @@ void Project::updateByJson(const Json::Value& pJson) noexcept(false)
         if(!pJson["title"].isNull() )
             title_=std::make_shared<std::string>(pJson["title"].asString() );
     }
-    if(pJson.isMember("manager_id") ) {
+    if(pJson.isMember("description") ) {
         dirtyFlag_[2] = true;
+        if(!pJson["description"].isNull() )
+            description_=std::make_shared<std::string>(pJson["description"].asString() );
+    }
+    if(pJson.isMember("manager_id") ) {
+        dirtyFlag_[3] = true;
         if(!pJson["manager_id"].isNull() )
             managerId_=std::make_shared<int32_t>( static_cast<int32_t>(pJson["manager_id"].asInt64() ) );
     }
@@ -279,6 +306,31 @@ void Project::setTitle(std::string&& pTitle) noexcept
     dirtyFlag_[1] = true;
 }
 
+const std::string& Project::getValueOfDescription() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(description_)
+        return *description_;
+    return defaultValue;
+}
+
+const std::shared_ptr<std::string>& Project::getDescription() const noexcept
+{
+    return description_;
+}
+
+void Project::setDescription(const std::string& pDescription) noexcept
+{
+    description_ = std::make_shared<std::string>(pDescription);
+    dirtyFlag_[2] = true;
+}
+
+void Project::setDescription(std::string&& pDescription) noexcept
+{
+    description_ = std::make_shared<std::string>(std::move(pDescription) );
+    dirtyFlag_[2] = true;
+}
+
 const int32_t& Project::getValueOfManagerId() const noexcept
 {
     const static int32_t defaultValue = int32_t();
@@ -295,13 +347,13 @@ const std::shared_ptr<int32_t>& Project::getManagerId() const noexcept
 void Project::setManagerId(const int32_t& pManagerId) noexcept
 {
     managerId_ = std::make_shared<int32_t>(pManagerId);
-    dirtyFlag_[2] = true;
+    dirtyFlag_[3] = true;
 }
 
 void Project::setManagerIdToNull() noexcept
 {
     managerId_.reset();
-    dirtyFlag_[2] = true;
+    dirtyFlag_[3] = true;
 }
 
 void Project::updateId(const uint64_t)
@@ -311,6 +363,7 @@ const std::vector<std::string>& Project::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "title",
+        "description",
         "manager_id"
     };
     return inCols;
@@ -325,6 +378,12 @@ void Project::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
+        if(getDescription() )
+            binder << getValueOfDescription();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[3]) {
         if(getManagerId() )
             binder << getValueOfManagerId();
         else
@@ -339,6 +398,8 @@ const std::vector<std::string> Project::updateColumns() const
         ret.push_back(getColumnName(1) );
     if(dirtyFlag_[2])
         ret.push_back(getColumnName(2) );
+    if(dirtyFlag_[3])
+        ret.push_back(getColumnName(3) );
     return ret;
 }
 
@@ -351,6 +412,12 @@ void Project::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
     }
     if(dirtyFlag_[2]) {
+        if(getDescription() )
+            binder << getValueOfDescription();
+        else
+            binder << nullptr;
+    }
+    if(dirtyFlag_[3]) {
         if(getManagerId() )
             binder << getValueOfManagerId();
         else
@@ -369,6 +436,10 @@ Json::Value Project::toJson() const
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
+    if(getDescription() )
+        ret["description"]=getValueOfDescription();
+    else
+        ret["description"]=Json::Value();
     if(getManagerId() )
         ret["manager_id"]=getValueOfManagerId();
     else
@@ -380,7 +451,7 @@ Json::Value Project::toMasqueradedJson(
     const std::vector<std::string>& pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 3) {
+    if(pMasqueradingVector.size() == 4) {
         if(!pMasqueradingVector[0].empty() ) {
             if(getId() )
                 ret[pMasqueradingVector[0]]=getValueOfId();
@@ -394,10 +465,16 @@ Json::Value Project::toMasqueradedJson(
                 ret[pMasqueradingVector[1]]=Json::Value();
         }
         if(!pMasqueradingVector[2].empty() ) {
-            if(getManagerId() )
-                ret[pMasqueradingVector[2]]=getValueOfManagerId();
+            if(getDescription() )
+                ret[pMasqueradingVector[2]]=getValueOfDescription();
             else
                 ret[pMasqueradingVector[2]]=Json::Value();
+        }
+        if(!pMasqueradingVector[3].empty() ) {
+            if(getManagerId() )
+                ret[pMasqueradingVector[3]]=getValueOfManagerId();
+            else
+                ret[pMasqueradingVector[3]]=Json::Value();
         }
         return ret;
     }
@@ -410,6 +487,10 @@ Json::Value Project::toMasqueradedJson(
         ret["title"]=getValueOfTitle();
     else
         ret["title"]=Json::Value();
+    if(getDescription() )
+        ret["description"]=getValueOfDescription();
+    else
+        ret["description"]=Json::Value();
     if(getManagerId() )
         ret["manager_id"]=getValueOfManagerId();
     else
@@ -430,8 +511,15 @@ bool Project::validateJsonForCreation(const Json::Value& pJson, std::string& err
         err="The title column cannot be null";
         return false;
     }
+    if(pJson.isMember("description") ) {
+        if(!validJsonOfField(2, "description", pJson["description"], err, true) )
+            return false;
+    } else{
+        err="The description column cannot be null";
+        return false;
+    }
     if(pJson.isMember("manager_id") ) {
-        if(!validJsonOfField(2, "manager_id", pJson["manager_id"], err, true) )
+        if(!validJsonOfField(3, "manager_id", pJson["manager_id"], err, true) )
             return false;
     }
     return true;
@@ -441,7 +529,7 @@ bool Project::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 3) {
+    if(pMasqueradingVector.size() != 4) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -464,6 +552,15 @@ bool Project::validateMasqueradedJsonForCreation(const Json::Value& pJson,
         if(!pMasqueradingVector[2].empty() ) {
             if(pJson.isMember(pMasqueradingVector[2]) ) {
                 if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true) )
+                    return false;
+            } else{
+                err="The " + pMasqueradingVector[2] + " column cannot be null";
+                return false;
+            }
+        }
+        if(!pMasqueradingVector[3].empty() ) {
+            if(pJson.isMember(pMasqueradingVector[3]) ) {
+                if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true) )
                     return false;
             }
         }
@@ -488,8 +585,12 @@ bool Project::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
         if(!validJsonOfField(1, "title", pJson["title"], err, false) )
             return false;
     }
+    if(pJson.isMember("description") ) {
+        if(!validJsonOfField(2, "description", pJson["description"], err, false) )
+            return false;
+    }
     if(pJson.isMember("manager_id") ) {
-        if(!validJsonOfField(2, "manager_id", pJson["manager_id"], err, false) )
+        if(!validJsonOfField(3, "manager_id", pJson["manager_id"], err, false) )
             return false;
     }
     return true;
@@ -499,7 +600,7 @@ bool Project::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         const std::vector<std::string>& pMasqueradingVector,
         std::string& err)
 {
-    if(pMasqueradingVector.size() != 3) {
+    if(pMasqueradingVector.size() != 4) {
         err = "Bad masquerading vector";
         return false;
     }
@@ -517,6 +618,10 @@ bool Project::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         }
         if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]) ) {
             if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, false) )
+                return false;
+        }
+        if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]) ) {
+            if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false) )
                 return false;
         }
     }catch(const Json::LogicError& e)
@@ -549,6 +654,7 @@ bool Project::validJsonOfField(size_t index,
         }
         break;
     case 1:
+    case 2:
         if(pJson.isNull() ) {
             err="The " + fieldName + " column cannot be null";
             return false;
@@ -558,7 +664,7 @@ bool Project::validJsonOfField(size_t index,
             return false;
         }
         break;
-    case 2:
+    case 3:
         if(pJson.isNull() )
             return true;
         if(!pJson.isInt() ) {

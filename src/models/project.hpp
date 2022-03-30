@@ -37,10 +37,10 @@ class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
 
 
-}  // namespace orm
+} // namespace orm
 
 
-}  // namespace drogon
+} // namespace drogon
 
 
 namespace drogon_model
@@ -69,6 +69,7 @@ public:
     struct Cols{
         static const std::string _id;
         static const std::string _title;
+        static const std::string _description;
         static const std::string _manager_id;
     };
 
@@ -138,6 +139,15 @@ public:
     void setTitle(const std::string& pTitle) noexcept;
     void setTitle(std::string&& pTitle) noexcept;
 
+    /**  For column description  */
+    ///Get the value of the column description, returns the default value if the column is null
+    const std::string& getValueOfDescription() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string>& getDescription() const noexcept;
+    ///Set the value of the column description
+    void setDescription(const std::string& pDescription) noexcept;
+    void setDescription(std::string&& pDescription) noexcept;
+
     /**  For column manager_id  */
     ///Get the value of the column manager_id, returns the default value if the column is null
     const int32_t& getValueOfManagerId() const noexcept;
@@ -149,7 +159,7 @@ public:
 
 
     static size_t getColumnNumber() noexcept {
-        return 3;
+        return 4;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -171,7 +181,7 @@ private:
     friend drogon::orm::Mapper<Project>;
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<Project>;
-#endif  // ifdef __cpp_impl_coroutine
+#endif // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -180,6 +190,7 @@ private:
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> title_;
+    std::shared_ptr<std::string> description_;
     std::shared_ptr<int32_t> managerId_;
     struct MetaData{
         const std::string colName_;
@@ -191,7 +202,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[3]={ false};
+    bool dirtyFlag_[4]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -218,6 +229,10 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[2]) {
+            sql += "description,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[3]) {
             sql += "manager_id,";
             ++parametersCount;
         }
@@ -225,7 +240,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else {
+        } else   {
             sql += ") values (";
         }
 
@@ -238,6 +253,10 @@ public:
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[2]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[3]) {
             n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
