@@ -7,30 +7,40 @@
 <head>
     <title>{%title%}</title>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/data/styles/bootstrap.min.css">
     <link rel="stylesheet" href="/data/styles/example_style.css">
 </head>
 <body>
 
-<header>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <%c++ if(!userId.empty() ) { %>
-                <li>
-                    <form action="/logout" method="POST">
-                        <input type="submit" value="Logout">
-                    </form>
-                </li>
-            <%c++ } else { %>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/signup">Signup</a></li>
-            <%c++ } %>
-        </ul>
-    </nav>
 
-    <form action="/search" method="GET">
-        <input type="text" id="search-project" name="search-project"/>
-        <input type="submit" value="Search Project">
-    </form>
+<header class="p-3 bg-dark text-white">
+<div class="container">
+<div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+
+    <div class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+
+        <a href="/" class="nav-link">Home</a>
+
+        <form  action="/search" method="GET" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+            <input type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search" id="search-project" name="search-project"/>
+        </form>
+
+        <%c++ if(!userId.empty() ) {%>
+            <form action="/logout" method="POST">
+                <input type="submit" value="Logout" class="btn btn-warning">
+            </form>
+        <%c++ } else { %>
+            <a href="/login" class="nav-link">Login</a>
+            <a href="/signup" class="nav-link">Signup</a>
+        <%c++ } %>
+    </div>
+
+
+
+</div>
+</div>
+<h2>Defect Tracker</h2>
 </header>
+
+
 <main>
