@@ -7,7 +7,7 @@
 <%c++ const auto ticketId = @@.get<std::string>("ticket_id"); %>
 <%c++ const auto ticketTitle = @@.get<std::string>("ticket_title"); %>
 <%c++ const auto ticketDescription = @@.get<std::string>("ticket_description"); %>
-<%c++ const auto ticketAssigned = @@.get<std::string>("ticket_assigned"); %>
+<%c++ const auto ticketAssignedId = @@.get<int32_t>("ticket_assigned_id"); %>
 <%c++ const auto assignableLst = @@.get<Json::Value>("assignable_lst"); %>
 <%c++ const auto isReporter = @@.get<bool>("is_reporter"); %>
 <%c++ const auto isStaff = @@.get<bool>("is_staff"); %>
@@ -30,10 +30,17 @@
         <label>
             Assign:
             <select id="form-assign" name="form-assign">
+                <%c++ if(!ticketAssignedId) { %>
+                    <option value="0" selected="selected" disabled="true">[Select!]</option>
+                <%c++ } %>
                 <%c++ for(const auto& assignable : assignableLst) { %>
                     <%c++ const std::string& assignableName = assignable["username"].asString(); %>
                     <%c++ const int assignableId = assignable["id"].asInt(); %>
-                    <option value="{%assignableId%}">{%assignableName%}</option>
+                    <%c++ if(ticketAssignedId == assignableId) {%>
+                        <option value="{%assignableId%}" selected="selected">{%assignableName%}</option>
+                    <%c++ } else { %>
+                        <option value="{%assignableId%}">{%assignableName%}</option>
+                    <%c++ } %>
                 <%c++ } %>
             </select>
         </label>

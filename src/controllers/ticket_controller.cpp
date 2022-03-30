@@ -110,7 +110,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
         data.insert("ticket_title", ticket.getValueOfTitle() );
         data.insert("ticket_description", ticket.getValueOfDescription() );
         if(ticket.getAssignedId() )
-            data.insert("ticket_assigned", std::to_string(ticket.getValueOfAssignedId() ) );
+            data.insert("ticket_assigned_id", ticket.getValueOfAssignedId() );
         data.insert("assignable_lst",  toJson(co_await ticket.getAssignables(mDB, userId) ) );
         data.insert("is_reporter", ticket.isReporter(userId) );
         data.insert("is_staff", co_await project.isStaff(mDB, userId) );
@@ -147,12 +147,11 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
         co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = session->get<int32_t>("user_id");
 
+    const auto& postParams = req->parameters();
     try {
         Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
         if(!co_await ticket.canEdit(mDB, userId) ) // cannot edit if not authorised
             co_return HttpResponse::newRedirectionResponse("/");
-
-        const auto& postParams = req->parameters();
 
         // The ticket's reporter can edit the ticket
         if(ticket.isReporter(userId) )
@@ -160,7 +159,7 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
         // Can only assign to people in the assingableLst
         const std::vector assingableLst = co_await ticket.getAssignables(mDB, userId);
-        if(!assingableLst.empty() ) {
+        if(!assingableLst.empty() && postParams.contains("form-assign") ) {
             const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
             for(const auto& staff : toJson(assingableLst) ) {
                 if(staff["id"] == assignedId)
