@@ -8,6 +8,7 @@
 #include "staff.hpp"
 #include "ticket.hpp"
 
+#include "../util/form_error.hpp"
 #include "../util/hash.hpp"
 
 #include <drogon/utils/Utilities.h>
@@ -37,11 +38,18 @@ Task<Account> Account::verifyLogin(CoroMapper<Account>& orm,
     const std::string& username = postParams.at("form-username");
     const std::string password = postParams.at("form-password");
 
-    const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, username};
-    const Model::Account user = co_await orm.findOne(userCriteria);
+    // Find the user with the specified username
+    const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
+    const std::vector userLst = co_await orm.findBy(hasUsername);
+    if(userLst.empty() ) // No user with that username can be found
+        throw Util::FormError("Invalid username");
+    if(userLst.size() > 1) // This should never happen as username is a unique property
+        throw std::logic_error("Multiple users with the same username has been found");
+    const Model::Account user = userLst.front();  // 1 user with the username has been found
 
+    // Check if the entered password is correct
     if(!Util::verifyHash(user.getValueOfPasswordHash(), password) )
-        throw std::runtime_error("Form Error: Invalid password");
+        throw Util::FormError("Invalid password");
 
     co_return user;
 }
@@ -53,8 +61,10 @@ Task<Account> Account::createAccount(CoroMapper<Account>& orm,
     const std::string& password = postParams.at("form-password");
 
     // TODO: Add more requirements for a valid username & password
-    if(username.empty() || password.empty() ) // Username or password should not be empty
-        throw std::runtime_error("Form Error: Invalid username or password");
+    if(username.empty() )
+        throw Util::FormError("Form Error: Username cannot be empty");
+    if(password.empty() )
+        throw Util::FormError("Form Error: Password cannot be empty");
 
     Model::Account newAccount;
     newAccount.setUsername(username);

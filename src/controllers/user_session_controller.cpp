@@ -2,6 +2,7 @@
 #include "auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../util/core.hpp"
+#include "../util/form_error.hpp"
 #include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>
@@ -30,24 +31,39 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
     static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
 
 private:
     CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
+
+    HttpResponsePtr newImpl(HttpRequestPtr req, std::unordered_map<std::string, std::string> formData,
+            std::string errorMessage);
 };
 
 
-void UserSessionController::newForm(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+Task<HttpResponsePtr> UserSessionController::newForm(HttpRequestPtr req) {
+    co_return newImpl(req, {}, "");
+}
+
+HttpResponsePtr UserSessionController::newImpl(HttpRequestPtr req,
+        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+{
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the login page.
     if(isLoggedIn(*session) )
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        return HttpResponse::newRedirectionResponse("/");
 
     HttpViewData data = getViewData("Login", *session);
-    data.insert("form_action", "/login"s);
-    cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
+    data.insert("form-action", "/login"s);
+
+    // If there was an error, then redisplay the form data
+    data.insert("form-error", errorMessage);
+    for(const auto& [k, v] : formData)
+        data.insert(k, v);
+
+    return HttpResponse::newHttpViewResponse("user_form.csp", data);
 }
 
 Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
@@ -55,15 +71,16 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
 
     try {
         const auto user = co_await Model::Account::verifyLogin(mAccountOrm, postParams);
-        // Everything is correct, so the user can login
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
-    }  catch(const std::exception& ex) {
+    } catch(const Util::FormError& ex) {
+        // There was a form error, so let the user retry again
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
-        HttpViewData data = getViewData("Login", *getSession(req) );
-        data.insert("form_action", "/login"s);
-        data.insert("form_error", "There seems to be an error. Try again."s);
-        co_return HttpResponse::newHttpViewResponse("user_form.csp", data);
+        co_return newImpl(req, postParams, ex.what() );
+    }  catch(const std::exception& ex) {
+        // An unexpected error has occured
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 

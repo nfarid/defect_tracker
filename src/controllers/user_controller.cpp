@@ -67,7 +67,7 @@ void UserController::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
 
     // Else show the signup page
     HttpViewData data = getViewData("Sign Up"s, *session);
-    data.insert("form_action", "/signup"s);
+    data.insert("form-action", "/signup"s);
     cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
 }
 
@@ -84,8 +84,8 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         // Form data is not valid, so show the signup page again with an error message
         HttpViewData data = getViewData("Sign Up"s, *getSession(req) );
-        data.insert("form_action", "/signup"s);
-        data.insert("form_error", "There seems to be an error"s);
+        data.insert("form-action", "/signup"s);
+        data.insert("form-error", "There seems to be an error"s);
         co_return HttpResponse::newHttpViewResponse("user_form.csp", data);
     }
 }

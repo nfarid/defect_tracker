@@ -61,7 +61,7 @@ public:  // Added functions
 
     // This coroutine takes the POST parameters from a login form and verifies them
     // If the credentials are correct, then co_return the respective Model::Account
-    // If it's incorrect then it would throw
+    // If it's incorrect, then throw Util::FormError with an error message
     static drogon::Task<Account> verifyLogin(drogon::orm::CoroMapper<Account>& orm,
             const std::unordered_map<std::string, std::string>& postParams);
 
