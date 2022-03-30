@@ -1,0 +1,32 @@
+
+<%view _header.csp %>
+
+<%c++ const auto title = @@.get<std::string>("title"); %>
+<%c++ const auto formAction = @@.get<std::string>("form-action"); %>
+<%c++ const auto formError = @@.get<std::string>("form-error"); %>
+<%c++ const auto formTitle = @@.get<std::string>("form-username"); %>
+<%c++ const auto formDescription = @@.get<std::string>("form-password"); %>
+
+<form action="{%formAction%}" method="POST">
+    <fieldset>
+        <legend>{%title%}</legend>
+        <%c++ if(!formError.empty() ) { %>
+            <p>Error: {%formError%}</p>
+        <%c++ } %>
+        <br/>
+        <label>
+            Title:
+            <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
+        </label>
+        <br/>
+
+        <label>
+            Description:
+            <textarea id="form-description" name="form-description" rows="4" cols="50">{%formDescription%}</textarea>
+        </label>
+        <br/>
+    <input type="submit" value="submit">
+    </fieldset>
+</form>
+
+<%view _footer.csp %>

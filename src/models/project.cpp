@@ -8,6 +8,7 @@
 #include "ticket.hpp"
 
 #include "../util/core.hpp"
+#include "../util/form_error.hpp"
 
 #include <drogon/utils/Utilities.h>
 #include <string>
@@ -49,6 +50,31 @@ UTIL_INTERNAL bool isalnum(std::string_view str) {
             return false;
     }
     return true;
+}
+
+drogon::Task<Project> Project::createProject(drogon::orm::CoroMapper<Project>& orm,
+        const std::unordered_map<std::string, std::string>& postParams, int32_t userId)
+{
+    const std::string& title = postParams.at("form-title");
+    const std::string& description = postParams.at("form-description");
+
+    // TODO: Add more requirements for a valid title & description
+    if(title.empty() )
+        throw Util::FormError("Title cannot be empty");
+    if(description.empty() )
+        throw Util::FormError("Description cannot be empty");
+
+    // Title must be unique
+    const Criteria hasTitle{Model::Project::Cols::_title, CompareOperator::EQ, title};
+    if(co_await orm.count(hasTitle) != 0)
+        throw Util::FormError("That title already exists");
+
+    Model::Project newProject;
+    newProject.setTitle(title);
+    newProject.setDescription(description);
+    newProject.setManagerId(userId);
+
+    co_return co_await orm.insert(newProject);
 }
 
 drogon::Task<std::vector<Project> > Project::searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery) {

@@ -37,10 +37,10 @@ class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
 
 
-} // namespace orm
+}  // namespace orm
 
 
-} // namespace drogon
+}  // namespace drogon
 
 
 namespace drogon_model
@@ -57,6 +57,10 @@ class Ticket;
 
 class Project{
 public:  // Added functions
+
+    static drogon::Task<Project> createProject(drogon::orm::CoroMapper<Project>& orm,
+            const std::unordered_map<std::string, std::string>& postParams, int32_t userId);
+
     static drogon::Task<std::vector<Project> > searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery);
 
     drogon::Task<Account> getManager(drogon::orm::DbClientPtr db) const;
@@ -181,7 +185,7 @@ private:
     friend drogon::orm::Mapper<Project>;
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<Project>;
-#endif // ifdef __cpp_impl_coroutine
+#endif  // ifdef __cpp_impl_coroutine
     static const std::vector<std::string>& insertColumns() noexcept;
     void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
@@ -240,7 +244,7 @@ public:
         if(parametersCount > 0) {
             sql[sql.length()-1]=')';
             sql += " values (";
-        } else   {
+        } else {
             sql += ") values (";
         }
 

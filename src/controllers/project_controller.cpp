@@ -3,6 +3,7 @@
 #include "../models/account.hpp"
 #include "../models/project.hpp"
 #include "../models/ticket.hpp"
+#include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -17,23 +18,31 @@ namespace Ctrlr
 using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
+using std::string_literals::operator""s;
 
 class ProjectController : public HttpController<ProjectController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(ProjectController::show, "/project/{1}", Get);
+    ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get);
+    ADD_METHOD_TO(ProjectController::create, "/project-new", Post);
         ADD_METHOD_TO(ProjectController::search, "/search", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req);
+    Task<HttpResponsePtr> create(HttpRequestPtr req);
     Task<HttpResponsePtr> search(HttpRequestPtr req);
 
 private:
     DbClientPtr mDB = app().getDbClient("db");
 
     CoroMapper<Model::Project> mProjectOrm{mDB};
+
+    HttpResponsePtr newImpl(HttpRequestPtr req, std::unordered_map<std::string, std::string> formData,
+            std::string errorMessage);
 };
 
 Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
@@ -49,6 +58,54 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
         data.insert("project_id", std::to_string(id) );
         co_return HttpResponse::newHttpViewResponse("project.csp", data);
     } catch(std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
+    }
+}
+
+Task<HttpResponsePtr> ProjectController::newForm(HttpRequestPtr req){
+    co_return newImpl(req, {}, "");
+}
+
+HttpResponsePtr ProjectController::newImpl(HttpRequestPtr req,
+        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+{
+    const SessionPtr session = getSession(req);
+    // If the user hasn't logged in, they cannot create a project
+    if(!isLoggedIn(*session) )
+        return HttpResponse::newRedirectionResponse("/");
+
+    // Else show the project creation
+    HttpViewData data = getViewData("Create project."s, *session);
+    data.insert("form-action", "/project-new"s);
+
+    // If there was an error, then redisplay the form data
+    data.insert("form-error", errorMessage);
+    for(const auto& [k, v] : formData)
+        data.insert(k, v);
+
+    return HttpResponse::newHttpViewResponse("project_new.csp", data);
+}
+
+Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
+    const SessionPtr session = getSession(req);
+    // If the user hasn't logged in, they cannot create a project
+    if(!isLoggedIn(*session) )
+        co_return HttpResponse::newRedirectionResponse("/");
+    const int32_t userId = session->get<int32_t>("user_id");
+
+    // Data from the HTTP POST request
+    const auto& postParams = req->parameters();
+
+    try {
+        const Model::Project project = co_await Model::Project::createProject(mProjectOrm, postParams, userId);
+        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+    } catch(Util::FormError& ex) {
+        // There was a form error, so let the user retry again
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return newImpl(req, postParams, ex.what() );
+    }  catch(const std::exception& ex) {
+        // An unexpected error has occured
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
