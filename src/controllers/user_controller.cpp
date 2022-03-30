@@ -1,6 +1,7 @@
 
 #include "auxiliary.hpp"
 #include "../models/account.hpp"
+#include "../util/form_error.hpp"
 #include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>
@@ -29,12 +30,15 @@ public:
     /*YES-FORMAT*/
 
     Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
-    static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
     CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
+
+    HttpResponsePtr newImpl(HttpRequestPtr req, std::unordered_map<std::string, std::string> formData,
+            std::string errorMessage);
 };
 
 
@@ -59,16 +63,28 @@ Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, int32_t id)
     }
 }
 
-void UserController::newForm(const HttpRequestPtr& req, ResponseCallback&& cb) {
+Task<HttpResponsePtr> UserController::newForm(HttpRequestPtr req) {
+    co_return newImpl(req, {}, {});
+}
+
+HttpResponsePtr UserController::newImpl(HttpRequestPtr req,
+        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+{
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the signup page
     if(isLoggedIn(*session) )
-        return cb(HttpResponse::newRedirectionResponse("/") );
+        return HttpResponse::newRedirectionResponse("/");
 
     // Else show the signup page
     HttpViewData data = getViewData("Sign Up"s, *session);
     data.insert("form-action", "/signup"s);
-    cb(HttpResponse::newHttpViewResponse("user_form.csp", data) );
+
+    // If there was an error, then redisplay the form data
+    data.insert("form-error", errorMessage);
+    for(const auto& [k, v] : formData)
+        data.insert(k, v);
+
+    return HttpResponse::newHttpViewResponse("user_form.csp", data);
 }
 
 Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
@@ -80,13 +96,14 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
         // If the form data is valid and the user can be created, then login
         logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
-    } catch(const std::exception& ex) {
+    } catch(Util::FormError& ex) {
+        // There was a form error, so let the user retry again
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
-        // Form data is not valid, so show the signup page again with an error message
-        HttpViewData data = getViewData("Sign Up"s, *getSession(req) );
-        data.insert("form-action", "/signup"s);
-        data.insert("form-error", "There seems to be an error"s);
-        co_return HttpResponse::newHttpViewResponse("user_form.csp", data);
+        co_return newImpl(req, postParams, ex.what() );
+    }  catch(const std::exception& ex) {
+        // An unexpected error has occured
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 

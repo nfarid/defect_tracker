@@ -66,8 +66,8 @@ public:  // Added functions
             const std::unordered_map<std::string, std::string>& postParams);
 
     // This coroutine takes the POST parameters from a signup form and validates them
-    // If the credentials are valid and the account can be created, return it
-    // If it's incorrect then it would throw
+    // If the credentials are valid then return a newly created Account
+    // If it's incorrect then throw Util::FormError with an error message
     static drogon::Task<Account> createAccount(drogon::orm::CoroMapper<Account>& orm,
             const std::unordered_map<std::string, std::string>& postParams);
 

@@ -62,9 +62,14 @@ Task<Account> Account::createAccount(CoroMapper<Account>& orm,
 
     // TODO: Add more requirements for a valid username & password
     if(username.empty() )
-        throw Util::FormError("Form Error: Username cannot be empty");
+        throw Util::FormError("Username cannot be empty");
     if(password.empty() )
-        throw Util::FormError("Form Error: Password cannot be empty");
+        throw Util::FormError("Password cannot be empty");
+
+    // Username must be unique
+    const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
+    if(co_await orm.count(hasUsername) != 0)
+        throw Util::FormError("That username already exists");
 
     Model::Account newAccount;
     newAccount.setUsername(username);
