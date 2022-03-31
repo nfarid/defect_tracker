@@ -7,25 +7,25 @@
 <%c++ const auto formUsername = @@.get<std::string>("form-username"); %>
 <%c++ const auto formPassword = @@.get<std::string>("form-password"); %>
 
+
+<div class="form-user">
 <form action="{%formAction%}" method="POST">
     <fieldset>
         <legend>{%title%}</legend>
         <%c++ if(!formError.empty() ) { %>
             <p>Error: {%formError%}</p>
         <%c++ } %>
-        <br/>
-        <label>
-            Username:
-            <input type="text" id="form-username" name="form-username" value="{%formUsername%}"/>
-        </label>
-        <br/>
-        <label>
-            Password:
-            <input type="password" id="form-password" name="form-password" value="{%formPassword%}"/>
-        </label>
-        <br/>
-    <input type="submit" value="submit">
+        <div class="form-floating">
+            <input type="text" id="form-username" name="form-username" class="form-control" value="{%formUsername%}" placeholder="username"/>
+            <label for="form-username">Username</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" id="form-password" name="form-password" class="form-control" value="{%formPassword%}" placeholder="password"/>
+            <label for="form-password">Password</label>
+        </div>
+    <input type="submit" class="w-100 btn btn-lg btn-primary" value="{%title%}">
     </fieldset>
 </form>
+</div>
 
 <%view _footer.csp %>

@@ -1,5 +1,32 @@
 
+html,
+body {
+    height: 100%;
+}
 
 body {
     background-color:lightblue;
+}
+
+
+.form-user {
+    align-items: center;
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+
+.form-user .checkbox {
+    font-weight: 400;
+}
+
+.form-user .form-floating:focus-within {
+    z-index: 2;
+}
+
+.form-user input {
+    margin-bottom: 4px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
