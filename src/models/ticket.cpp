@@ -8,6 +8,7 @@
 #include "./project.hpp"
 
 #include "../util/core.hpp"
+#include "../util/form_error.hpp"
 #include "../constants.hpp"
 
 #include <drogon/utils/Utilities.h>
@@ -62,8 +63,13 @@ drogon::Task<Ticket> Ticket::createTicket(drogon::orm::CoroMapper<Ticket>& orm,
     const std::string description = postParams.at("form-description");
     const std::string severity = postParams.at("form-severity");
 
+    // TODO: Add more requirements:
+    if(title.empty() )
+        throw Util::FormError("Title cannot be empty");
+    if(description.empty() )
+        throw Util::FormError("Description cannot be empty");
     if(std::find(begin(severityLst), end(severityLst), severity) == end(severityLst) )
-        throw std::runtime_error("Form Error: Invalid severity");
+        throw Util::FormError("Invalid severity");
 
     Model::Ticket newTicket;
     newTicket.setTitle(title);
