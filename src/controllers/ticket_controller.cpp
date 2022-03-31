@@ -6,6 +6,7 @@
 #include "../models/project.hpp"
 #include "../models/staff.hpp"
 #include "../models/ticket.hpp"
+#include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 
 #include <drogon/HttpController.h>
@@ -46,6 +47,9 @@ private:
 
     CoroMapper<Model::Ticket> mTicketOrm{mDB};
     CoroMapper<Model::Project> mProjectOrm{mDB};
+
+    Task<HttpResponsePtr> newImpl(HttpRequestPtr req, int32_t projectId,
+            std::unordered_map<std::string, std::string> formData, std::string errorMessage);
 };
 
 Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
@@ -75,6 +79,12 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
 }
 
 Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, int32_t projectId) {
+    return newImpl(req, projectId, {}, "");
+}
+
+Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t projectId,
+        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+{
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
@@ -84,7 +94,10 @@ Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, int32_t proj
 
         HttpViewData data = getViewData("New Ticket", *session);
         data.insert("project", project.toJson() );
-        data.insert("severity_lst", Model::Ticket::getSeverityLst() );
+        data.insert("severity-lst", Model::Ticket::getSeverityLst() );
+        data.insert("form-error", errorMessage);
+        for(const auto& [k, v] : formData)
+            data.insert(k, v);
 
         co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
     }  catch(const std::exception& ex) {
@@ -115,7 +128,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
         data.insert("is_reporter", ticket.isReporter(userId) );
         data.insert("is_staff", co_await project.isStaff(mDB, userId) );
         data.insert("status_lst", Model::Ticket::getStatusLst() );
-        data.insert("severity_lst", Model::Ticket::getSeverityLst() );
+        data.insert("severity-lst", Model::Ticket::getSeverityLst() );
 
         co_return HttpResponse::newHttpViewResponse("ticket_edit.csp", data);
     } catch(const std::exception& ex) {
@@ -131,14 +144,21 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     const int32_t userId = session->get<int32_t>("user_id");
     const auto& postParams = req->parameters();
 
+    std::optional<Task<HttpResponsePtr> > retryForm;
+
     try {
         co_await Model::Ticket::createTicket(mTicketOrm, postParams, userId, projectId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
-    }  catch(const std::exception& ex) {
+    }  catch(const Util::FormError& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
-        const std::string location = "/project/"s + std::to_string(projectId) + "/report";
-        co_return HttpResponse::newRedirectionResponse(location);
+        // If there's a form error, then retry the ticket creation form
+        retryForm = newImpl(req, projectId, postParams, ex.what() );
+        // co_await newImpl(req, projectId, postParams, ex.what() ) cannot be done in catch handler
+    } catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
+    co_return co_await retryForm.value();
 }
 
 Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {

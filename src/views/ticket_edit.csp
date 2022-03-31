@@ -12,7 +12,7 @@
 <%c++ const auto isReporter = @@.get<bool>("is_reporter"); %>
 <%c++ const auto isStaff = @@.get<bool>("is_staff"); %>
 <%c++ const auto statusLst = @@.get<Json::Value>("status_lst"); %>
-<%c++ const auto severityLst = @@.get<Json::Value>("severity_lst"); %>
+<%c++ const auto severityLst = @@.get<Json::Value>("severity-lst"); %>
 
 <h1>Edit {%ticketTitle%} </h1>
 

@@ -5,24 +5,23 @@
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
-<%c++ const auto severityLst = @@.get<Json::Value>("severity_lst"); %>
-<%c++ const auto formTitle = @@.get<std::string>("form_title"); %>
-<%c++ const auto formDescription = @@.get<std::string>("form_description"); %>
-<%c++ const auto formSeverity = @@.get<std::string>("form_severity"); %>
+<%c++ const auto severityLst = @@.get<Json::Value>("severity-lst"); %>
+<%c++ const auto formError = @@.get<std::string>("form-error"); %>
+<%c++ const auto formTitle = @@.get<std::string>("form-title"); %>
+<%c++ const auto formDescription = @@.get<std::string>("form-description"); %>
+<%c++ const auto formSeverity = @@.get<std::string>("form-severity"); %>
 
 <%c++ const auto projectName = project["title"].asString(); %>
 <h1>{%projectName%}'s Report Form: </h1>
-
-<h2>{%formTitle%}</h2>
-<h2>{%formDescription%}</h2>
-<h2>{%formSeverity%}</h2>
-
 
 <%c++ const auto projectId = project["id"].asInt(); %>
 <form action="/project/{%projectId%}/report" method="POST">
     <fieldset>
         <legend>{%title%}</legend>
         <br/>
+        <%c++ if(!formError.empty() ) { %>
+            <p>Error: {%formError%}</p>
+        <%c++ } %>
 
         <label>
             Title:
