@@ -39,7 +39,14 @@
 
 </div>
 </div>
-<h2>Defect Tracker</h2>
+
+<div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+    <img src="data/images/icons8-bug-64.png" alt="Bug Icon" width="64" height="64" class="bi me-2"/>
+    <!--Bug Icon is from: https://icons8.com/icons/set/bug -->
+    <h2 class="fs-4">Defect Tracker</h2>
+</a>
+
+
 </header>
 
 
