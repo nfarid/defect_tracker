@@ -14,39 +14,33 @@
 
 
 <header class="p-3 bg-dark text-white">
-<div class="container">
-<div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+<div class="d-flex flex-wrap align-items-center justify-content-center">
+
+    <div class="d-flex align-items-center me-4">
+        <img src="/data/images/icons8-bug-64.png" alt="Bug Icon" width="64" height="64" class="bi me-2"/>
+        <!--Bug Icon is from: https://icons8.com/icons/set/bug -->
+        <h2 class="fs-4">Defect Tracker</h2>
+    </div>
 
     <div class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
 
-        <a href="/" class="nav-link">Home</a>
+        <a href="/" class="btn btn-primary me-2">Home</a>
 
         <form  action="/search" method="GET" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
-            <input type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search" id="search-project" name="search-project"/>
+            <input type="search" class="form-control form-control-dark" placeholder="Project Search..." aria-label="Search" id="search-project" name="search-project"/>
         </form>
 
         <%c++ if(!userId.empty() ) {%>
             <form action="/logout" method="POST">
-                <input type="submit" value="Logout" class="btn btn-warning">
+                <input type="submit" value="Logout" class="btn btn-primary me-2">
             </form>
         <%c++ } else { %>
-            <a href="/login" class="nav-link">Login</a>
-            <a href="/signup" class="nav-link">Signup</a>
+            <a href="/login" class="btn btn-primary me-2">Login</a>
+            <a href="/signup" class="btn btn-primary me-2">Signup</a>
         <%c++ } %>
     </div>
 
-
-
 </div>
-</div>
-
-<div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
-    <img src="data/images/icons8-bug-64.png" alt="Bug Icon" width="64" height="64" class="bi me-2"/>
-    <!--Bug Icon is from: https://icons8.com/icons/set/bug -->
-    <h2 class="fs-4">Defect Tracker</h2>
-</a>
-
-
 </header>
 
 
