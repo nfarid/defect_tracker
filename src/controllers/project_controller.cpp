@@ -53,9 +53,9 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
         const std::vector ticketLst = co_await project.getTickets(mDB);
 
         HttpViewData data = getViewData(project.getValueOfTitle(), *getSession(req) );
-        data.insert("manager_name", manager.getValueOfUsername() );
-        data.insert("ticket_lst", toJson(ticketLst) );
-        data.insert("project_id", std::to_string(id) );
+        data.insert("project", project.toJson() );
+        data.insert("manager-name", manager.getValueOfUsername() );
+        data.insert("ticket-lst", toJson(ticketLst) );
         co_return HttpResponse::newHttpViewResponse("project.csp", data);
     } catch(std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;

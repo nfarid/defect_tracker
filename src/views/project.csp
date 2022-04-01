@@ -4,26 +4,45 @@
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto managerName = @@.get<std::string>("manager_name"); %>
-<%c++ const auto projectId = @@.get<std::string>("project_id"); %>
-<%c++ const auto ticketLst = @@.get<Json::Value>("ticket_lst"); %>
+<%c++ const auto project = @@.get<Json::Value>("project"); %>
+<%c++ const auto managerName = @@.get<std::string>("manager-name"); %>
+<%c++ const auto ticketLst = @@.get<Json::Value>("ticket-lst"); %>
+<%c++ const auto userId = @@.get<std::string>("session_user_id"); %>
 
 
 <h1>Project:{%title%}</h1>
+<%c++ const auto projectDescription = project["description"].asString(); %>
+<p>Description: {%projectDescription%}</p>
 <p>Manager: {%managerName%}</p>
+
+
 
 <%c++ if(!ticketLst.empty() ) { %>
     <h3>List of current ticket: </h3>
-    <ul>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Severity</th>
+        </tr>
         <%c++ for(const auto& ticket : ticketLst) { %>
-            <%c++ const auto ticketId = ticket["id"].asInt(); %>
-            <%c++ const auto ticketTitle = ticket["title"].asString(); %>
-            <li><a href="/ticket/{%ticketId%}">{%ticketTitle%}</a></li>
+            <tr>
+                <%c++ const auto ticketId = ticket["id"].asInt(); %>
+                <%c++ const auto ticketTitle = ticket["title"].asString(); %>
+                <%c++ const auto ticketStatus = ticket["status"].asString(); %>
+                <%c++ const auto ticketSeverity = ticket["severity"].asString(); %>
+                <td><a href="/ticket/{%ticketId%}">{%ticketTitle%}</a></td>
+                <td>{%ticketStatus%}</td>
+                <td>{%ticketSeverity%}</td>
+            </tr>
         <%c++ } %>
-    </ul>
+    </table>
 <%c++ } %>
 
-<a href="/project/{%projectId%}/report">Report an issue</a>
+<%c++ if(!userId.empty() ) { %>
+    <%c++ const auto projectId = project["id"].asInt(); %>
+    <a href="/project/{%projectId%}/report">Report an issue</a>
+<%c++ } %>
 
 <%view _footer.csp %>
 
