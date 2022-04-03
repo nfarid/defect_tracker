@@ -15,7 +15,7 @@
 <h1>{%projectName%}'s Report Form: </h1>
 
 <%c++ const auto projectId = project["id"].asInt(); %>
-<form action="/project/{%projectId%}/report" method="POST">
+<form action="/project/{%projectId%}/report" method="POST" enctype="multipart/form-data">
     <fieldset>
         <legend>{%title%}</legend>
         <br/>
@@ -26,6 +26,12 @@
         <label>
             Title:
             <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
+        </label>
+        <br/>
+
+        <label>
+            Image:
+            <input type="file" id="form-image" name="form-image"/>
         </label>
         <br/>
 

@@ -58,6 +58,10 @@ std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRe
         postParams[k] = v;
 
     for(const auto& [key, file] : parser.getFilesMap() ) {
+        if(file.getFileType() != FileType::FT_IMAGE) {  // Only image files are accepted
+            postParams[key] = "";
+            continue;
+        }
         const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
         const std::string& filename = timestamp + file.getMd5() + file.getFileName();
         postParams[key] = filename;

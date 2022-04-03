@@ -15,6 +15,9 @@
 <%c++ const auto ticketDescription = ticket["descrption"].asString(); %>
 <p>{%ticketDescription%}</p>
 
+<%c++ const auto ticketImageFilename = ticket["image_filename"].asString(); %>
+<img src="/uploads/{%ticketImageFilename%}" alt=""/>
+
 <%c++ const auto projectId = ticket["project_id"].asInt(); %>
 <a href="/project/{%projectId%}">{%projectName%}</a>
 

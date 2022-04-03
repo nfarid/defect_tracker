@@ -63,9 +63,10 @@ UTIL_INTERNAL Json::Value lstToJson(const std::vector<std::string>& lst) {
 drogon::Task<Ticket> Ticket::createTicket(drogon::orm::CoroMapper<Ticket>& orm,
         const std::unordered_map<std::string, std::string>& postParams, int32_t reporterId, int32_t projectId)
 {
-    const std::string title = postParams.at("form-title");
-    const std::string description = postParams.at("form-description");
-    const std::string severity = postParams.at("form-severity");
+    const std::string& title = postParams.at("form-title");
+    const std::string& description = postParams.at("form-description");
+    const std::string& severity = postParams.at("form-severity");
+    const std::string& imageFilename = postParams.at("form-image");
 
     // TODO: Add more requirements:
     if(title.empty() )
@@ -83,9 +84,10 @@ drogon::Task<Ticket> Ticket::createTicket(drogon::orm::CoroMapper<Ticket>& orm,
     newTicket.setCreatedDate(trantor::Date::now() );
     newTicket.setReporterId(reporterId);
     newTicket.setProjectId(projectId);
+    if(!imageFilename.empty() )
+        newTicket.setImageFilename(imageFilename);
 
-    co_await orm.insert(newTicket);
-    co_return newTicket;
+    co_return co_await orm.insert(newTicket);
 }
 
 Json::Value Ticket::getSeverityLst() {
