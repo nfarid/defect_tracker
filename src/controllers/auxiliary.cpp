@@ -1,5 +1,8 @@
 
 #include "auxiliary.hpp"
+#include "../util/form_error.hpp"
+
+#include <drogon/MultiPart.h>
 
 #include <cassert>
 #include <string>
@@ -43,6 +46,25 @@ bool isLoggedIn(const Session& session) {
 void logIn(drogon::Session& session, int32_t userId, const std::string& username) {
     session.insert("user_id", userId);
     session.insert("username", username);
+}
+
+std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRequestPtr& req) {
+    std::unordered_map<std::string, std::string> postParams;
+    MultiPartParser parser;
+    if(parser.parse(req) != 0)
+        throw Util::FormError("Cannot parse http request");
+
+    for(const auto& [k, v] : parser.getParameters() )
+        postParams[k] = v;
+
+    for(const auto& [key, file] : parser.getFilesMap() ) {
+        const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
+        const std::string& filename = timestamp + file.getMd5() + file.getFileName();
+        postParams[key] = filename;
+        file.saveAs(filename);
+    }
+
+    return postParams;
 }
 
 

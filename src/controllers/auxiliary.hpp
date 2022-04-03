@@ -18,6 +18,13 @@ namespace Aux
 
 
 /**
+ * @brief parseMultiPart - obtain the POST parameters from a multipart/form-data request
+ * @throws Util::FormError if the httprequest cannot be parsed
+ */
+std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRequestPtr& req);
+
+
+/**
  * \brief Obtains the session from a http request
  * \throws std::runtime_error if session is not enabled
  */
