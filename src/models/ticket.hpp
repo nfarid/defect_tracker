@@ -17,7 +17,6 @@
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Logger.h>
 #include <json/json.h>
-
 #include <string>
 #include <memory>
 #include <vector>
@@ -121,6 +120,7 @@ public:  // Generated custom method
         static const std::string _severity;
         static const std::string _created_date;
         static const std::string _resolved_date;
+        static const std::string _image_filename;
         static const std::string _reporter_id;
         static const std::string _assigned_id;
         static const std::string _project_id;
@@ -236,6 +236,16 @@ public:  // Generated custom method
     void setResolvedDate(const trantor::Date& pResolvedDate) noexcept;
     void setResolvedDateToNull() noexcept;
 
+    /**  For column image_filename  */
+    ///Get the value of the column image_filename, returns the default value if the column is null
+    const std::string& getValueOfImageFilename() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string>& getImageFilename() const noexcept;
+    ///Set the value of the column image_filename
+    void setImageFilename(const std::string& pImageFilename) noexcept;
+    void setImageFilename(std::string&& pImageFilename) noexcept;
+    void setImageFilenameToNull() noexcept;
+
     /**  For column reporter_id  */
     ///Get the value of the column reporter_id, returns the default value if the column is null
     const int32_t& getValueOfReporterId() const noexcept;
@@ -263,7 +273,7 @@ public:  // Generated custom method
 
 
     static size_t getColumnNumber() noexcept {
-        return 10;
+        return 11;
     }
 
     static const std::string& getColumnName(size_t index) noexcept(false);
@@ -299,6 +309,7 @@ private:
     std::shared_ptr<std::string> severity_;
     std::shared_ptr<trantor::Date> createdDate_;
     std::shared_ptr<trantor::Date> resolvedDate_;
+    std::shared_ptr<std::string> imageFilename_;
     std::shared_ptr<int32_t> reporterId_;
     std::shared_ptr<int32_t> assignedId_;
     std::shared_ptr<int32_t> projectId_;
@@ -312,7 +323,7 @@ private:
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[10]={ false};
+    bool dirtyFlag_[11]={ false};
 
 public:
     static const std::string& sqlForFindingByPrimaryKey()
@@ -359,14 +370,18 @@ public:
             ++parametersCount;
         }
         if(dirtyFlag_[7]) {
-            sql += "reporter_id,";
+            sql += "image_filename,";
             ++parametersCount;
         }
         if(dirtyFlag_[8]) {
-            sql += "assigned_id,";
+            sql += "reporter_id,";
             ++parametersCount;
         }
         if(dirtyFlag_[9]) {
+            sql += "assigned_id,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[10]) {
             sql += "project_id,";
             ++parametersCount;
         }
@@ -418,6 +433,10 @@ public:
             n = sprintf(placeholderStr, "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
+        if(dirtyFlag_[10]) {
+            n = sprintf(placeholderStr, "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        }
         if(parametersCount > 0)
             sql.resize(sql.length() - 1);
         if(needSelection)
@@ -433,7 +452,6 @@ public:
 }  // namespace bug_tracker
 
 
-} // namespace drogon_model
-
+}  // namespace drogon_model
 
 namespace Model = drogon_model::bug_tracker;

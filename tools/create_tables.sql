@@ -26,6 +26,7 @@ CREATE TABLE Ticket(
     severity SeverityType NOT NULL,
     created_date TIMESTAMP NOT NULL,
     resolved_date TIMESTAMP,
+    image_filename TEXT,
     reporter_id INTEGER NOT NULL REFERENCES Account(id) ON DELETE CASCADE,
     assigned_id INTEGER REFERENCES Account(id) ON DELETE SET NULL,
     project_id INTEGER NOT NULL REFERENCES Project(id) ON DELETE CASCADE
