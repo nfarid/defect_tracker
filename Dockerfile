@@ -17,6 +17,7 @@ WORKDIR /src
 COPY cmake/ cmake/
 COPY src/ src/
 COPY tools tools/
+COPY data data/
 COPY CMakeLists.txt ./
 
 RUN mkdir build/
