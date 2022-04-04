@@ -75,7 +75,6 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(const Util::FormError& ex) {
         // There was a form error, so let the user retry again
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return newImpl(req, postParams, ex.what() );
     }  catch(const std::exception& ex) {
         // An unexpected error has occured

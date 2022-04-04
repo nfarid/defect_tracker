@@ -81,6 +81,7 @@ add_executable("${TEST_NAME}"
 
     "tests/home.test.cpp"
     "tests/project.test.cpp"
+    "tests/ticket.test.cpp"
     "tests/user.test.cpp"
     "tests/user_session.test.cpp"
 
