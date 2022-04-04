@@ -80,6 +80,7 @@ add_executable("${TEST_NAME}"
     "${APP_SRC}"
 
     "tests/home.test.cpp"
+    "tests/project.test.cpp"
     "tests/user.test.cpp"
     "tests/user_session.test.cpp"
 
