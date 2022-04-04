@@ -9,6 +9,7 @@
 <%c++ const auto projectName = @@.get<std::string>("project_name"); %>
 <%c++ const auto reporterUsername = @@.get<std::string>("reporter_username"); %>
 <%c++ const auto canEdit = @@.get<bool>("can_edit"); %>
+<%c++ const auto canDelete = @@.get<bool>("can_delete"); %>
 
 <h1>{%title%}</h1>
 
@@ -42,7 +43,16 @@
 
 <%c++ if(canEdit) { %>
     <a href="/ticket/{%ticketId%}/edit">Edit Ticket</a>
+    <br/>
+
+    <%c++ if(canDelete) { %>
+        <form action="/ticket/{%ticketId%}/delete" method="POST">
+            <input type="submit" value="Delete">
+        </form>
+    <%c++ } %>
 <%c++ } %>
+
+
 
 
 <%view _footer.csp %>

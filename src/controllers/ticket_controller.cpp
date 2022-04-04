@@ -33,6 +33,7 @@ public:
         ADD_METHOD_TO(TicketController::edit, "/ticket/{1}/edit", Get);
         ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post);
         ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post);
+        ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -41,6 +42,7 @@ public:
     Task<HttpResponsePtr> edit(HttpRequestPtr req, int32_t id);
     Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t projectId);
     Task<HttpResponsePtr> update(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
     DbClientPtr mDB = app().getDbClient("db");
@@ -69,6 +71,8 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
         if(isLoggedIn(*session) ) {
             const int32_t userId = session->get<int32_t>("user_id");
             data.insert("can_edit", co_await ticket.canEdit(mDB, userId) );
+            if(ticket.isReporter(userId) )
+                data.insert("can_delete", true);
         }
 
         co_return HttpResponse::newHttpViewResponse("ticket.csp", data);
@@ -200,6 +204,19 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
+}
+
+Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
+    SessionPtr session = getSession(req);
+    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
+    if(!userIdOpt) // Not authenticated
+        co_return HttpResponse::newNotFoundResponse();
+    const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+    if(*userIdOpt != ticket.getValueOfReporterId() ) // Not authorised (i.e. only the defect reporter can delete their own ticket)
+        co_return HttpResponse::newNotFoundResponse();
+
+    co_await mTicketOrm.deleteByPrimaryKey(id);
+    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 
