@@ -22,11 +22,12 @@ COPY CMakeLists.txt ./
 
 RUN mkdir build/
 WORKDIR build/
-RUN cmake ..
-RUN cmake --build . -- -j12
+RUN cmake -DCMAKE_BUILD_TYPE=Release ..
+RUN cmake --build . -- -j4
 
 RUN mkdir /app
 RUN mv app/defect_tracker /app
+RUN mv ../data /app/data
 
 WORKDIR /app
 ENTRYPOINT ./defect_tracker $PORT
