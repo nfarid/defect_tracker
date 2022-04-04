@@ -25,9 +25,10 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(ProjectController::show, "/project/{1}", Get);
-    ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get);
-    ADD_METHOD_TO(ProjectController::create, "/project-new", Post);
+        ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get);
+        ADD_METHOD_TO(ProjectController::create, "/project-new", Post);
         ADD_METHOD_TO(ProjectController::search, "/search", Get);
+        ADD_METHOD_TO(ProjectController::destroy, "/project/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -35,6 +36,7 @@ public:
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
     Task<HttpResponsePtr> search(HttpRequestPtr req);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
     DbClientPtr mDB = app().getDbClient("db");
@@ -122,6 +124,19 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
+}
+
+Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
+    SessionPtr session = getSession(req);
+    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
+    if(!userIdOpt) // Not authenticated
+        co_return HttpResponse::newNotFoundResponse();
+    const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
+    if(*userIdOpt != project.getValueOfManagerId() ) // Not authorised (i.e. only project manager can delete their own project)
+        co_return HttpResponse::newNotFoundResponse();
+
+    co_await mProjectOrm.deleteByPrimaryKey(id);
+    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 

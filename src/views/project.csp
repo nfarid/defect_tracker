@@ -42,7 +42,16 @@
 <%c++ if(!userId.empty() ) { %>
     <%c++ const auto projectId = project["id"].asInt(); %>
     <a href="/project/{%projectId%}/report">Report an issue</a>
+
+    <%c++ const auto managerId = std::to_string(project["manager_id"].asInt() ); %>
+    <%c++ if(userId == managerId) { %>
+        <form action="/project/{%projectId%}/delete" method="POST">
+            <input type="submit" value="Delete">
+        </form>
+    <%c++ } %>
 <%c++ } %>
+
+
 
 <%view _footer.csp %>
 
