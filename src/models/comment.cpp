@@ -11,7 +11,7 @@ using namespace drogon::orm;
 
 
 drogon::Task<Comment> Comment::createComment(CoroMapper<Comment>& orm, const
-        std::unordered_map<std::string, std::string>& postParams, int32_t userId, int32_t ticketId)
+        Util::StringMap& postParams, int32_t userId, int32_t ticketId)
 {
     Model::Comment newComment{};
     newComment.setPost(postParams.at("form-post") );

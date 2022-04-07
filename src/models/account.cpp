@@ -13,7 +13,7 @@ using namespace drogon::orm;
 
 
 Task<Account> Account::verifyLogin(CoroMapper<Account>& orm,
-        const std::unordered_map<std::string, std::string>& postParams)
+        const Util::StringMap& postParams)
 {
     const std::string& username = postParams.at("form-username");
     const std::string password = postParams.at("form-password");
@@ -28,7 +28,7 @@ Task<Account> Account::verifyLogin(CoroMapper<Account>& orm,
 }
 
 Task<Account> Account::createAccount(CoroMapper<Account>& orm,
-        const std::unordered_map<std::string, std::string>& postParams)
+        const Util::StringMap& postParams)
 {
     const std::string& username = postParams.at("form-username");
     const std::string& password = postParams.at("form-password");

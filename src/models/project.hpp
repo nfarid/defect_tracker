@@ -1,5 +1,6 @@
 
 #include "../util/coroutine.hpp"
+#include "../util/typedefs.hpp"
 #include "generated/project.hpp"
 
 #include <drogon/utils/coroutine.h>
@@ -18,7 +19,7 @@ public:
 
     friend drogon::orm::CoroMapper<Project>;
     static drogon::Task<Project> createProject(drogon::orm::CoroMapper<Project>& orm,
-            const std::unordered_map<std::string, std::string>& postParams, int32_t userId);
+            const Util::StringMap& postParams, int32_t userId);
     static drogon::Task<std::vector<Project> > searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery);
     drogon::Task<Account> getManager(drogon::orm::DbClientPtr db) const;
     drogon::Task<std::vector<Ticket> > getTickets(drogon::orm::DbClientPtr db) const;

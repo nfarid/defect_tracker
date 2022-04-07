@@ -48,8 +48,8 @@ void logIn(drogon::Session& session, int32_t userId, const std::string& username
     session.insert("username", username);
 }
 
-std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRequestPtr& req) {
-    std::unordered_map<std::string, std::string> postParams;
+Util::StringMap parseMultiPart(const drogon::HttpRequestPtr& req) {
+    Util::StringMap postParams;
     MultiPartParser parser;
     if(parser.parse(req) != 0)
         throw Util::FormError("Cannot parse http request");

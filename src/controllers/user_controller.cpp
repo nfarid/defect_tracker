@@ -37,7 +37,7 @@ public:
 private:
     CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
 
-    HttpResponsePtr newImpl(HttpRequestPtr req, std::unordered_map<std::string, std::string> formData,
+    HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);
 };
 
@@ -68,7 +68,7 @@ Task<HttpResponsePtr> UserController::newForm(HttpRequestPtr req) {
 }
 
 HttpResponsePtr UserController::newImpl(HttpRequestPtr req,
-        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+        Util::StringMap formData, std::string errorMessage)
 {
     const SessionPtr session = getSession(req);
     // If the user has already logged in, there's no point of the signup page

@@ -1,5 +1,6 @@
 
 #include "../util/coroutine.hpp"
+#include "../util/typedefs.hpp"
 #include "generated/ticket.hpp"
 
 
@@ -18,7 +19,7 @@ public:
     friend drogon::orm::CoroMapper<Ticket>;
 
     static drogon::Task<Ticket> createTicket(drogon::orm::CoroMapper<Ticket>& orm,
-            const std::unordered_map<std::string, std::string>& postParams, int32_t reporterId, int32_t projectId);
+            const Util::StringMap& postParams, int32_t reporterId, int32_t projectId);
 
     static Json::Value getSeverityLst();
     static Json::Value getStatusLst();

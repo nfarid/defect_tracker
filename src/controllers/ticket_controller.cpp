@@ -50,7 +50,7 @@ private:
     CoroMapper<Model::Project> mProjectOrm{mDB};
 
     Task<HttpResponsePtr> newImpl(HttpRequestPtr req, int32_t projectId,
-            std::unordered_map<std::string, std::string> formData, std::string errorMessage);
+            Util::StringMap formData, std::string errorMessage);
 };
 
 Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
@@ -86,7 +86,7 @@ Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, int32_t proj
 }
 
 Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t projectId,
-        std::unordered_map<std::string, std::string> formData, std::string errorMessage)
+        Util::StringMap formData, std::string errorMessage)
 {
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in

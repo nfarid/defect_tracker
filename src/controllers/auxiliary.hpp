@@ -2,6 +2,8 @@
 #ifndef HPP_CONTROLLERS_AUXILIARY
 #define HPP_CONTROLLERS_AUXILIARY
 
+#include "../util/typedefs.hpp"
+
 #include <drogon/Session.h>
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
@@ -21,7 +23,7 @@ namespace Aux
  * @brief parseMultiPart - obtain the POST parameters from a multipart/form-data request
  * @throws Util::FormError if the httprequest cannot be parsed
  */
-std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRequestPtr& req);
+Util::StringMap parseMultiPart(const drogon::HttpRequestPtr& req);
 
 
 /**

@@ -1,5 +1,6 @@
 
 #include "../util/coroutine.hpp"
+#include "../util/typedefs.hpp"
 #include "generated/account.hpp"
 
 
@@ -17,7 +18,7 @@ public:
      * @throws Util::FormError if the data is incorrect
      */
     static drogon::Task<Account> verifyLogin(drogon::orm::CoroMapper<Account>& orm,
-            const std::unordered_map<std::string, std::string>& postParams);
+            const Util::StringMap& postParams);
 
     /**
      * @brief validates the data from the POST parameter
@@ -27,7 +28,7 @@ public:
      * @throws Util::FormError if the data is invalid
      */
     static drogon::Task<Account> createAccount(drogon::orm::CoroMapper<Account>& orm,
-            const std::unordered_map<std::string, std::string>& postParams);
+            const Util::StringMap& postParams);
 
     using drogon_model::bug_tracker::Account::Account;
 

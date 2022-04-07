@@ -42,7 +42,7 @@ UTIL_INTERNAL bool isalnum(std::string_view str) {
 }
 
 drogon::Task<Project> Project::createProject(drogon::orm::CoroMapper<Project>& orm,
-        const std::unordered_map<std::string, std::string>& postParams, int32_t userId)
+        const Util::StringMap& postParams, int32_t userId)
 {
     const std::string& title = postParams.at("form-title");
     const std::string& description = postParams.at("form-description");

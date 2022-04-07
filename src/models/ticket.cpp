@@ -30,7 +30,7 @@ UTIL_INTERNAL Json::Value lstToJson(const std::vector<std::string>& lst) {
 }
 
 drogon::Task<Ticket> Ticket::createTicket(drogon::orm::CoroMapper<Ticket>& orm,
-        const std::unordered_map<std::string, std::string>& postParams, int32_t reporterId, int32_t projectId)
+        const Util::StringMap& postParams, int32_t reporterId, int32_t projectId)
 {
     const std::string title = postParams.at("form-title");
     const std::string description = postParams.at("form-description");
