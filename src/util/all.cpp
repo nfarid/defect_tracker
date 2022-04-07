@@ -1,6 +1,7 @@
 
 // All the basic utility headers
 #include "core.hpp"
+#include "constants.hpp"
 #include "cstring_view.hpp"
 #include "hash.hpp"
 #include "form_error.hpp"

@@ -3,7 +3,7 @@
 #define DROGON_TEST_MAIN
 
 #include "app.hpp"
-#include "constants.hpp"
+#include "util/constants.hpp"
 #include "util/misc.hpp"
 
 #include <drogon/drogon_test.h>

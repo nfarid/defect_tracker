@@ -1,12 +1,12 @@
 
- #include "../constants.hpp"
- #include "../models/account.hpp"
+#include "../util/constants.hpp"
+#include "../models/account.hpp"
 
- #include <drogon/HttpAppFramework.h>
- #include <drogon/HttpClient.h>
- #include <drogon/drogon_test.h>
+#include <drogon/HttpAppFramework.h>
+#include <drogon/HttpClient.h>
+#include <drogon/drogon_test.h>
 
- #include <string>
+#include <string>
 
 using namespace drogon;
 using namespace drogon::orm;
