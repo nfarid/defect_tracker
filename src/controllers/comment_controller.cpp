@@ -1,6 +1,7 @@
 
 #include "auxiliary.hpp"
 #include "../models/comment.hpp"
+#include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -25,34 +26,49 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t ticketId);
-    void create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t ticketId);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req, int32_t ticketId);
+    Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t ticketId);
 
 private:
-    Mapper<Model::Comment> mCommentOrm = Mapper<Model::Comment>(app().getDbClient("db") );
+    CoroMapper<Model::Comment> mCommentOrm{app().getDbClient("db")};
+
+    HttpResponsePtr newImpl(HttpRequestPtr req, int32_t ticketId);
 };
 
-void CommentController::newForm(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t ticketId) {
-    auto data = getViewData("Post Comment", *getSession(req) );
-    data.insert("ticket_id", std::to_string(ticketId) );
-    return cb(HttpResponse::newHttpViewResponse("comment_form.csp", data) );
+Task<HttpResponsePtr> CommentController::newForm(HttpRequestPtr req, int32_t ticketId) {
+    co_return newImpl(req, ticketId);
 }
 
-void CommentController::create(const HttpRequestPtr& req, ResponseCallback&& cb, int32_t  ticketId) {
+HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, int32_t ticketId) {
+    const SessionPtr session = getSession(req);
+    if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
+        return HttpResponse::newRedirectionResponse("/");
+
+    auto data = getViewData("Post Comment", *getSession(req) );
+    data.insert("ticket_id", std::to_string(ticketId) );
+    return HttpResponse::newHttpViewResponse("comment_form.csp", data);
+}
+
+Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t ticketId)
+{
+    const SessionPtr session = getSession(req);
+    if(!isLoggedIn(*session) ) // Cannot create a comment if not logged in
+        co_return HttpResponse::newRedirectionResponse("/");
+    const int32_t userId = session->get<int32_t>("user_id");
+
     const auto& postParams = req->parameters();
     try {
-        Model::Comment newComment{};
-        newComment.setPost(postParams.at("form-post") );
-        newComment.setCreatedDate(trantor::Date::now() );
-        newComment.setTicketId(ticketId);
-        mCommentOrm.insert(newComment);
-        return cb(HttpResponse::newRedirectionResponse("/ticket/"s + std::to_string(ticketId) ) );
-    } catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        return cb(HttpResponse::newNotFoundResponse() );
+        co_await Model::Comment::createComment(mCommentOrm, postParams, userId, ticketId);
+    }  catch(const Util::FormError& ex) {
+        // TODO: Let the user retry
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return newImpl(req, ticketId);
+    } catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
     }
 }
 
 
-}// namespace Ctrlr
+} // namespace Ctrlr
 
