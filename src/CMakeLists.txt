@@ -36,6 +36,13 @@ set(APP_SRC
     "models/staff.cpp"
     "models/ticket.cpp"
 
+    "models/generated/account.cpp"
+    "models/generated/comment.cpp"
+    "models/generated/notification.cpp"
+    "models/generated/project.cpp"
+    "models/generated/staff.cpp"
+    "models/generated/ticket.cpp"
+
     "util/all.cpp"
 
     "${VIEW_SRC}"
