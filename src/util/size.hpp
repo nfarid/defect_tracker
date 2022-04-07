@@ -41,7 +41,7 @@ using std::size;
 #if __cplusplus < 202002L
 
 /**
- * \brief Gets the number of elements of a container
+ * @brief Gets the number of elements of a container
  */
 template<typename Container>
 UTIL_PURE constexpr auto ssize(const Container& con) noexcept {
@@ -50,7 +50,7 @@ UTIL_PURE constexpr auto ssize(const Container& con) noexcept {
 }
 
 /**
- * \brief Gets the number of elements of an array
+ * @brief Gets the number of elements of an array
  */
 template<typename T, ptrdiff_t N>
 UTIL_CONSTPURE auto ssize(const T(& )[N]) noexcept {
@@ -63,7 +63,7 @@ using std::ssize;
 #endif    // if __cplusplus < 202002L
 
 /**
- * \brief Gets the total size of all the elements in bytes
+ * @brief Gets the total size of all the elements in bytes
  */
 template<typename Container>
 UTIL_PURE constexpr auto size_bytes(const Container& con) noexcept {
@@ -71,7 +71,7 @@ UTIL_PURE constexpr auto size_bytes(const Container& con) noexcept {
 }
 
 /**
- * \brief Gets the total size of an array in bytes
+ * @brief Gets the total size of an array in bytes
  */
 template<typename T, size_t N>
 UTIL_PURE constexpr auto size_bytes(const T(& arr)[N]) noexcept {
@@ -79,7 +79,7 @@ UTIL_PURE constexpr auto size_bytes(const T(& arr)[N]) noexcept {
 }
 
 /**
- * \brief Gets the total signed size of all the elements in bytes
+ * @brief Gets the total signed size of all the elements in bytes
  */
 template<typename Container>
 UTIL_PURE constexpr auto ssize_bytes(const Container& con) noexcept {
@@ -87,7 +87,7 @@ UTIL_PURE constexpr auto ssize_bytes(const Container& con) noexcept {
 }
 
 /**
- * \brief Gets the total signed size of an array in bytes
+ * @brief Gets the total signed size of an array in bytes
  */
 template<typename T, ptrdiff_t N>
 UTIL_PURE constexpr auto ssize_bytes(const T(& arr)[N]) noexcept {

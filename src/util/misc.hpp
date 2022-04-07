@@ -27,17 +27,17 @@ bool contains(const C& container, const K& key) {
 }
 
 /**
- * \brief Obtain the value of the specified environmental variable
- * \throws runtime_error if the specified environmental variable does not exist
+ * @brief Obtain the value of the specified environmental variable
+ * @throws runtime_error if the specified environmental variable does not exist
  */
 CStringView getEnvironment(CStringView env_var);
 
 /**
- * \brief Converts a string to a number
- * \throws invalid_argument if str does not correspond to a valid number
- * \throws out_of_range if str correspond to a number outside of T's range
+ * @brief Converts a string to a number
+ * @throws invalid_argument if str does not correspond to a valid number
+ * @throws out_of_range if str correspond to a number outside of T's range
  *
- * \example const auto x = str_to_num<int>("210");
+ * @example const auto x = str_to_num<int>("210");
  */
 template<typename T>
 T strToNum(std::string_view str) {
@@ -56,11 +56,11 @@ T strToNum(std::string_view str) {
 }
 
 /**
- * \brief A function-like class for a more convenient conversion from string to number
- * \throws invalid_argument if the string does not correspond to a valid number
- * \throws out_of_range if the string correspond to a number outside of T's range
+ * @brief A function-like class for a more convenient conversion from string to number
+ * @throws invalid_argument if the string does not correspond to a valid number
+ * @throws out_of_range if the string correspond to a number outside of T's range
  *
- * \example int x = StrToNum{"210"};
+ * @example int x = StrToNum{"210"};
  */
 using StrToNum = struct [[nodiscard]] StrToNum {
     template<typename T>
@@ -72,9 +72,9 @@ using StrToNum = struct [[nodiscard]] StrToNum {
 };
 
 /**
- * \brief A function object class to apply functions to a variant
+ * @brief A function object class to apply functions to a variant
  *
- * \example:
+ * @example:
  *  constexpr Visitor example_visitor{
  *      [](double d) -> int {return d + 3.4;},
  *      [](int i) -> int {return i - 2;},

@@ -95,7 +95,7 @@ inline namespace Udl
 
 
 /**
- * \brief Creates a byte literal
+ * @brief Creates a byte literal
  */
 UTIL_CONSTPURE std::byte operator"" _B( unsigned long long int x ) {
     assert( x <= UCHAR_MAX );
@@ -103,7 +103,7 @@ UTIL_CONSTPURE std::byte operator"" _B( unsigned long long int x ) {
 }
 
 /**
- * \brief Creates a byte literal
+ * @brief Creates a byte literal
  */
 UTIL_CONSTPURE std::byte operator"" _b( unsigned long long int x ) {
     assert( x <= UCHAR_MAX );

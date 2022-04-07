@@ -25,32 +25,32 @@ std::unordered_map<std::string, std::string> parseMultiPart(const drogon::HttpRe
 
 
 /**
- * \brief Obtains the session from a http request
- * \throws std::runtime_error if session is not enabled
+ * @brief Obtains the session from a http request
+ * @throws std::runtime_error if session is not enabled
  */
 drogon::SessionPtr getSession(const drogon::HttpRequestPtr& req);
 
 /**
- * \brief Obtain the data set to be sent to the view
- * \param title - the title of that the page should have
- * \param session - the session data
+ * @brief Obtain the data set to be sent to the view
+ * @param title - the title of that the page should have
+ * @param session - the session data
  */
 drogon::HttpViewData getViewData(const std::string& title, const drogon::Session& session);
 
 
 /**
- * \brief Check if the user is logged in
+ * @brief Check if the user is logged in
  */
 bool isLoggedIn(const drogon::Session& session);
 
 /**
- * \brief Creates the session when the user logs in
+ * @brief Creates the session when the user logs in
  */
 void logIn(drogon::Session& session, int32_t userId, const std::string& username);
 
 
 /**
- * \brief Turns an array of elements into its json equivalent
+ * @brief Turns an array of elements into its json equivalent
  */
 template<typename T>
 Json::Value toJson(const std::vector<T>& lst) {

@@ -7,7 +7,7 @@
 #include <string_view>
 
 /**
- * \brief getApp - Create a drogon app
+ * @brief getApp - Create a drogon app
  */
 drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl);
 
