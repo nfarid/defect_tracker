@@ -13,7 +13,7 @@ using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(ProjectController_Search){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
 
     auto searchReq = HttpRequest::newHttpRequest();
     searchReq->setPath("/search?search-project=project");

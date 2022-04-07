@@ -11,7 +11,7 @@ using std::string_literals::operator""s;
 
 // Test when the user goes to the login page
 DROGON_TEST(UserSessionController_New){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
 
     auto req = HttpRequest::newHttpRequest();
     req->setPath("/login");
@@ -27,7 +27,7 @@ DROGON_TEST(UserSessionController_New){
 
 // Test when a correct user session is created
 DROGON_TEST(UserSessionController_Create){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
     auto createReq = HttpRequest::newHttpFormPostRequest();
@@ -63,7 +63,7 @@ DROGON_TEST(UserSessionController_Create){
 
 // Test when a user tries to create a session with the wrong details
 DROGON_TEST(UserSessionController_CreateIncorrect){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
     auto createReq = HttpRequest::newHttpFormPostRequest();
@@ -84,7 +84,7 @@ DROGON_TEST(UserSessionController_CreateIncorrect){
 
 // Test when a users login then logout
 DROGON_TEST(UserSessionController_Destroy){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
     auto createReq = HttpRequest::newHttpFormPostRequest();

@@ -11,7 +11,7 @@ using namespace drogon;
 using std::string_literals::operator""s;
 
 DROGON_TEST(HomeController_IndexGet){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
 
     auto req = HttpRequest::newHttpRequest();
 
@@ -31,7 +31,7 @@ DROGON_TEST(HomeController_IndexGet){
 
 
 DROGON_TEST(HomeController_IndexPost){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
 
     auto req = HttpRequest::newHttpFormPostRequest();
 

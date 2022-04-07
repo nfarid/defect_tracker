@@ -13,7 +13,7 @@ using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(UserController_New){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
     auto newReq = HttpRequest::newHttpRequest();
@@ -29,7 +29,7 @@ DROGON_TEST(UserController_New){
 }
 
 DROGON_TEST(UserController_CreateAndDestroy){
-    auto client = HttpClient::newHttpClient(localhost, testPort);
+    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
     auto createReq = HttpRequest::newHttpFormPostRequest();

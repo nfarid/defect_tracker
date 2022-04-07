@@ -19,7 +19,7 @@ DROGON_TEST(TicketController_Show){
     DrogonDbException ex;
     orm.findOne(hasTitle,
                 [TEST_CTX](const Model::Ticket& ticket){
-        auto client = HttpClient::newHttpClient(localhost, testPort);
+        auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
         const int32_t ticketId = ticket.getValueOfId();
 
         auto showReq = HttpRequest::newHttpRequest();

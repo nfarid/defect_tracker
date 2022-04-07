@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     if(dbUrl.empty() )
         dbUrl = Util::getEnvironment("DATABASE_URL");
 
-    auto& app = getApp(testPort, dbUrl);
+    auto& app = getApp(Util::testPort, dbUrl);
     std::promise<void> promise;
     std::future<void> future = promise.get_future();
 
