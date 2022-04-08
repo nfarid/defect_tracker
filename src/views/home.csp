@@ -1,9 +1,10 @@
 
 <%view _header.csp %>
 
-<%c++ const auto sessionUsername = @@.get<std::string>("session_username"); %>
+<%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
+<%c++ const auto sessionUsername = @@.get<std::string>("session-username"); %>
 
-<%c++ if(!sessionUsername.empty() ) { %>
+<%c++ if(isLoggedIn) { %>
     <h1>Welcome {%sessionUsername%}</h1>
 <%c++ } else { %>
     <h1>Guest welcome.</h1>

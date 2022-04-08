@@ -7,7 +7,8 @@
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
 <%c++ const auto managerName = @@.get<std::string>("manager-name"); %>
 <%c++ const auto ticketLst = @@.get<Json::Value>("ticket-lst"); %>
-<%c++ const auto userId = @@.get<std::string>("session_user_id"); %>
+<%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
+<%c++ const auto userId = @@.get<int32_t>("session-user-id"); %>
 
 
 <h1>Project:{%title%}</h1>
@@ -39,11 +40,11 @@
     </table>
 <%c++ } %>
 
-<%c++ if(!userId.empty() ) { %>
+<%c++ if(isLoggedIn) { %>
     <%c++ const auto projectId = project["id"].asInt(); %>
     <a href="/project/{%projectId%}/report">Report an issue</a>
 
-    <%c++ const auto managerId = std::to_string(project["manager_id"].asInt() ); %>
+    <%c++ const auto managerId = project["manager_id"].asInt(); %>
     <%c++ if(userId == managerId) { %>
         <form action="/project/{%projectId%}/delete" method="POST">
             <input type="submit" value="Delete">

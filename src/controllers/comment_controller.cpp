@@ -54,7 +54,7 @@ Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t tick
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a comment if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
-    const int32_t userId = session->get<int32_t>("user_id");
+    const int32_t userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
     try {

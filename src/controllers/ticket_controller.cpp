@@ -68,7 +68,7 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
         data.insert("project_name", project.getValueOfTitle() );
         data.insert("reporter_username", reporter.getValueOfUsername() );
         if(isLoggedIn(*session) ) {
-            const int32_t userId = session->get<int32_t>("user_id");
+            const int32_t userId = getUserId(*session);
             data.insert("can_edit", co_await ticket.canEdit(mDB, userId) );
             if(ticket.isReporter(userId) )
                 data.insert("can_delete", true);
@@ -113,7 +113,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
         co_return HttpResponse::newRedirectionResponse("/");
-    const int32_t userId = session->get<int32_t>("user_id");
+    const int32_t userId = getUserId(*session);
 
     try {
         const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
@@ -144,7 +144,7 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     const SessionPtr session = getSession(req);
     if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
-    const int32_t userId = session->get<int32_t>("user_id");
+    const int32_t userId = getUserId(*session);
     const auto& postParams = parseMultiPart(req);
 
     std::optional<Task<HttpResponsePtr> > retryForm;
@@ -168,7 +168,7 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
     if(!isLoggedIn(*session) ) // cannot edit if not authenticated
         co_return HttpResponse::newRedirectionResponse("/");
-    const int32_t userId = session->get<int32_t>("user_id");
+    const int32_t userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
     try {
@@ -207,11 +207,12 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
-    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
-    if(!userIdOpt) // Not authenticated
+
+    if(!isLoggedIn(*session) ) // Not authenticated
         co_return HttpResponse::newNotFoundResponse();
     const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
-    if(*userIdOpt != ticket.getValueOfReporterId() ) // Not authorised (i.e. only the defect reporter can delete their own ticket)
+    const int32_t userId = getUserId(*session);
+    if(!ticket.isReporter(userId) ) // Not authorised (i.e. only the defect reporter can delete their own ticket)
         co_return HttpResponse::newNotFoundResponse();
 
     co_await mTicketOrm.deleteByPrimaryKey(id);

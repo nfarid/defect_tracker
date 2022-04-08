@@ -1,6 +1,6 @@
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto userId = @@.get<std::string>("session_user_id"); %>
+<%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +32,7 @@
     </div>
 
     <div class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-    <%c++ if(!userId.empty() ) {%>
+    <%c++ if(isLoggedIn) {%>
         <form action="/logout" method="POST">
             <input type="submit" value="Logout" class="btn btn-primary me-2">
         </form>

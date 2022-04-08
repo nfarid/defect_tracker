@@ -28,12 +28,9 @@ HttpViewData getViewData(const std::string& title, const drogon::Session& sessio
     HttpViewData data;
     data.insert("title", title);
 
-    const std::optional<int32_t> userId = session.getOptional<int32_t>("user_id");
-    if(userId)
-        data.insert("session_user_id", std::to_string(*userId) );
-    const std::optional<std::string> username = session.getOptional<std::string>("username");
-    if(username)
-        data.insert("session_username", *username);
+    data.insert("is-logged-in", isLoggedIn(session) );
+    data.insert("session-username", HttpViewData::htmlTranslate(getUsername(session) ) );
+    data.insert("session-user-id", getUserId(session) );
 
     return data;
 }
@@ -41,6 +38,16 @@ HttpViewData getViewData(const std::string& title, const drogon::Session& sessio
 bool isLoggedIn(const Session& session) {
     const std::optional<int32_t> userId = session.getOptional<int32_t>("user_id");
     return userId.has_value();
+}
+
+int32_t getUserId(const Session& session) {
+    const std::optional<int32_t> userId = session.getOptional<int32_t>("user_id");
+    return userId.value_or(0);
+}
+
+std::string getUsername(const drogon::Session& session) {
+    const std::optional<std::string> username = session.getOptional<std::string>("username");
+    return username.value_or("");
 }
 
 void logIn(drogon::Session& session, int32_t userId, const std::string& username) {

@@ -94,7 +94,7 @@ Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     // If the user hasn't logged in, they cannot create a project
     if(!isLoggedIn(*session) )
         co_return HttpResponse::newRedirectionResponse("/");
-    const int32_t userId = session->get<int32_t>("user_id");
+    const int32_t userId = getUserId(*session);
 
     // Data from the HTTP POST request
     const auto& postParams = req->parameters();
@@ -128,11 +128,10 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
 
 Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
-    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
-    if(!userIdOpt) // Not authenticated
+    if(!isLoggedIn(*session) ) // Not authenticated
         co_return HttpResponse::newNotFoundResponse();
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
-    if(*userIdOpt != project.getValueOfManagerId() ) // Not authorised (i.e. only project manager can delete their own project)
+    if(getUserId(*session) != project.getValueOfManagerId() ) // Not authorised (i.e. only project manager can delete their own project)
         co_return HttpResponse::newNotFoundResponse();
 
     co_await mProjectOrm.deleteByPrimaryKey(id);

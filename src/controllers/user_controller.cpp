@@ -110,8 +110,7 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
 Task<HttpResponsePtr> UserController::destroy(HttpRequestPtr req, int32_t id)
 {
     SessionPtr session = getSession(req);
-    const std::optional userIdOpt = session->getOptional<int32_t>("user_id");
-    if(!userIdOpt || (*userIdOpt != id) ) // Only the user can delete their own account
+    if(!isLoggedIn(*session) || (getUserId(*session) != id) ) // Only the user can delete their own account
         co_return HttpResponse::newNotFoundResponse();// Should be http 403
 
     session->clear();
