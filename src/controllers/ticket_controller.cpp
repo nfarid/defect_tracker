@@ -100,7 +100,7 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
         data.insert("severity-lst", Model::Ticket::getSeverityLst() );
         data.insert("form-error", errorMessage);
         for(const auto& [k, v] : formData)
-            data.insert(k, v);
+            data.insert(k, HttpViewData::htmlTranslate(v) );
 
         co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
     }  catch(const std::exception& ex) {

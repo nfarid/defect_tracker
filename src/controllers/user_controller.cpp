@@ -82,7 +82,7 @@ HttpResponsePtr UserController::newImpl(HttpRequestPtr req,
     // If there was an error, then redisplay the form data
     data.insert("form-error", errorMessage);
     for(const auto& [k, v] : formData)
-        data.insert(k, v);
+        data.insert(k, HttpViewData::htmlTranslate(v) );
 
     return HttpResponse::newHttpViewResponse("user_form.csp", data);
 }
