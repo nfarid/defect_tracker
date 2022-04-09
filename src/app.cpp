@@ -54,7 +54,7 @@ drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl) {
         std::exit(EXIT_FAILURE);
     }
 
-    std::clog<<"Listening at port "<<port<<std::endl;
+    std::cout<<"Listening at port "<<port<<std::endl;
     app.addListener("0.0.0.0", port);
     app.enableSession();
 
