@@ -5,10 +5,11 @@
 <%c++ const auto sessionUsername = @@.get<std::string>("session-username"); %>
 
 <%c++ if(isLoggedIn) { %>
-    <h1>Welcome {%sessionUsername%}</h1>
+    <h1>Welcome {%sessionUsername%}!</h1>
 <%c++ } else { %>
     <h1>Guest welcome.</h1>
 <%c++ } %>
+<hr/>
 
 
 <%view _footer.csp %>

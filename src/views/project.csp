@@ -20,7 +20,7 @@
 
 <%c++ if(!ticketLst.empty() ) { %>
     <h3>List of current ticket: </h3>
-    <table>
+    <table class="table table-hover table-striped">
         <tr>
             <th>Name</th>
             <th>Status</th>
