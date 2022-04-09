@@ -3,7 +3,7 @@
 
 <%view _header.csp %>
 
-<%c++ const auto projectLst = @@.get<Json::Value>("project_lst"); %>
+<%c++ const auto projectLst = @@.get<Json::Value>("project-lst"); %>
 
 <h1>Project Search</h1>
 

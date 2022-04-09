@@ -118,7 +118,7 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     try{
         const std::vector projectLst = co_await Model::Project::searchProject(mDB, param);
         HttpViewData data = getViewData("project_search", *getSession(req) );
-        data.insert("project_lst", toViewJson(projectLst) );
+        data.insert("project-lst", toViewJson(projectLst) );
         co_return HttpResponse::newHttpViewResponse("search.csp", data);
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
