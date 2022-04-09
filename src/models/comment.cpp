@@ -20,6 +20,7 @@ drogon::Task<Comment> Comment::createComment(CoroMapper<Comment>& orm, const
     Model::Comment newComment{};
     newComment.setPost(postParams.at("form-post") );
     newComment.setCreatedDate(trantor::Date::now() );
+    newComment.setPosterId(userId);
     newComment.setTicketId(ticketId);
     co_return co_await orm.insert(newComment);
 }

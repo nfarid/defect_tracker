@@ -2,11 +2,15 @@
 <%view _header.csp %>
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto ticketId = @@.get<std::string>("ticket_id"); %>
+<%c++ const auto ticketId = @@.get<std::string>("ticket-id"); %>
+<%c++ const auto formError = @@.get<std::string>("form-error"); %>
 
 <h1>{%title%}</h1>
 
-<form action="/ticket/{1}/comment" method="POST">
+<form action="/ticket/{%ticketId%}/comment" method="POST">
+        <%c++ if(!formError.empty() ) { %>
+            <p>Error:{%formError%}</p>
+        <%c++ } %>
         <textarea id="form-post" name="form-post" rows="4" cols="50"></textarea>
         <input type="submit" value="submit">
     </fieldset>
