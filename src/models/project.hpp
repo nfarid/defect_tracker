@@ -60,6 +60,10 @@ public:
      */
     drogon::Task<bool> isStaff(drogon::orm::DbClientPtr db, int32_t userId) const;
 
+    /**
+     * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
+     */
+    Json::Value toViewJson() const;
 
 private:
     using drogon_model::bug_tracker::Project::Project;

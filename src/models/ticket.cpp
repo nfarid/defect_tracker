@@ -5,6 +5,9 @@
 #include "comment.hpp"
 #include "project.hpp"
 #include "../util/core.hpp"
+#include "../util/constants.hpp"
+
+#include <drogon/HttpViewData.h>
 
 #include <vector>
 #include <string>
@@ -124,6 +127,28 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(DbClientPtr db, int32
 
     // Else the user cannot assign the ticket
     co_return{};
+}
+
+Json::Value Ticket::toViewJson() const {
+    Json::Value json{};
+    json["id"] = getValueOfId();
+    json["title"] = HttpViewData::htmlTranslate(getValueOfTitle() );
+    json["description"] = HttpViewData::htmlTranslate(getValueOfDescription() );
+    json["status"] = HttpViewData::htmlTranslate(getValueOfStatus() );
+    json["severity"] = HttpViewData::htmlTranslate(getValueOfSeverity() );
+    const auto createdDate = getValueOfCreatedDate().toCustomedFormattedString(Util::dateFormat);
+    json["created-date"] = HttpViewData::htmlTranslate(createdDate);
+    if(getResolvedDate() ) {
+        const auto resolvedDate = getValueOfResolvedDate().toCustomedFormattedString(Util::dateFormat);
+        json["resolved-date"] = HttpViewData::htmlTranslate(resolvedDate);
+    }
+    if(getImageFilename() )
+        json["image-filename"] = HttpViewData::htmlTranslate(getValueOfImageFilename() );
+    json["reporter-id"] = getValueOfReporterId();
+    if(getAssignedId() )
+        json["assigned-id"] = getValueOfAssignedId();
+    json["project-id"] = getValueOfProjectId();
+    return json;
 }
 
 

@@ -3,9 +3,10 @@
 
 #include "account.hpp"
 #include "ticket.hpp"
-
 #include "../util/core.hpp"
 #include "../util/form_error.hpp"
+
+#include <drogon/HttpViewData.h>
 
 #include <cctype>
 #include <string>
@@ -130,6 +131,15 @@ Task<bool> Project::isStaff(DbClientPtr db, int32_t userId) const {
             co_return true;
     }
     co_return false;
+}
+
+Json::Value Project::toViewJson() const {
+    Json::Value json{};
+    json["id"] = getValueOfId();
+    json["title"] = HttpViewData::htmlTranslate(getValueOfTitle() );
+    json["description"] = HttpViewData::htmlTranslate(getValueOfDescription() );
+    json["manager-id"] = getValueOfManagerId();
+    return json;
 }
 
 

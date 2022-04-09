@@ -36,6 +36,10 @@ public:
     static drogon::Task<Account> createAccount(drogon::orm::CoroMapper<Account>& orm,
             const Util::StringMap& postParams);
 
+    /**
+     * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
+     */
+    Json::Value toViewJson() const;
 
 private:
     using drogon_model::bug_tracker::Account::Account;

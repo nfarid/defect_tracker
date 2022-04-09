@@ -29,6 +29,10 @@ public:
             const Util::StringMap& postParams,
             int32_t userId, int32_t ticketId);
 
+    /**
+     * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
+     */
+    Json::Value toViewJson() const;
 
 private:
     using drogon_model::bug_tracker::Comment::Comment;

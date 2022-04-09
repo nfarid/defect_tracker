@@ -3,6 +3,8 @@
 
 #include "../util/hash.hpp"
 
+#include <drogon/HttpViewData.h>
+
 
 namespace Model
 {
@@ -42,6 +44,13 @@ Task<Account> Account::createAccount(CoroMapper<Account>& orm,
     newAccount.setPasswordHash(Util::hash(password) );
 
     co_return co_await orm.insert(newAccount);
+}
+
+Json::Value Account::toViewJson() const {
+    Json::Value json{};
+    json["id"] = getValueOfId();
+    json["username"] = HttpViewData::htmlTranslate(getValueOfUsername() );
+    return json;
 }
 
 
