@@ -65,10 +65,10 @@ void logIn(drogon::Session& session, int32_t userId, const std::string& username
  * @brief Turns an array of elements into its json equivalent
  */
 template<typename T>
-Json::Value toJson(const std::vector<T>& lst) {
+Json::Value toViewJson(const std::vector<T>& lst) {
     Json::Value json{};
     for(const auto& elem : lst)
-        json.append(elem.toJson() );
+        json.append(elem.toViewJson() );
     return json;
 }
 

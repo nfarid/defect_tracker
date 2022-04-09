@@ -55,9 +55,9 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
         const std::vector ticketLst = co_await project.getTickets(mDB);
 
         HttpViewData data = getViewData(project.getValueOfTitle(), *getSession(req) );
-        data.insert("project", project.toJson() );
+        data.insert("project", project.toViewJson() );
         data.insert("manager-name", manager.getValueOfUsername() );
-        data.insert("ticket-lst", toJson(ticketLst) );
+        data.insert("ticket-lst", toViewJson(ticketLst) );
         co_return HttpResponse::newHttpViewResponse("project.csp", data);
     } catch(std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
@@ -118,7 +118,7 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     try{
         const std::vector projectLst = co_await Model::Project::searchProject(mDB, param);
         HttpViewData data = getViewData("project_search", *getSession(req) );
-        data.insert("project_lst", toJson(projectLst) );
+        data.insert("project_lst", toViewJson(projectLst) );
         co_return HttpResponse::newHttpViewResponse("search.csp", data);
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;

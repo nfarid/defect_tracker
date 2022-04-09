@@ -63,8 +63,8 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
         const std::vector commentLst = co_await ticket.getComments(mDB);
 
         HttpViewData data = getViewData(ticket.getValueOfTitle(), *session);
-        data.insert("ticket", ticket.toJson() );
-        data.insert("comment_lst", toJson(commentLst) );
+        data.insert("ticket", ticket.toViewJson() );
+        data.insert("comment_lst", toViewJson(commentLst) );
         data.insert("project_name", project.getValueOfTitle() );
         data.insert("reporter_username", reporter.getValueOfUsername() );
         if(isLoggedIn(*session) ) {
@@ -96,7 +96,7 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
 
         HttpViewData data = getViewData("New Ticket", *session);
-        data.insert("project", project.toJson() );
+        data.insert("project", project.toViewJson() );
         data.insert("severity-lst", Model::Ticket::getSeverityLst() );
         data.insert("form-error", errorMessage);
         for(const auto& [k, v] : formData)
@@ -127,7 +127,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
         data.insert("ticket_description", ticket.getValueOfDescription() );
         if(ticket.getAssignedId() )
             data.insert("ticket_assigned_id", ticket.getValueOfAssignedId() );
-        data.insert("assignable_lst",  toJson(co_await ticket.getAssignables(mDB, userId) ) );
+        data.insert("assignable_lst",  toViewJson(co_await ticket.getAssignables(mDB, userId) ) );
         data.insert("is_reporter", ticket.isReporter(userId) );
         data.insert("is_staff", co_await project.isStaff(mDB, userId) );
         data.insert("status_lst", Model::Ticket::getStatusLst() );
@@ -184,7 +184,7 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
         const std::vector assingableLst = co_await ticket.getAssignables(mDB, userId);
         if(!assingableLst.empty() && postParams.contains("form-assign") ) {
             const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
-            for(const auto& staff : toJson(assingableLst) ) {
+            for(const auto& staff : toViewJson(assingableLst) ) {
                 if(staff["id"] == assignedId)
                     ticket.setAssignedId(assignedId);
             }
