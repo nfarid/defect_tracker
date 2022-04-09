@@ -64,14 +64,13 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
 
         HttpViewData data = getViewData(ticket.getValueOfTitle(), *session);
         data.insert("ticket", ticket.toViewJson() );
-        data.insert("comment_lst", toViewJson(commentLst) );
-        data.insert("project_name", project.getValueOfTitle() );
-        data.insert("reporter_username", reporter.getValueOfUsername() );
+        data.insert("project", project.toViewJson() );
+        data.insert("reporter", reporter.toViewJson() );
+        data.insert("comment-lst", toViewJson(commentLst) );
         if(isLoggedIn(*session) ) {
             const int32_t userId = getUserId(*session);
-            data.insert("can_edit", co_await ticket.canEdit(mDB, userId) );
-            if(ticket.isReporter(userId) )
-                data.insert("can_delete", true);
+            data.insert("can-edit", co_await ticket.canEdit(mDB, userId) );
+            data.insert("can-delete", ticket.isReporter(userId) );
         }
 
         co_return HttpResponse::newHttpViewResponse("ticket.csp", data);

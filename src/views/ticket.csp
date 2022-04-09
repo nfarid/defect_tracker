@@ -3,29 +3,36 @@
 
 <%view _header.csp %>
 
-<%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
-<%c++ const auto commentLst = @@.get<Json::Value>("comment_lst"); %>
-<%c++ const auto projectName = @@.get<std::string>("project_name"); %>
-<%c++ const auto reporterUsername = @@.get<std::string>("reporter_username"); %>
-<%c++ const auto canEdit = @@.get<bool>("can_edit"); %>
-<%c++ const auto canDelete = @@.get<bool>("can_delete"); %>
+<%c++ const auto project = @@.get<Json::Value>("project"); %>
+<%c++ const auto reporter = @@.get<Json::Value>("reporter"); %>
+<%c++ const auto commentLst = @@.get<Json::Value>("comment-lst"); %>
 
-<h1>{%title%}</h1>
-
+<%c++ const auto ticketId = ticket["id"].asInt(); %>
+<%c++ const auto ticketTitle = ticket["title"].asString();%>
 <%c++ const auto ticketDescription = ticket["descrption"].asString(); %>
-<p>{%ticketDescription%}</p>
+<%c++ const auto ticketImageFilename = ticket["image-filename"].asString(); %>
+<%c++ const auto ticketCreatedDate = ticket["created-date"].asString(); %>
 
-<%c++ const auto ticketImageFilename = ticket["image_filename"].asString(); %>
-<img src="/uploads/{%ticketImageFilename%}" alt=""/>
+<%c++ const auto projectId = project["id"].asInt(); %>
+<%c++ const auto projectTitle = project["title"].asString(); %>
 
-<%c++ const auto projectId = ticket["project_id"].asInt(); %>
-<a href="/project/{%projectId%}">{%projectName%}</a>
+<%c++ const auto reporterUsername = reporter["username"].asString(); %>
 
-<%c++ const auto ticketCreatedDate = ticket["created_date"].asString(); %>
-<p>Creation date: {%ticketCreatedDate%}</p>
+<%c++ const auto canEdit = @@.get<bool>("can-edit"); %>
+<%c++ const auto canDelete = @@.get<bool>("can-delete"); %>
 
-<p>Reported by: {%reporterUsername%}</p>
+
+<article>
+    <h1>{%ticketTitle%}</h1>
+    <p>{%ticketDescription%}</p>
+    <p><a href="/project/{%projectId%}">Project: {%projectTitle%}</a></p>
+    <p>Creation date: {%ticketCreatedDate%}</p>
+    <p>Reported by: {%reporterUsername%}</p>
+    <%c++ if(!ticketImageFilename.empty() ) { %>
+        <img src="/uploads/{%ticketImageFilename%}" alt="{%ticketTitle%}'s attachment"/>
+    <%c++ } %>
+</article>
 
 <%c++ if(!commentLst.empty() ) { %>
     <p>Comments: </p>
@@ -37,7 +44,6 @@
     </ul>
 <%c++ } %>
 
-<%c++ const auto ticketId = ticket["id"].asInt(); %>
 <a href="/ticket/{%ticketId%}/comment">New comment</a>
 <br/>
 
