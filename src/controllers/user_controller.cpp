@@ -47,14 +47,9 @@ Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, int32_t id)
     const SessionPtr session = getSession(req);
     try {
         const Model::Account user = co_await mAccountOrm.findByPrimaryKey(id);
-        const std::string& username = user.getValueOfUsername();
         // Add the user's info to the ViewData to be sent to the view
-        HttpViewData data = getViewData(username, *session);
-        data.insert("user_username", username);
-        data.insert("user_id", std::to_string(id) );
-        const std::optional userIdOpt = session->getOptional<int32_t>("user");
-        if(userIdOpt && (*userIdOpt == id) ) // Only the user can delete their own account
-            data.insert("can_delete", true);
+        HttpViewData data = getViewData(user.getValueOfUsername(), *session);
+        data.insert("user", user.toViewJson() );
 
         co_return HttpResponse::newHttpViewResponse("user.csp", data);
     }  catch(const std::exception& ex) {
