@@ -104,7 +104,7 @@ drogon::Task<bool> Ticket::canEdit(DbClientPtr db, int32_t userId) const {
         co_return true;
 
     const Model::Project project = co_await getProject(db);
-    co_return co_await project.isStaff(db, userId);
+    co_return co_await project.isStaff(userId);
 }
 
 bool Ticket::isReporter(int32_t userId) const {
@@ -116,10 +116,10 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(DbClientPtr db, int32
 
     // Manager can assign to any staff
     if(project.getValueOfManagerId() == userId)
-        co_return co_await project.getStaff(db);
+        co_return co_await project.getStaff();
 
     // If the ticket is not yet assigned, then a staff can self-assign
-    if(!getAssignedId() && co_await project.isStaff(db, userId) ) {
+    if(!getAssignedId() && co_await project.isStaff(userId) ) {
         CoroMapper<Account> accountOrm{db};
         const Account staff = co_await accountOrm.findByPrimaryKey(userId);
         co_return{staff};

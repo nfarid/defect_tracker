@@ -29,36 +29,35 @@ public:
      * @return a newly created Project if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Project> createProject(drogon::orm::CoroMapper<Project>& orm,
-            const std::unordered_map<std::string, std::string>& postParams, int32_t userId);
+    static drogon::Task<Project> createProject(const Util::StringMap& postParams, int32_t userId);
 
     /**
      * @brief search for projects that match the query
      * @param db - the database client
-     * @param urlQuery - the query from a GET request
+     * @param getQuery - the query from a GET request
      * @return a list of projects
      */
-    static drogon::Task<std::vector<Project> > searchProject(drogon::orm::DbClientPtr db, std::string_view urlQuery);
+    static drogon::Task<std::vector<Project> > searchProject(std::string_view getQuery);
 
     /**
      * @brief obtain the manager of this project
      */
-    drogon::Task<Account> getManager(drogon::orm::DbClientPtr db) const;
+    drogon::Task<Account> getManager() const;
 
     /**
      * @brief obtain all the tickets that this project has
      */
-    drogon::Task<std::vector<Ticket> > getTickets(drogon::orm::DbClientPtr db) const;
+    drogon::Task<std::vector<Ticket> > getTickets() const;
 
     /**
      * @brief obtain a list of staff that are working on thus project
      */
-    drogon::Task<std::vector<Account> > getStaff(drogon::orm::DbClientPtr db) const;
+    drogon::Task<std::vector<Account> > getStaff() const;
 
     /**
      * @brief check if the user with the specified userId is a staff of this project
      */
-    drogon::Task<bool> isStaff(drogon::orm::DbClientPtr db, int32_t userId) const;
+    drogon::Task<bool> isStaff(int32_t userId) const;
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
@@ -74,4 +73,4 @@ private:
 
 } // namespace Model
 
-#endif // ifndef HPP_MODELS_PROJECT
+#endif  // ifndef HPP_MODELS_PROJECT

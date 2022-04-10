@@ -128,7 +128,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
             data.insert("ticket_assigned_id", ticket.getValueOfAssignedId() );
         data.insert("assignable_lst",  toViewJson(co_await ticket.getAssignables(mDB, userId) ) );
         data.insert("is_reporter", ticket.isReporter(userId) );
-        data.insert("is_staff", co_await project.isStaff(mDB, userId) );
+        data.insert("is_staff", co_await project.isStaff(userId) );
         data.insert("status_lst", Model::Ticket::getStatusLst() );
         data.insert("severity-lst", Model::Ticket::getSeverityLst() );
 
@@ -191,7 +191,7 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
         // Staff can edit severity and status
         const Model::Project project  = co_await ticket.getProject(mDB);
-        if(co_await project.isStaff(mDB, userId) ) {
+        if(co_await project.isStaff(userId) ) {
             ticket.setSeverity( postParams.at("form-severity") );
             ticket.setStatus( postParams.at("form-status") );
         }

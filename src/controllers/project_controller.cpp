@@ -39,9 +39,7 @@ public:
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
-    DbClientPtr mDB = app().getDbClient("db");
-
-    CoroMapper<Model::Project> mProjectOrm{mDB};
+    CoroMapper<Model::Project> mProjectOrm = app().getDbClient("db");
 
     HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);
@@ -51,8 +49,8 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
 {
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
-        const Model::Account manager = co_await project.getManager(mDB);
-        const std::vector ticketLst = co_await project.getTickets(mDB);
+        const Model::Account manager = co_await project.getManager();
+        const std::vector ticketLst = co_await project.getTickets();
 
         HttpViewData data = getViewData(project.getValueOfTitle(), *getSession(req) );
         data.insert("project", project.toViewJson() );
@@ -100,7 +98,7 @@ Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
-        const Model::Project project = co_await Model::Project::createProject(mProjectOrm, postParams, userId);
+        const Model::Project project = co_await Model::Project::createProject(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(Util::FormError& ex) {
         // There was a form error, so let the user retry again
@@ -116,7 +114,7 @@ Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
 Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     const std::string_view param = req->parameters().at("search-project");
     try{
-        const std::vector projectLst = co_await Model::Project::searchProject(mDB, param);
+        const std::vector projectLst = co_await Model::Project::searchProject(param);
         HttpViewData data = getViewData("project_search", *getSession(req) );
         data.insert("project-lst", toViewJson(projectLst) );
         co_return HttpResponse::newHttpViewResponse("search.csp", data);
