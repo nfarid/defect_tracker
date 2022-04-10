@@ -58,9 +58,12 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
 
     try {
         const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
-        const Model::Account reporter = co_await ticket.getReporter();
-        const Model::Project project = co_await ticket.getProject();
-        const std::vector commentLst = co_await ticket.getComments();
+        const auto reporterAwaiter = ticket.getReporter();
+        const auto projectAwaiter = ticket.getProject();
+        const auto commentLstAwaiter = ticket.getComments();
+        const Model::Account reporter = co_await reporterAwaiter;
+        const Model::Project project = co_await projectAwaiter;
+        const std::vector commentLst = co_await commentLstAwaiter;
 
         HttpViewData data = getViewData(ticket.getValueOfTitle(), *session);
         data.insert("ticket", ticket.toViewJson() );
