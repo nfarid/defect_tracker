@@ -35,7 +35,7 @@ public:
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
-    CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
+    CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
 
     HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);
@@ -87,7 +87,7 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
-        const Model::Account account = co_await Model::Account::createAccount(mAccountOrm, postParams);
+        const Model::Account account = co_await Model::Account::createAccount(postParams);
         // If the form data is valid and the user can be created, then login
         logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);

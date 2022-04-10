@@ -36,7 +36,7 @@ public:
     static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
 
 private:
-    CoroMapper<Model::Account> mAccountOrm{app().getDbClient("db")};
+    CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
 
     HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);
@@ -70,7 +70,7 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
-        const auto user = co_await Model::Account::verifyLogin(mAccountOrm, postParams);
+        const auto user = co_await Model::Account::verifyLogin(postParams);
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(const Util::FormError& ex) {
