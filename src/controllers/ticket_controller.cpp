@@ -173,38 +173,20 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const int32_t userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
+    std::optional<Task<HttpResponsePtr> > retryForm;
     try {
         Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
-        if(!co_await ticket.canEdit(userId) ) // cannot edit if not authorised
-            co_return HttpResponse::newRedirectionResponse("/");
-
-        // The ticket's reporter can edit the ticket
-        if(ticket.isReporter(userId) )
-            ticket.setDescription(postParams.at("form-description") );
-
-        // Can only assign to people in the assingableLst
-        const std::vector assingableLst = co_await ticket.getAssignables(userId);
-        if(!assingableLst.empty() && postParams.contains("form-assign") ) {
-            const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
-            for(const auto& staff : toViewJson(assingableLst) ) {
-                if(staff["id"] == assignedId)
-                    ticket.setAssignedId(assignedId);
-            }
-        }
-
-        // Staff can edit severity and status
-        const Model::Project project  = co_await ticket.getProject();
-        if(co_await project.isStaff(userId) ) {
-            ticket.setSeverity( postParams.at("form-severity") );
-            ticket.setStatus( postParams.at("form-status") );
-        }
-
-        co_await mTicketOrm.update(ticket);
+        co_await ticket.update(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/");
+    } catch(const Util::FormError& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        retryForm = edit(req, id);  // If there's a form error, then retry
     }  catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
+
+    co_return co_await retryForm.value();
 }
 
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {

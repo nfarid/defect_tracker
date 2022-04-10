@@ -22,7 +22,7 @@ class Project;
 class Ticket : public drogon_model::bug_tracker::Ticket {
 public:
     /**
-     * @brief validates the data from the POST parameter
+     * @brief creates a ticket from the data from the form
      * @param orm - the object–relational mapper for Ticket
      * @param postParams - the data obtain from the POST request
      * @param reporterId - the id of the current user
@@ -71,6 +71,13 @@ public:
      * @brief obtain a list of users that the current user can assign this ticket to
      */
     drogon::Task<std::vector<Account> >getAssignables(int32_t userId) const;
+
+    /**
+     * @brief update a ticket from the data from the form
+     * @param postParams - the data obtain from the POST request
+     * @param userId - the id of the current user
+     */
+    drogon::Task<> update(const Util::StringMap& postParams, int32_t userId);
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

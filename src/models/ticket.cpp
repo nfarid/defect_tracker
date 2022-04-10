@@ -4,8 +4,11 @@
 #include "account.hpp"
 #include "comment.hpp"
 #include "project.hpp"
+
 #include "../util/core.hpp"
 #include "../util/constants.hpp"
+#include "../util/form_error.hpp"
+#include "../util/misc.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpViewData.h>
@@ -124,6 +127,45 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
 
     // Else the user can assign to no one (i.e. they cannot assign)
     co_return{};
+}
+
+drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId) {
+    // TODO: html readonly input
+
+    if(!co_await canEdit(userId) ) // cannot edit if not authorised
+        throw Util::FormError("Unauthoried to edit ticket");
+
+    // The ticket's reporter can edit the ticket
+    if(isReporter(userId) )
+        setDescription(postParams.at("form-description") );
+
+    // Can only assign to people in the assingableLst
+    const std::vector assingableLst = co_await getAssignables(userId);
+    if(!assingableLst.empty() && postParams.contains("form-assign") ) {
+        const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
+        for(const auto& staff : assingableLst) {
+            if(staff.getValueOfId() == assignedId)
+                setAssignedId(assignedId);
+        }
+    }
+
+    // Staff can edit severity and status
+    const Model::Project project  = co_await getProject();
+    const bool isStaff = co_await project.isStaff(userId);
+    if(isStaff) {
+        const std::string severity = postParams.at("form-severity");
+        const std::string status = postParams.at("form-status");
+        if(!contains(severityLst, severity) )
+            throw Util::FormError("Severity is invalid");
+        if(!contains(statusLst, status) )
+            throw Util::FormError("Status is invalid");
+        setSeverity(severity);
+        setStatus(status);
+    }
+
+    CoroMapper<Ticket> orm = app().getDbClient("db");
+    co_await orm.update(*this);
+    co_return;
 }
 
 Json::Value Ticket::toViewJson() const {
