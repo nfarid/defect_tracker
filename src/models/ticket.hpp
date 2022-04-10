@@ -30,8 +30,7 @@ public:
      * @return a newly created Ticket if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Ticket> createTicket(drogon::orm::CoroMapper<Ticket>& orm,
-            const Util::StringMap& postParams, int32_t reporterId, int32_t projectId);
+    static drogon::Task<Ticket> createTicket(const Util::StringMap& postParams, int32_t reporterId, int32_t projectId);
 
     /**
      * @brief return a list of all the severities as JSON
@@ -46,22 +45,22 @@ public:
     /**
      * @brief obtain the reporter of this project
      */
-    drogon::Task<Account> getReporter(drogon::orm::DbClientPtr db) const;
+    drogon::Task<Account> getReporter() const;
 
     /**
      * @brief obtain the project of that this ticket belongs to
      */
-    drogon::Task<Project> getProject(drogon::orm::DbClientPtr db) const;
+    drogon::Task<Project> getProject() const;
 
     /**
      * @brief obtain a list of comments that this ticket has
      */
-    drogon::Task<std::vector<Comment> > getComments(drogon::orm::DbClientPtr db) const;
+    drogon::Task<std::vector<Comment> > getComments() const;
 
     /**
      * @brief check if the current user can edit this ticket
      */
-    drogon::Task<bool> canEdit(drogon::orm::DbClientPtr db, int32_t userId) const;
+    drogon::Task<bool> canEdit(int32_t userId) const;
 
     /**
      * @brief check if the current user is the reporter of this ticket
@@ -71,7 +70,7 @@ public:
     /**
      * @brief obtain a list of users that the current user can assign this ticket to
      */
-    drogon::Task<std::vector<Account> >getAssignables(drogon::orm::DbClientPtr db, int32_t userId) const;
+    drogon::Task<std::vector<Account> >getAssignables(int32_t userId) const;
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
@@ -86,4 +85,4 @@ private:
 
 } // namespace Model
 
-#endif // ifndef HPP_MODELS_TICKET
+#endif  // ifndef HPP_MODELS_TICKET
