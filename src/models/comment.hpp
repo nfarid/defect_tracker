@@ -25,9 +25,7 @@ public:
      * @return a newly created Comment if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Comment> createComment(drogon::orm::CoroMapper<Comment>& orm,
-            const Util::StringMap& postParams,
-            int32_t userId, int32_t ticketId);
+    static drogon::Task<Comment> createComment(const Util::StringMap& postParams, int32_t userId, int32_t ticketId);
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

@@ -60,7 +60,7 @@ Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t tick
 
     const auto& postParams = req->parameters();
     try {
-        co_await Model::Comment::createComment(mCommentOrm, postParams, userId, ticketId);
+        co_await Model::Comment::createComment(postParams, userId, ticketId);
         co_return HttpResponse::newRedirectionResponse("/");
     }  catch(const Util::FormError& ex) {
         // TODO: Let the user retry

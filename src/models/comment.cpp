@@ -3,6 +3,7 @@
 
 #include "../util/constants.hpp"
 
+#include <drogon/HttpAppFramework.h>
 #include <drogon/HttpViewData.h>
 
 
@@ -14,9 +15,10 @@ using namespace drogon;
 using namespace drogon::orm;
 
 
-drogon::Task<Comment> Comment::createComment(CoroMapper<Comment>& orm, const
-        Util::StringMap& postParams, int32_t userId, int32_t ticketId)
+drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, int32_t userId, int32_t ticketId)
 {
+    CoroMapper<Comment> orm = app().getDbClient("db");
+
     Model::Comment newComment{};
     newComment.setPost(postParams.at("form-post") );
     newComment.setCreatedDate(trantor::Date::now() );
