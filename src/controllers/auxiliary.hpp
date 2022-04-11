@@ -8,6 +8,7 @@
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpViewData.h>
+#include <drogon/MultiPart.h>
 
 #include <functional>
 #include <string>
@@ -20,10 +21,12 @@ namespace Aux
 
 
 /**
- * @brief parseMultiPart - obtain the POST parameters from a multipart/form-data request
+ * @brief parseMultiPart - obtain the parameters from a multipart/form-data request
+ * @param req - The POST request
+ * @return 2 maps - one containing the regular inputs, and the other containing the file inputs
  * @throws Util::FormError if the httprequest cannot be parsed
  */
-Util::StringMap parseMultiPart(const drogon::HttpRequestPtr& req);
+std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const drogon::HttpRequestPtr& req);
 
 
 /**

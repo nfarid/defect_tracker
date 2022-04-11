@@ -41,7 +41,8 @@ UTIL_INTERNAL bool contains(const C& container, const T& value) {
     return std::find(cbegin(container), cend(container), value) != cend(container);
 }
 
-drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, int32_t reporterId, int32_t projectId)
+drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
+        int32_t reporterId, int32_t projectId)
 {
     CoroMapper<Ticket> orm = app().getDbClient("db");
 
@@ -49,6 +50,7 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, int
     const std::string title = postParams.at("form-title");
     const std::string description = postParams.at("form-description");
     const std::string severity = postParams.at("form-severity");
+    std::string imageFilename = "";
 
     // TODO: Add more requirements for a valid username & password
     if(title.empty() )
@@ -57,6 +59,16 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, int
         throw Util::FormError("Description cannot be empty");
     if(!contains(severityLst, severity) )
         throw Util::FormError("Invalid severity.");
+
+    // Handling the image upload
+    const HttpFile& image = fileParams.at("form-image");
+    if(image.getFileType() == FileType::FT_IMAGE) {  // If an image file is uploaded
+        imageFilename = postParams.at("form-image");
+        if(image.saveAs(imageFilename) != 0) // saveAs function returns zero on success
+            throw Util::FormError("Unable to upload image");
+    } else if(image.getFileType() != 0) {  // If a non-image file is uploaded
+        throw Util::FormError("Non-image file has been uploaded");
+    }
 
     // Validation is complete, so create a new ticket
     Ticket newTicket;
@@ -67,6 +79,8 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, int
     newTicket.setCreatedDate(trantor::Date::now() );
     newTicket.setReporterId(reporterId);
     newTicket.setProjectId(projectId);
+    if(!imageFilename.empty() )
+        newTicket.setImageFilename(std::move(imageFilename) );
 
     co_return co_await orm.insert(newTicket);
 }

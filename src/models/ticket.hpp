@@ -25,12 +25,14 @@ public:
      * @brief creates a ticket from the data from the form
      * @param orm - the object–relational mapper for Ticket
      * @param postParams - the data obtain from the POST request
+     * @param fileParams - the files obtain from the POST request
      * @param reporterId - the id of the current user
      * @param projectId - the id of the project
      * @return a newly created Ticket if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Ticket> createTicket(const Util::StringMap& postParams, int32_t reporterId, int32_t projectId);
+    static drogon::Task<Ticket> createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
+            int32_t reporterId, int32_t projectId);
 
     /**
      * @brief return a list of all the severities as JSON

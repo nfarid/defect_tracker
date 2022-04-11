@@ -147,12 +147,12 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
         co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
-    const auto& postParams = parseMultiPart(req);
+    const auto& [postParams, fileParams] = parseMultiPart(req);
 
     std::optional<Task<HttpResponsePtr> > retryForm;
 
     try {
-        co_await Model::Ticket::createTicket(postParams, userId, projectId);
+        co_await Model::Ticket::createTicket(postParams, fileParams, userId, projectId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     }  catch(const Util::FormError& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;

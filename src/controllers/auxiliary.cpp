@@ -2,8 +2,6 @@
 #include "auxiliary.hpp"
 #include "../util/form_error.hpp"
 
-#include <drogon/MultiPart.h>
-
 #include <cassert>
 #include <string>
 
@@ -55,7 +53,7 @@ void logIn(drogon::Session& session, int32_t userId, const std::string& username
     session.insert("username", username);
 }
 
-Util::StringMap parseMultiPart(const drogon::HttpRequestPtr& req) {
+std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const drogon::HttpRequestPtr& req) {
     Util::StringMap postParams;
     MultiPartParser parser;
     if(parser.parse(req) != 0)
@@ -65,17 +63,12 @@ Util::StringMap parseMultiPart(const drogon::HttpRequestPtr& req) {
         postParams[k] = v;
 
     for(const auto& [key, file] : parser.getFilesMap() ) {
-        if(file.getFileType() != FileType::FT_IMAGE) {  // Only image files are accepted
-            postParams[key] = "";
-            continue;
-        }
         const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
         const std::string& filename = timestamp + file.getMd5() + file.getFileName();
         postParams[key] = filename;
-        file.saveAs(filename);
     }
 
-    return postParams;
+    return {postParams, parser.getFilesMap()};
 }
 
 
