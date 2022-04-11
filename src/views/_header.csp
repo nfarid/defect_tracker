@@ -6,9 +6,9 @@
 <html lang="en">
 <head>
     <title>{%title%}</title>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/data/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="/data/styles/example_style.css">
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="/data/styles/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/data/styles/custom_style.css"/>
 </head>
 <body>
 
@@ -34,7 +34,7 @@
     <div class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
     <%c++ if(isLoggedIn) {%>
         <form action="/logout" method="POST">
-            <input type="submit" value="Logout" class="btn btn-primary me-2">
+            <input type="submit" value="Logout" class="btn btn-primary me-2"/>
         </form>
     <%c++ } else { %>
         <a href="/login" class="btn btn-primary me-2">Login</a>
