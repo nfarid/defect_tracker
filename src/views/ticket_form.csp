@@ -21,39 +21,47 @@
         <br/>
         <%c++ if(!formError.empty() ) { %>
             <p>Error: {%formError%}</p>
+            <br/>
         <%c++ } %>
 
-        <label>
-            Title:
-            <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
-        </label>
-        <br/>
 
-        <label>
-            Image:
-            <input type="file" id="form-image" name="form-image"/>
-        </label>
-        <br/>
+        <div class="form-group">
+            <label for="form-title">Title:</label>
+            <div class="col-md-10">
+                <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
+            </div>
+        </div>
 
-        <label>
-            Description:
-            <textarea id="form-description" name="form-description" rows="4" cols="50">{%formDescription%}</textarea>
-        </label>
-        <br/>
+        <div class="form-group">
+            <label for="form-image">Image:</label>
+            <div class="col-md-10">
+                <input type="file" id="form-image" name="form-image"/>
+            </div>
+        </div>
 
 
-        <label>
-            Severity:
-            <select name="form-severity" id="form-severity">
-            <%c++ for(const Json::Value& severityJson : severityLst) { %>
-                <%c++ const auto severity = severityJson.asString(); %>
-                <option value="{%severity%}">{%severity%}</option>
-            <%c++ } %>
-            </select>
-        </label>
-        <br/>
+        <div class="form-group">
+            <label for="form-description">Description:</label>
+            <div class="col-md-10">
+                <textarea id="form-description" name="form-description" rows="4" cols="50">{%formDescription%}</textarea>
+            </div>
+        </div>
 
-        <input type="submit" value="submit">
+        <div class="form-group">
+            <label for="form-severity">Severity:</label>
+            <div class="col-md-10">
+                <select name="form-severity" id="form-severity">
+                    <%c++ for(const Json::Value& severityJson : severityLst) { %>
+                        <%c++ const auto severity = severityJson.asString(); %>
+                        <option value="{%severity%}">{%severity%}</option>
+                    <%c++ } %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="submit">
+        </div>
     </fieldset>
 </form>
 
