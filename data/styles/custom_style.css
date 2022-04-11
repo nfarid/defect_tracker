@@ -31,6 +31,25 @@ body {
     border-bottom-left-radius: 0;
 }
 
-input[readonly], textarea[readonly]{
-  background-color:transparent;
+input[readonly].form-control, textarea[readonly].form-control {
+    background-color:lightblue;
+    border: grey;
+}
+
+
+.select-input {
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: menulist;
+}
+
+fieldset {
+    border: 2px solid black;
+    padding: 4px;
+    width: 100%;
+}
+
+.form-group {
+    width: 90%;
+    margin:8px auto;
 }

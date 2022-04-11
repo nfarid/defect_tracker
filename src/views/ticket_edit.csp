@@ -17,57 +17,67 @@
 <h1>Edit {%ticketTitle%} </h1>
 
 <form action="/ticket/{%ticketId%}/edit" method="POST">
-    <%c++ if(isReporter) { %>
-        <label>
-            Description:
-            <textarea id="form-description" name="form-description" rows="4" cols="50">{%ticketDescription%}</textarea>
-        </label>
-    <%c++ } else { %>
-        <p>{%ticketDescription%}</p>
-    <%c++ } %>
+    <fieldset>
 
-    <%c++ if(!assignableLst.empty() ) { %>
-        <label>
-            Assign:
-            <select id="form-assign" name="form-assign">
-                <%c++ if(!ticketAssignedId) { %>
-                    <option value="0" selected="selected" disabled="true">[Select!]</option>
-                <%c++ } %>
-                <%c++ for(const auto& assignable : assignableLst) { %>
-                    <%c++ const std::string& assignableName = assignable["username"].asString(); %>
-                    <%c++ const int assignableId = assignable["id"].asInt(); %>
-                    <%c++ if(ticketAssignedId == assignableId) {%>
-                        <option value="{%assignableId%}" selected="selected">{%assignableName%}</option>
-                    <%c++ } else { %>
-                        <option value="{%assignableId%}">{%assignableName%}</option>
+        <legend>{%title%}</legend>
+
+        <div class="form-group">
+            <%c++ const auto descriptionReadOnly = isReporter ? "" : "readonly=\"readonly\""; %>
+            <label for="form-description">Description:</label>
+            <div class="col-md-10">
+                <textarea id="form-description" name="form-description" rows="4" class="form-control" {%descriptionReadOnly%}>{%ticketDescription%}</textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="form-assign">Assign:</label>
+            <div class="col-md-10">
+                <%c++ const auto assignReadOnly = assignableLst.empty() ? "readonly=\"true\"" : ""; %>
+                <select id="form-assign" name="form-assign" {%assignReadOnly%} class="select-input form-control">
+                    <%c++ if(!ticketAssignedId) { %>
+                        <option value="0" selected="selected" disabled="true">[!Select!]</option>
                     <%c++ } %>
-                <%c++ } %>
-            </select>
-        </label>
-    <%c++ } %>
+                    <%c++ for(const auto& assignable : assignableLst) { %>
+                        <%c++ const std::string& assignableName = assignable["username"].asString(); %>
+                        <%c++ const int assignableId = assignable["id"].asInt(); %>
+                        <%c++ const auto assignSelected = (ticketAssignedId == assignableId) ? "selected=\"selected\"" : ""; %>
+                        <option value="{%assignableId%}" {%assignSelected%}>{%assignableName%}</option>
+                    <%c++ } %>
+                </select>
+            </div>
+        </div>
 
-    <%c++ if(isStaff) { %>
-        <label>
-            Severity:
-            <select name="form-severity" id="form-severity">
-            <%c++ for(const Json::Value& severityJson : severityLst) { %>
-                <%c++ const auto severity = severityJson.asString(); %>
-                <option value="{%severity%}">{%severity%}</option>
-            <%c++ } %>
-            </select>
-        </label>
-        <label>
-            Severity:
-            <select name="form-status" id="form-status">
-            <%c++ for(const Json::Value& statusJson : statusLst) { %>
-                <%c++ const auto status = statusJson.asString(); %>
-                <option value="{%status%}">{%status%}</option>
-            <%c++ } %>
-            </select>
-        </label>
-    <%c++ } %>
+        <div class="form-group">
+            <label for="form-severity" >Severity:</label>
+            <div class="col-md-10">
+                <%c++ const auto severityReadOnly = isStaff ? "" : "readonly=\"true\""; %>
+                <select id="form-severity" name="form-severity" {%severityReadOnly%} class="select-input form-control">
+                    <%c++ for(const Json::Value& severityJson : severityLst) { %>
+                        <%c++ const auto severity = severityJson.asString(); %>
+                        <option value="{%severity%}">{%severity%}</option>
+                    <%c++ } %>
+                </select>
+            </div>
+        </div>
 
-    <input type="submit" value="submit">
+        <div class="form-group">
+            <label for="form-status">Status:</label>
+            <div class="col-md-10">
+                <%c++ const auto statusReadOnly = isStaff ? "" : "readonly=\"true\""; %>
+                <select id="form-status" name="form-status" {%statusReadOnly%} class="select-input form-control">
+                    <%c++ for(const Json::Value& statusJson : statusLst) { %>
+                        <%c++ const auto status = statusJson.asString(); %>
+                        <option value="{%status%}">{%status%}</option>
+                    <%c++ } %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="submit"/>
+        </div>
+    </fieldset>
 </form>
+
 
 <%view _footer.csp %>
