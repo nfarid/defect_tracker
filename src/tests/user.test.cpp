@@ -13,6 +13,7 @@ using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(UserController_New){
+    // Check if the signup form is correct
     auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
@@ -29,6 +30,7 @@ DROGON_TEST(UserController_New){
 }
 
 DROGON_TEST(UserController_CreateAndDestroy){
+    // Emulate a signup form
     auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
     client->enableCookies();
 
@@ -39,29 +41,25 @@ DROGON_TEST(UserController_CreateAndDestroy){
     createReq->setParameter("form-username", new_username);
     createReq->setParameter("form-password", "new_password");
 
+    // Send a signup request
     client->sendRequest(createReq, [TEST_CTX, new_username, client](ReqResult res, const HttpResponsePtr& resp){
         REQUIRE(res == ReqResult::Ok);
         REQUIRE(resp != nullptr);
         // User is redirected to homepage after signup
         REQUIRE(resp->getHeader("location"s) == "/"s);
 
-        // The user should be in the database
-        Mapper<Model::Account> orm = Mapper<Model::Account>(app().getDbClient("db") );
-        const Criteria userCriteria{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
-        const auto foundUserLst = orm.findBy(userCriteria);
-        REQUIRE(size(foundUserLst) == 1);
+        // Check if the new user is in the database
+        async_run([new_username, TEST_CTX]()-> Task<> {
+            // User should be in the database
+            CoroMapper<Model::Account> accountOrm = app().getDbClient("db");
+            const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
+            const auto foundUsers = co_await accountOrm.findBy(hasUsername);
+            CO_REQUIRE(size(foundUsers) == 1);  // there should be 1 new user with the username
 
-        const auto id = foundUserLst.front().getValueOfId();
-        // Delete the user
-        auto deleteReq = HttpRequest::newHttpFormPostRequest();
-        deleteReq->setPath("/user/"s + std::to_string(id) + "/delete");
-        client->sendRequest(deleteReq, [TEST_CTX, userCriteria, orm]
-        (ReqResult res, const HttpResponsePtr& resp) mutable{
-            REQUIRE(res == ReqResult::Ok);
-            REQUIRE(resp != nullptr);
-            REQUIRE(resp->getHeader("location"s) == "/"s);
-            // User should not be in the database
-            REQUIRE(orm.count(userCriteria) == 0);
+            // Deleting the new user
+            const auto userId = foundUsers.front().getValueOfId();
+            co_await accountOrm.deleteByPrimaryKey(userId);
+            CO_REQUIRE( (co_await accountOrm.findBy(hasUsername) ).empty() );  // User should not be in the database
         });
     });
 }
