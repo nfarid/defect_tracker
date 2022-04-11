@@ -10,7 +10,7 @@
 
 <%c++ const auto ticketId = ticket["id"].asInt(); %>
 <%c++ const auto ticketTitle = ticket["title"].asString();%>
-<%c++ const auto ticketDescription = ticket["descrption"].asString(); %>
+<%c++ const auto ticketDescription = ticket["description"].asString(); %>
 <%c++ const auto ticketImageFilename = ticket["image-filename"].asString(); %>
 <%c++ const auto ticketCreatedDate = ticket["created-date"].asString(); %>
 
