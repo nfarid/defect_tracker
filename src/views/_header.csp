@@ -14,7 +14,7 @@
 
 
 <header class="p-3 bg-dark text-white">
-<div class="d-flex flex-wrap align-items-center justify-content-center">
+<nav class="d-flex flex-wrap align-items-center justify-content-center">
 
     <div class="d-flex align-items-center me-4">
         <img src="/data/images/icons8-bug-64.png" alt="Bug Icon" width="64" height="64" class="bi me-2"/>
@@ -42,7 +42,7 @@
     <%c++ } %>
     </div>
 
-</div>
+</nav>
 </header>
 
 

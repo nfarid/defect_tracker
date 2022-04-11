@@ -1,9 +1,11 @@
 
-</main>
-<footer>
-</footer>
+        </main>
+        <footer>
 
 
+        <script src="/data/scripts/custom_script.js" defer></script>
 
-</body>
+        </footer>
+
+    </body>
 </html>

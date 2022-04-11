@@ -22,41 +22,51 @@
 <%c++ const auto canEdit = @@.get<bool>("can-edit"); %>
 <%c++ const auto canDelete = @@.get<bool>("can-delete"); %>
 
-
 <article>
-    <h1>{%ticketTitle%}</h1>
-    <p>{%ticketDescription%}</p>
-    <p><a href="/project/{%projectId%}">Project: {%projectTitle%}</a></p>
-    <p>Creation date: {%ticketCreatedDate%}</p>
-    <p>Reported by: {%reporterUsername%}</p>
-    <%c++ if(!ticketImageFilename.empty() ) { %>
-        <img src="/uploads/{%ticketImageFilename%}" alt="{%ticketTitle%}'s attachment"/>
-    <%c++ } %>
+    <h1>Ticket: {%ticketTitle%}</h1>
+    <article>
+        <p>Description:</p>
+        <p>{%ticketDescription%}</p>
+    </article>
+    <article>
+        <%c++ if(!ticketImageFilename.empty() ) { %>
+            <img class="float-end" src="/uploads/{%ticketImageFilename%}" width="128" height="128" alt="{%ticketTitle%}'s attachment"/>
+        <%c++ } %>
+        <p>Project: <a href="/project/{%projectId%}">{%projectTitle%}</a></p>
+        <p>Creation date: {%ticketCreatedDate%}</p>
+        <p>Reported by: {%reporterUsername%}</p>
+    <article>
 </article>
 
 <%c++ if(!commentLst.empty() ) { %>
-    <p>Comments: </p>
-    <ul>
-        <%c++ for(const auto& comment : commentLst) { %>
-            <%c++ const auto post = comment["post"].asString(); %>
-            <p>{%post%}</p>
+    <article>
+        <p>Comments: </p>
+        <ul>
+            <%c++ for(const auto& comment : commentLst) { %>
+                <%c++ const auto post = comment["post"].asString(); %>
+                <p>{%post%}</p>
+            <%c++ } %>
+        </ul>
+    </article>
+<%c++ } %>
+
+<nav class="d-flex flex-wrap align-items-center justify-content-center">
+
+    <a href="/ticket/{%ticketId%}/comment" class="btn btn-secondary me-2">New comment</a>
+
+
+    <%c++ if(canEdit) { %>
+        <a href="/ticket/{%ticketId%}/edit" class="btn btn-secondary me-2">Edit Ticket</a>
+        <br/>
+
+        <%c++ if(canDelete) { %>
+            <form action="/ticket/{%ticketId%}/delete" method="POST">
+                <input type="submit" value="Delete" class="btn btn-danger me-2" onclick="return onDelete();"/>
+            </form>
         <%c++ } %>
-    </ul>
-<%c++ } %>
-
-<a href="/ticket/{%ticketId%}/comment">New comment</a>
-<br/>
-
-<%c++ if(canEdit) { %>
-    <a href="/ticket/{%ticketId%}/edit">Edit Ticket</a>
-    <br/>
-
-    <%c++ if(canDelete) { %>
-        <form action="/ticket/{%ticketId%}/delete" method="POST">
-            <input type="submit" value="Delete">
-        </form>
     <%c++ } %>
-<%c++ } %>
+
+</nav>
 
 
 
