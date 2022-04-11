@@ -51,8 +51,12 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, int
     const std::string severity = postParams.at("form-severity");
 
     // TODO: Add more requirements for a valid username & password
+    if(title.empty() )
+        throw Util::FormError("Title cannot be empty");
+    if(description.empty() )
+        throw Util::FormError("Description cannot be empty");
     if(!contains(severityLst, severity) )
-        throw std::runtime_error("Form Error: Invalid severity");
+        throw Util::FormError("Invalid severity.");
 
     // Validation is complete, so create a new ticket
     Ticket newTicket;
