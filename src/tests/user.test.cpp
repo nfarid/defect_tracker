@@ -48,8 +48,7 @@ DROGON_TEST(UserController_CreateAndDestroy){
         // User is redirected to homepage after signup
         REQUIRE(resp->getHeader("location"s) == "/"s);
 
-        // Check if the new user is in the database
-        async_run([new_username, TEST_CTX]()-> Task<> {
+        sync_wait([TEST_CTX, new_username]() -> Task<> {
             // User should be in the database
             CoroMapper<Model::Account> accountOrm = app().getDbClient("db");
             const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
@@ -60,6 +59,6 @@ DROGON_TEST(UserController_CreateAndDestroy){
             const auto userId = foundUsers.front().getValueOfId();
             co_await accountOrm.deleteByPrimaryKey(userId);
             CO_REQUIRE( (co_await accountOrm.findBy(hasUsername) ).empty() );  // User should not be in the database
-        });
+        }() );
     });
 }
