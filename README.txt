@@ -21,12 +21,17 @@ This application uses a docker container, to create the image:
 docker build . -t defect_tracker
 
 
-To run the container:
+To run the container (linux):
 docker run -d --network="host" -e DATABASE_URL="dbUrl" -e PORT="portNum" defect_tracker
-[porNum is a number from 0 to 65535]
+[replace porNum with the port]
 [dbUrl is the a datbase url in the form: scheme://username:password@host:port/path]
 
+To run the container (windows):
+docker run -dp portNum:3000 -e DATABASE_URL="dbUrl" defect_tracker
+[replace porNum with the port]
+[replace dbUrl with the the datbase url in the form: scheme://username:password@host:port/path (replace localhost with host.docker.internal)]
+
+
 To stop the container:
-docker stop -a
-[Or docker stop -a [containerId] ]
+docker stop containerId
 
