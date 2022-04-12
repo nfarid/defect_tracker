@@ -13,19 +13,20 @@ tools/create_test_data.sql can be run for example data for the application, (and
 The database url must be in the form:
 scheme://username:password@host:port/path
 
-The database can be passed through the command line.
-defect_tracker --db [database url goes here]
-
-Alternatively the DATABASE_URL can be set, and the application will use that:
-export DATABASE_URL=[datebase url goes here]
 
 
 
 
-The port this application listen to can also be specified either by:
-Using the the --port argument:
-Or the PORT environment variable:
+This application uses a docker container, to create the image:
+docker build . -t defect_tracker
 
 
+To run the container:
+docker run -d --network="host" -e DATABASE_URL="dbUrl" -e PORT="portNum" defect_tracker
+[porNum is a number from 0 to 65535]
+[dbUrl is the a datbase url in the form: scheme://username:password@host:port/path]
 
+To stop the container:
+docker stop -a
+[Or docker stop -a [containerId] ]
 
