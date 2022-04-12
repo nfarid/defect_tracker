@@ -1,4 +1,5 @@
 
+
 #Build directory
 build*/
 _build*/
@@ -7,7 +8,6 @@ out/
 #Hidden files
 .*
 !.gitignore
-!.dockerignore
 !.astylerc
 !.clang-format
 !.uncrustify.cfg
@@ -23,3 +23,5 @@ CMakeLists.txt.user
 #Misc
 model.json
 tmp/
+README.txt
+Dockerfile
