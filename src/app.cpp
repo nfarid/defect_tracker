@@ -6,51 +6,59 @@
 #include <sodium.h>
 
 
+using std::string;
+using std::string_view;
+
+
 namespace
 {
 
 
+// Url format is like this: scheme://username:password@host:port/path
 typedef struct Url {
-    std::string dbUsername;
-    std::string dbPassword;
-    std::string dbHost;
-    unsigned short dbPort;
-    std::string dbName;
+    string scheme{};
+    string username{};
+    string password{};
+    string host{};
+    unsigned short port{};
+    string path{};
+    // Does not contain query nor fragment
 } Url;
 
 // A simple url parser for parsing a database url
-// Url format is like this: scheme://username:password@host:port/path
-Url parseUrl(std::string_view url);
+Url parseUrl(string_view urlString);
 
 
 }  // namespace
 
 
-drogon::HttpAppFramework& getApp(unsigned short port, std::string_view dbUrl) {
+drogon::HttpAppFramework& getApp(unsigned short port, string_view dbUrl) {
     const auto sodiumError = sodium_init();
     if(sodiumError) {
         std::cerr<<"Sodium failed to initialised! "<<sodiumError<<std::endl;
         std::exit(EXIT_FAILURE);
     }
 
+    std::cout<<"Starting the web application"<<std::endl;
     auto& app = drogon::app();
 
     try {
         const auto parsedUrl = parseUrl(dbUrl);
         app.createDbClient(
                 "postgresql",
-                parsedUrl.dbHost,
-                parsedUrl.dbPort,
-                parsedUrl.dbName,
-                parsedUrl.dbUsername,
-                parsedUrl.dbPassword,
+                parsedUrl.host,
+                parsedUrl.port,
+                parsedUrl.path,
+                parsedUrl.username,
+                parsedUrl.password,
                 1,
                 "",
                 "db"
         );
     }catch(std::exception& ex) {
-        std::cerr<<"Unable to create a database: "<<std::endl;
+        std::cerr<<"Unable to connect to database: "<<std::endl;
         std::cerr<<ex.what()<<std::endl;
+        std::cerr<<"Database url must be in format: \n"<<"scheme://username:password@host:port/path"<<std::endl;
         std::exit(EXIT_FAILURE);
     }
 
@@ -66,54 +74,71 @@ namespace
 {
 
 
-Url parseUrl(std::string_view url) {
-    // TODO: Improve implementation
-    using std::string;
-    const size_t len = size(url);
+Url parseUrl(string_view urlStr) {
+    std::cout<<"Parsing datbase url, should be in format: scheme://username:password@host:port/path"<<std::endl;
+    Url parsed;
 
-    const auto schemeEndpos = url.find(':');
-    if( (schemeEndpos == string::npos) || (schemeEndpos + 3 >= len) ||
-                (url[schemeEndpos+1] != '/') || (url[schemeEndpos+2] != '/') )
-    {
-        throw std::invalid_argument("Invalid Database URL, invalid scheme.");
+    // Obtaining the scheme
+    size_t schemeEndpos = urlStr.find("://");
+    size_t authorityStartpos = schemeEndpos+3;
+    if(schemeEndpos != string::npos) {
+        parsed.scheme = urlStr.substr(0, schemeEndpos);
+    } else {
+        std::cerr<<"Database scheme has not been specified! Assuming scheme is 'postgres'."<<std::endl;
+        parsed.scheme = "postgres";
+        schemeEndpos = 0;
+        authorityStartpos = 0;
     }
 
-    const auto usernameStartpos = schemeEndpos + 3;
-    const auto usernameEndpos = url.find(':', usernameStartpos);
-    if(usernameEndpos == string::npos)
-        throw std::invalid_argument("Invalid Database URL, invalid username.");
-    const auto username = url.substr(usernameStartpos, usernameEndpos - usernameStartpos);
+    // Obtaining the authority (i.e. userinfo@host:port)
+    const size_t authorityEndpos = urlStr.find('/', authorityStartpos);
+    if(authorityEndpos == string::npos)
+        throw std::invalid_argument("Invalid database url. Invalid url authority (i.e. userinfo@host:port).");
+    const string_view authority = urlStr.substr(authorityStartpos, authorityEndpos - authorityStartpos);
 
-    const auto passwordStartpos = usernameEndpos + 1;
-    const auto passwordEndpos = url.find('@', passwordStartpos);
-    if(passwordEndpos == string::npos)
-        throw std::invalid_argument("Invalid Database URL, invalid password.");
-    const auto password = url.substr(passwordStartpos, passwordEndpos - passwordStartpos);
+    // Obtaining the userinfo (i.e. username:password)
+    size_t userinfoEndpos = authority.find('@');
+    size_t hostStartpos = userinfoEndpos + 1;
+    if(userinfoEndpos != string::npos) {
+        // Obtaining the username and password from userinfo
+        const string_view userinfo = authority.substr(0, userinfoEndpos);
+        const size_t usernameEndpos = userinfo.find(':');
+        parsed.username = userinfo.substr(0, usernameEndpos);
+        if(usernameEndpos != string::npos) {
+            const size_t passwordStartpos = usernameEndpos + 1;
+            parsed.password = userinfo.substr(passwordStartpos);
+        }
+    } else {
+        userinfoEndpos = 0;
+        hostStartpos = 0;
+        std::cerr<<"Database userinfo has not been specified! Assuming empty userinfo."<<std::endl;
+    }
 
-    const auto hostStartpos = passwordEndpos + 1;
-    const auto hostEndpos = url.find(':', hostStartpos);
-    if(hostEndpos == string::npos)
-        throw std::invalid_argument("Invalid Database URL, invalid host.");
-    const auto host = url.substr(hostStartpos, hostEndpos - hostStartpos);
+    // Obtain host:port
+    const size_t hostEndpos = authority.find(':', hostStartpos);
+    if(hostEndpos != string::npos) {
+        parsed.host = authority.substr(hostStartpos, hostEndpos - hostStartpos);
+        const size_t portStartpos = hostEndpos + 1;
+        try {
+            parsed.port = Util::StrToNum{authority.substr(portStartpos)};
+        } catch(const std::exception& ex) {
+            std::cerr<<ex.what()<<"; Database port is invalid! Assuming port is 5432."<<std::endl;
+            parsed.port = 5432;
+        }
+    } else if(hostStartpos != authority.size() ) {  // There is no ':', so there is no port only host
+        parsed.host = authority.substr(hostStartpos);
+        std::cerr<<"Database port has not been specified! Assuming port is 5432."<<std::endl;
+        parsed.port = 5432;
+    } else {
+        std::cerr<<"Database host has not been specified! Assuming host is 'localhost'."<<std::endl;
+        parsed.host = "localhost";
+    }
 
-    const auto portStartpos = hostEndpos + 1;
-    const auto portEndpos = url.find('/', portStartpos);
-    if(portEndpos == string::npos)
-        throw std::invalid_argument("Invalid Database URL, invalid port.");
-    const auto port_str = url.substr(portStartpos, portEndpos - portStartpos);
-    const unsigned short port = Util::StrToNum{port_str};
+    // Obtaining the path
+    const size_t pathStartpos = authorityEndpos + 1;
+    parsed.path = urlStr.substr(pathStartpos);
 
-    const auto pathStartpos = portEndpos + 1;
-    const auto pathEndpos = len;
-    const auto path = url.substr(pathStartpos, pathEndpos - pathStartpos);
-
-    return {
-        string(username),
-        string(password),
-        string(host),
-        port,
-        string(path),
-    };
+    return parsed;
 }
 
 
