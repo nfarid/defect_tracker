@@ -1,5 +1,6 @@
 
 #include "../util/constants.hpp"
+#include "../util/coroutine.hpp"
 #include "../models/account.hpp"
 
 #include <drogon/HttpAppFramework.h>
@@ -13,52 +14,60 @@ using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(UserController_New){
-    // Check if the signup form is correct
-    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
-    client->enableCookies();
+    drogon::sync_wait([TEST_CTX]()-> Task<> {
+        // Check if the signup form is correct
+        auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
+        client->enableCookies();
 
-    auto newReq = HttpRequest::newHttpRequest();
-    newReq->setPath("/signup");
+        auto newReq = HttpRequest::newHttpRequest();
+        newReq->setPath("/signup");
 
-    client->sendRequest(newReq, [TEST_CTX](ReqResult res, const HttpResponsePtr& resp){
-        REQUIRE(res == ReqResult::Ok);
-        REQUIRE(resp != nullptr);
-        // User can access the signup page if they haven't logged in
-        REQUIRE(resp->getStatusCode() == k200OK);
-        REQUIRE(resp->contentType() == CT_TEXT_HTML);
-    });
+        try {
+            const HttpResponsePtr resp = co_await client->sendRequestCoro(newReq);
+
+            CO_REQUIRE(resp != nullptr);
+            CHECK(resp->getStatusCode() == k200OK);
+            CHECK(resp->contentType() == CT_TEXT_HTML);
+        }  catch(const std::exception& ex) {
+            FAIL(ex.what() );
+        }
+    }() );
 }
 
-DROGON_TEST(UserController_CreateAndDestroy){
-    // Emulate a signup form
-    auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
-    client->enableCookies();
+DROGON_TEST(UserController_Create){
+    drogon::sync_wait([TEST_CTX]()-> Task<> {
+        // Emulate a signup form
+        auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
+        client->enableCookies();
 
-    auto createReq = HttpRequest::newHttpFormPostRequest();
-    createReq->setPath("/signup");
+        auto createReq = HttpRequest::newHttpFormPostRequest();
+        createReq->setPath("/signup");
 
-    const std::string new_username = "new_username";
-    createReq->setParameter("form-username", new_username);
-    createReq->setParameter("form-password", "new_password");
+        const std::string new_username = "new_username";
+        createReq->setParameter("form-username", new_username);
+        createReq->setParameter("form-password", "new_password");
 
-    // Send a signup request
-    client->sendRequest(createReq, [TEST_CTX, new_username, client](ReqResult res, const HttpResponsePtr& resp){
-        REQUIRE(res == ReqResult::Ok);
-        REQUIRE(resp != nullptr);
-        // User is redirected to homepage after signup
-        REQUIRE(resp->getHeader("location"s) == "/"s);
+        const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
 
-        sync_wait([TEST_CTX, new_username]() -> Task<> {
-            // User should be in the database
-            CoroMapper<Model::Account> accountOrm = app().getDbClient("db");
-            const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, new_username};
-            const auto foundUsers = co_await accountOrm.findBy(hasUsername);
-            CO_REQUIRE(size(foundUsers) == 1);  // there should be 1 new user with the username
+        try {
+            const HttpResponsePtr resp = co_await client->sendRequestCoro(createReq);
 
-            // Deleting the new user
-            const auto userId = foundUsers.front().getValueOfId();
-            co_await accountOrm.deleteByPrimaryKey(userId);
-            CO_REQUIRE( (co_await accountOrm.findBy(hasUsername) ).empty() );  // User should not be in the database
-        }() );
-    });
+            CO_REQUIRE(resp != nullptr);
+            // User is redirected to homepage after signup
+            CHECK(resp->getHeader("location"s) == "/"s);
+        }  catch(const std::exception& ex) {
+            FAIL(ex.what() );
+        }
+
+        // User should be in the database
+        CoroMapper<Model::Account> accountOrm = app().getDbClient("db");
+        const auto foundUsersAfterCreation = co_await accountOrm.findBy(hasUsername);
+        CO_REQUIRE(size(foundUsersAfterCreation) == 1);                    // there should be 1 new user with the username
+
+        // Now manually deleting the new user
+        const auto userId = foundUsersAfterCreation.front().getValueOfId();
+        co_await accountOrm.deleteByPrimaryKey(userId);
+        const auto foundUsersAfterDeletion = co_await accountOrm.findBy(hasUsername);
+        CHECK( foundUsersAfterDeletion.empty() );  // User should not be in the database
+    }() );
 }
