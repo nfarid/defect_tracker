@@ -25,14 +25,12 @@ public:
         ADD_METHOD_TO(UserController::show, "/user/{1}", Get);
         ADD_METHOD_TO(UserController::newForm, "/signup", Get);
         ADD_METHOD_TO(UserController::create, "/signup", Post);
-        ADD_METHOD_TO(UserController::destroy, "/user/{1}/delete", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
-    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
     CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
@@ -100,17 +98,6 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
-}
-
-Task<HttpResponsePtr> UserController::destroy(HttpRequestPtr req, int32_t id)
-{
-    SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) || (getUserId(*session) != id) ) // Only the user can delete their own account
-        co_return HttpResponse::newNotFoundResponse();// Should be http 403
-
-    session->clear();
-    co_await mAccountOrm.deleteByPrimaryKey(id);
-    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 
