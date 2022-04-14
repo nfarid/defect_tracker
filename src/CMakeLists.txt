@@ -4,14 +4,13 @@
 file(GLOB CSP_LIST "${CMAKE_CURRENT_SOURCE_DIR}/views/*.csp")
 set(VIEW_SRC "")
 foreach(CSP_FILE ${CSP_LIST})
-    message(STATUS "CSP_FILE:" "${CSP_FILE}")
     exec_program(basename ARGS "-s .csp ${CSP_FILE}" OUTPUT_VARIABLE classname)
-    message(STATUS "view classname:" "${classname}")
     add_custom_command(OUTPUT "${classname}.h" "${classname}.cc"
         COMMAND drogon_ctl
         ARGS create view "${CSP_FILE}"
         DEPENDS "${CSP_FILE}"
         VERBATIM
+        COMMENT "abc"
     )
     set(VIEW_SRC "${VIEW_SRC}" "${classname}.cc")
     set_source_files_properties("${classname}.cc" COMPILE_FLAGS "-w")

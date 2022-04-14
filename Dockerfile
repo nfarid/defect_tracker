@@ -24,7 +24,7 @@ COPY . .
 #Build the application
 RUN mkdir build/ && \
     cd build/ && \
-    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. -DENABLE_ADDITIONAL_WARNINGS=ON && \
     cmake --build . -- -j4
 
 #Cleanup

@@ -79,6 +79,14 @@ if(ENABLE_ADDRESS_SANTISER)
     endif()
 endif()
 
+option(ENABLE_THREAD_SANTISER "Turn on sanitiser for data races" OFF)
+
+if(ENABLE_THREAD_SANITISER)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(SANTISER "${SANITISER}" "-fsanitize=thread")
+    endif()
+endif()
+
 
 
 #Misc
