@@ -108,7 +108,7 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
         for(const auto& [k, v] : formData)
             data.insert(k, HttpViewData::htmlTranslate(v) );
 
-        co_return HttpResponse::newHttpViewResponse("ticket_form.csp", data);
+        co_return HttpResponse::newHttpViewResponse("ticket_new.csp", data);
     }  catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();

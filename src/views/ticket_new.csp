@@ -51,6 +51,7 @@
             <label for="form-severity">Severity:</label>
             <div class="col-md-10">
                 <select name="form-severity" id="form-severity">
+                    <option value="0" selected="selected" disabled="true">[!Select!]</option>
                     <%c++ for(const Json::Value& severityJson : severityLst) { %>
                         <%c++ const auto severity = severityJson.asString(); %>
                         <option value="{%severity%}">{%severity%}</option>
