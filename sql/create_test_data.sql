@@ -26,7 +26,7 @@ INSERT INTO project(title, description, manager_id) VALUES
     ('project', 'description', (SELECT id FROM account WHERE username='username') ),
     ('example_project_1', 'This is an example description.', (SELECT id FROM account WHERE username='example_manager') ),
     ('example_project_2', 'Another example description!', (SELECT id FROM account WHERE username='example_manager') ),
-    ('demo_project', 'This is a demo project.', (SELECT id FROM account WHERE username='example_manager') )
+    ('demo_project', 'This is a demo project.', (SELECT id FROM account WHERE username='demo_project_manager') )
 ;
 
 INSERT INTO ticket(title, description, status, severity, created_date, resolved_date, assigned_id, project_id, reporter_id) VALUES

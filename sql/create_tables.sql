@@ -15,7 +15,7 @@ CREATE TABLE project(
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
-    manager_id INTEGER REFERENCES account(id) ON DELETE CASCADE
+    manager_id INTEGER NOT NULL REFERENCES account(id) ON DELETE CASCADE
 );
 
 CREATE TYPE status_type AS ENUM('new', 'confirmed', 'unreproducible', 'resolved', 'reopened');
