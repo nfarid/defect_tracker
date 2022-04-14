@@ -33,7 +33,7 @@ public:
 
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
-    static void destroy(const HttpRequestPtr& req, ResponseCallback&& cb);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req);
 
 private:
     CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
@@ -83,12 +83,12 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
     }
 }
 
-void UserSessionController::destroy(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb)
+Task<HttpResponsePtr> UserSessionController::destroy(HttpRequestPtr req)
 {
     const SessionPtr session = getSession(req);
     // There's no check if the user is logged in or not, since the result is the same either way
     req->session()->clear();
-    return cb(HttpResponse::newRedirectionResponse("/", k303SeeOther) );
+    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 

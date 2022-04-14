@@ -26,17 +26,16 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    static void index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+    Task<HttpResponsePtr> index(HttpRequestPtr req);
 
 private:
 };
 
 
-void HomeController::index(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
     HttpViewData data = getViewData("Home", *session);
-    const auto response = HttpResponse::newHttpViewResponse("home.csp", data);
-    cb(response);
+    co_return HttpResponse::newHttpViewResponse("home.csp", data);
 }
 
 
