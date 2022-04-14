@@ -3,6 +3,7 @@
 
 #include "account.hpp"
 #include "comment.hpp"
+#include "notification.hpp"
 #include "project.hpp"
 
 #include "../util/core.hpp"
@@ -24,6 +25,7 @@ namespace Model
 
 using namespace drogon;
 using namespace drogon::orm;
+using namespace std::literals;
 
 
 UTIL_INTERNAL std::vector<std::string> severityLst = {"low", "medium", "high"};
@@ -44,8 +46,6 @@ UTIL_INTERNAL bool contains(const C& container, const T& value) {
 drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
         int32_t reporterId, int32_t projectId)
 {
-    CoroMapper<Ticket> orm = app().getDbClient("db");
-
     // Obtain the data from the POST request
     const std::string title = postParams.at("form-title");
     const std::string description = postParams.at("form-description");
@@ -71,6 +71,7 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, con
     }
 
     // Validation is complete, so create a new ticket
+    CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
     Ticket newTicket;
     newTicket.setTitle(title);
     newTicket.setDescription(description);
@@ -81,8 +82,18 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, con
     newTicket.setProjectId(projectId);
     if(!imageFilename.empty() )
         newTicket.setImageFilename(std::move(imageFilename) );
+    const Ticket createdTicket = co_await ticketOrm.insert(newTicket);
 
-    co_return co_await orm.insert(newTicket);
+    // Create a notification for the new ticket
+    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+    Notification newNotifcation;
+    newNotifcation.setSummary("A new defect has been reported: "s + title);
+    newNotifcation.setTicketId( createdTicket.getValueOfId() );
+    const Project project = co_await createdTicket.getProject();
+    newNotifcation.setUserId( project.getValueOfManagerId() );  // notify the project manager when a ticket is created
+    co_await notificationOrm.insert(newNotifcation);
+
+    co_return newTicket;
 }
 
 Json::Value Ticket::getSeverityLst() {
@@ -148,7 +159,8 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
 }
 
 drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId) {
-    // TODO: html readonly input
+    CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
+    const Model::Project project  = co_await getProject();
 
     if(!co_await canEdit(userId) ) // cannot edit if not authorised
         throw Util::FormError("Unauthoried to edit ticket");
@@ -162,13 +174,22 @@ drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId)
     if(!assingableLst.empty() && postParams.contains("form-assign") ) {
         const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
         for(const auto& staff : assingableLst) {
-            if(staff.getValueOfId() == assignedId)
-                setAssignedId(assignedId);
+            if(staff.getValueOfId() == assignedId) {  // if the assigned staff is valid
+                if(!getAssignedId() || (getValueOfAssignedId() != assignedId) ) {  // if assigning to a new staff member
+                    setAssignedId(assignedId);
+                    // Create a notification
+                    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+                    Notification newNotifcation;
+                    newNotifcation.setSummary("You have been assigned a ticket: "s + getValueOfTitle() );
+                    newNotifcation.setTicketId(getValueOfId() );
+                    newNotifcation.setUserId(assignedId);  // notify the assigned staff when assigning
+                    co_await notificationOrm.insert(newNotifcation);
+                }
+            }
         }
     }
 
     // Staff can edit severity and status
-    const Model::Project project  = co_await getProject();
     const bool isStaff = co_await project.isStaff(userId);
     if(isStaff) {
         const std::string severity = postParams.at("form-severity");
@@ -178,11 +199,19 @@ drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId)
         if(!contains(statusLst, status) )
             throw Util::FormError("Status is invalid");
         setSeverity(severity);
+        if( (status == "resolved") && (getValueOfStatus() != status) ) {  // if change status to resolved
+            // Create a notification
+            CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+            Notification newNotifcation;
+            newNotifcation.setSummary("Your ticket has been resolved: "s + getValueOfTitle() );
+            newNotifcation.setTicketId(getValueOfId() );
+            newNotifcation.setUserId(getValueOfReporterId() );  // notify the original reporter after resolution
+            co_await notificationOrm.insert(newNotifcation);
+        }
         setStatus(status);
     }
 
-    CoroMapper<Ticket> orm = app().getDbClient("db");
-    co_await orm.update(*this);
+    co_await ticketOrm.update(*this);
     co_return;
 }
 
