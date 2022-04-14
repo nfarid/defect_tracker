@@ -23,7 +23,11 @@ using namespace drogon;
 using namespace drogon::orm;
 
 
-UTIL_INTERNAL std::vector<std::string> split(std::string_view str, std::string_view delim) {
+namespace
+{
+
+
+std::vector<std::string> split(std::string_view str, std::string_view delim) {
     std::vector<std::string> tokens;
     auto beginPos = str.find_first_not_of(delim, 0);
     auto endPos = str.find_first_of(delim, beginPos);
@@ -35,13 +39,17 @@ UTIL_INTERNAL std::vector<std::string> split(std::string_view str, std::string_v
     return tokens;
 }
 
-UTIL_INTERNAL bool isalnum(std::string_view str) {
+bool isalnum(std::string_view str) {
     for(const char c : str) {
         if(!std::isalnum(c) )
             return false;
     }
     return true;
 }
+
+
+} // namespace
+
 
 drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, int32_t userId)
 {

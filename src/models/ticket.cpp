@@ -28,20 +28,16 @@ using namespace drogon::orm;
 using namespace std::literals;
 
 
-UTIL_INTERNAL std::vector<std::string> severityLst = {"low", "medium", "high"};
-UTIL_INTERNAL std::vector<std::string> statusLst = {"new", "confirmed", "unreproducible", "resolved", "reopened"};
+namespace
+{
 
-UTIL_INTERNAL Json::Value lstToJson(const std::vector<std::string>& lst) {
-    Json::Value json{};
-    for(const auto& elem : lst)
-        json.append(elem);
-    return json;
-}
 
-template<typename T, typename C>
-UTIL_INTERNAL bool contains(const C& container, const T& value) {
-    return std::find(cbegin(container), cend(container), value) != cend(container);
-}
+std::vector<std::string> severityLst = {"low", "medium", "high"};
+std::vector<std::string> statusLst = {"new", "confirmed", "unreproducible", "resolved", "reopened"};
+
+
+}  // namespace
+
 
 drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
         int32_t reporterId, int32_t projectId)
@@ -57,7 +53,7 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, con
         throw Util::FormError("Title cannot be empty");
     if(description.empty() )
         throw Util::FormError("Description cannot be empty");
-    if(!contains(severityLst, severity) )
+    if(!Util::contains(severityLst, severity) )
         throw Util::FormError("Invalid severity.");
 
     // Handling the image upload
@@ -98,13 +94,13 @@ drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, con
 
 Json::Value Ticket::getSeverityLst() {
     // Note: initialising static variables is thread safe
-    const static Json::Value severityLstJson = lstToJson(severityLst);
+    const static Json::Value severityLstJson = Util::toJson(severityLst);
     return severityLstJson;
 }
 
 Json::Value Ticket::getStatusLst() {
     // Note: initialising static variables is thread safe
-    const static Json::Value statusLstJson = lstToJson(statusLst);
+    const static Json::Value statusLstJson = Util::toJson(statusLst);
     return statusLstJson;
 }
 
@@ -194,9 +190,9 @@ drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId)
     if(isStaff) {
         const std::string severity = postParams.at("form-severity");
         const std::string status = postParams.at("form-status");
-        if(!contains(severityLst, severity) )
+        if(!Util::contains(severityLst, severity) )
             throw Util::FormError("Severity is invalid");
-        if(!contains(statusLst, status) )
+        if(!Util::contains(statusLst, status) )
             throw Util::FormError("Status is invalid");
         setSeverity(severity);
         if( (status == "resolved") && (getValueOfStatus() != status) ) {  // if change status to resolved

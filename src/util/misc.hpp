@@ -5,6 +5,8 @@
 #include "core.hpp"
 #include "cstring_view.hpp"
 
+#include <json/value.h>
+
 #include <charconv>
 #include <stdexcept>
 #include <string_view>
@@ -19,11 +21,21 @@ namespace Util
 
 
 /**
- *\brief Checks if the container contains element with specific key
+ *\brief Checks if the container contains element with specified element
  */
-template<typename C, typename K>
-bool contains(const C& container, const K& key) {
-    return container.find(key) != container.cend();
+template<typename C, typename T>
+bool contains(const C& container, const T& val) {
+    return std::find(cbegin(container), cend(container), val) != cend(container);
+}
+
+/**
+ * @brief convert a list of string into a JSON
+ */
+inline Json::Value toJson(const std::vector<std::string>& lst) {
+    Json::Value json{};
+    for(const auto& elem : lst)
+        json.append(elem);
+    return json;
 }
 
 /**
