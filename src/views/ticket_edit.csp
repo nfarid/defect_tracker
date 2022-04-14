@@ -3,11 +3,15 @@
 
 <%view _header.csp %>
 
-<%c++ const auto title = @@.get<std::string>("title"); %>
-<%c++ const auto ticketId = @@.get<std::string>("ticket_id"); %>
-<%c++ const auto ticketTitle = @@.get<std::string>("ticket_title"); %>
-<%c++ const auto ticketDescription = @@.get<std::string>("ticket_description"); %>
-<%c++ const auto ticketAssignedId = @@.get<int32_t>("ticket_assigned_id"); %>
+<%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
+<%c++ const auto ticketTitle = ticket["title"].asString(); %>
+<%c++ const auto ticketDescription = ticket["description"].asString(); %>
+<%c++ const auto ticketId = ticket["id"].asInt(); %>
+<%c++ const auto ticketAssignedId = ticket["assigned-id"].isNull() ? 0 : ticket["assigned-id"].asInt(); %>
+<%c++ const auto ticketSeverity = ticket["severity"].asString(); %>
+<%c++ const auto ticketStatus = ticket["status"].asString(); %>
+
+
 <%c++ const auto assignableLst = @@.get<Json::Value>("assignable_lst"); %>
 <%c++ const auto isReporter = @@.get<bool>("is_reporter"); %>
 <%c++ const auto isStaff = @@.get<bool>("is_staff"); %>
@@ -19,7 +23,7 @@
 <form action="/ticket/{%ticketId%}/edit" method="POST">
     <fieldset>
 
-        <legend>{%title%}</legend>
+        <legend>Edit ticket details:</legend>
 
         <div class="form-group">
             <%c++ const auto descriptionReadOnly = isReporter ? "" : "readonly=\"readonly\""; %>
@@ -40,7 +44,7 @@
                     <%c++ for(const auto& assignable : assignableLst) { %>
                         <%c++ const std::string& assignableName = assignable["username"].asString(); %>
                         <%c++ const int assignableId = assignable["id"].asInt(); %>
-                        <%c++ const auto assignSelected = (ticketAssignedId == assignableId) ? "selected=\"selected\"" : ""; %>
+                        <%c++ const auto assignSelected = (ticketAssignedId == assignableId) ? "selected=\"selected\"" : ""; %>                        
                         <option value="{%assignableId%}" {%assignSelected%}>{%assignableName%}</option>
                     <%c++ } %>
                 </select>
@@ -54,7 +58,8 @@
                 <select id="form-severity" name="form-severity" {%severityReadOnly%} class="select-input form-control">
                     <%c++ for(const Json::Value& severityJson : severityLst) { %>
                         <%c++ const auto severity = severityJson.asString(); %>
-                        <option value="{%severity%}">{%severity%}</option>
+                        <%c++ const auto severitySelected = (severity == ticketSeverity) ? "selected=\"selected\"" : ""; %>
+                        <option value="{%severity%}" {%severitySelected%}>{%severity%}</option>
                     <%c++ } %>
                 </select>
             </div>
@@ -67,7 +72,8 @@
                 <select id="form-status" name="form-status" {%statusReadOnly%} class="select-input form-control">
                     <%c++ for(const Json::Value& statusJson : statusLst) { %>
                         <%c++ const auto status = statusJson.asString(); %>
-                        <option value="{%status%}">{%status%}</option>
+                        <%c++ const auto statusSelected = (status == ticketStatus) ? "selected=\"selected\"" : ""; %>
+                        <option value="{%status%}" {%statusSelected%}>{%status%}</option>
                     <%c++ } %>
                 </select>
             </div>

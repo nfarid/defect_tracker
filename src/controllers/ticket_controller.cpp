@@ -128,11 +128,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
             co_return HttpResponse::newRedirectionResponse("/");
 
         HttpViewData data = getViewData("Edit Ticket", *session);
-        data.insert("ticket_id", std::to_string(id) );
-        data.insert("ticket_title", ticket.getValueOfTitle() );
-        data.insert("ticket_description", ticket.getValueOfDescription() );
-        if(ticket.getAssignedId() )
-            data.insert("ticket_assigned_id", ticket.getValueOfAssignedId() );
+        data.insert("ticket", ticket.toViewJson() );
         data.insert("assignable_lst",  toViewJson(co_await ticket.getAssignables(userId) ) );
         data.insert("is_reporter", ticket.isReporter(userId) );
         data.insert("is_staff", co_await project.isStaff(userId) );
