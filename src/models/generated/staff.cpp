@@ -38,7 +38,7 @@ Staff::Staff(const Row& r, const ssize_t indexOffset) noexcept
             projectId_=std::make_shared<int32_t>(r["project_id"].as<int32_t>() );
         if(!r["staff_id"].isNull() )
             staffId_=std::make_shared<int32_t>(r["staff_id"].as<int32_t>() );
-    } else  {
+    } else {
         size_t offset = (size_t)indexOffset;
         if(offset + 3 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
@@ -203,7 +203,7 @@ void Staff::setStaffId(const int32_t& pStaffId) noexcept
     dirtyFlag_[2] = true;
 }
 
-void Staff::updateId(const uint64_t id)
+void Staff::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Staff::insertColumns() noexcept
@@ -325,14 +325,14 @@ bool Staff::validateJsonForCreation(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("project_id") ) {
         if(!validJsonOfField(1, "project_id", pJson["project_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The project_id column cannot be null";
         return false;
     }
     if(pJson.isMember("staff_id") ) {
         if(!validJsonOfField(2, "staff_id", pJson["staff_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The staff_id column cannot be null";
         return false;
     }
@@ -358,7 +358,7 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[1] + " column cannot be null";
                 return false;
             }
@@ -367,7 +367,7 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[2]) ) {
                 if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[2] + " column cannot be null";
                 return false;
             }
@@ -385,7 +385,7 @@ bool Staff::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("id") ) {
         if(!validJsonOfField(0, "id", pJson["id"], err, false) )
             return false;
-    } else  {
+    } else {
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
@@ -412,7 +412,7 @@ bool Staff::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false) )
                 return false;
-        } else    {
+        } else {
             err = "The value of primary key must be set in the json object for update";
             return false;
         }

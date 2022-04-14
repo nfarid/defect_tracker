@@ -220,7 +220,7 @@ void Account::setPasswordHash(std::string&& pPasswordHash) noexcept
     dirtyFlag_[2] = true;
 }
 
-void Account::updateId(const uint64_t id)
+void Account::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Account::insertColumns() noexcept

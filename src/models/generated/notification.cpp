@@ -255,7 +255,7 @@ void Notification::setTicketId(const int32_t& pTicketId) noexcept
     dirtyFlag_[3] = true;
 }
 
-void Notification::updateId(const uint64_t id)
+void Notification::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Notification::insertColumns() noexcept

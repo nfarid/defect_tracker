@@ -64,7 +64,7 @@ Comment::Comment(const Row& r, const ssize_t indexOffset) noexcept
             ticketId_=std::make_shared<int32_t>(r["ticket_id"].as<int32_t>() );
         if(!r["poster_id"].isNull() )
             posterId_=std::make_shared<int32_t>(r["poster_id"].as<int32_t>() );
-    } else  {
+    } else {
         size_t offset = (size_t)indexOffset;
         if(offset + 5 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
@@ -394,7 +394,7 @@ void Comment::setPosterId(const int32_t& pPosterId) noexcept
     dirtyFlag_[4] = true;
 }
 
-void Comment::updateId(const uint64_t id)
+void Comment::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Comment::insertColumns() noexcept
@@ -574,28 +574,28 @@ bool Comment::validateJsonForCreation(const Json::Value& pJson, std::string& err
     if(pJson.isMember("post") ) {
         if(!validJsonOfField(1, "post", pJson["post"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The post column cannot be null";
         return false;
     }
     if(pJson.isMember("created_date") ) {
         if(!validJsonOfField(2, "created_date", pJson["created_date"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The created_date column cannot be null";
         return false;
     }
     if(pJson.isMember("ticket_id") ) {
         if(!validJsonOfField(3, "ticket_id", pJson["ticket_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The ticket_id column cannot be null";
         return false;
     }
     if(pJson.isMember("poster_id") ) {
         if(!validJsonOfField(4, "poster_id", pJson["poster_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The poster_id column cannot be null";
         return false;
     }
@@ -621,7 +621,7 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[1] + " column cannot be null";
                 return false;
             }
@@ -630,7 +630,7 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[2]) ) {
                 if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[2] + " column cannot be null";
                 return false;
             }
@@ -639,7 +639,7 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[3]) ) {
                 if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[3] + " column cannot be null";
                 return false;
             }
@@ -648,7 +648,7 @@ bool Comment::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[4]) ) {
                 if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[4] + " column cannot be null";
                 return false;
             }
@@ -666,7 +666,7 @@ bool Comment::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("id") ) {
         if(!validJsonOfField(0, "id", pJson["id"], err, false) )
             return false;
-    } else  {
+    } else {
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
@@ -701,7 +701,7 @@ bool Comment::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false) )
                 return false;
-        } else    {
+        } else {
             err = "The value of primary key must be set in the json object for update";
             return false;
         }
@@ -812,7 +812,7 @@ void Comment::getTicket(const DbClientPtr& clientPtr,
             ecb(UnexpectedRows("Found more than one row") );
         else
             rcb(Ticket(r[0]) );
-    }
+        }
         >> ecb;
 }
 
@@ -830,6 +830,6 @@ void Comment::getPoster(const DbClientPtr& clientPtr,
             ecb(UnexpectedRows("Found more than one row") );
         else
             rcb(Account(r[0]) );
-    }
+        }
         >> ecb;
 }

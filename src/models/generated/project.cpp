@@ -270,7 +270,7 @@ void Project::setManagerIdToNull() noexcept
     dirtyFlag_[3] = true;
 }
 
-void Project::updateId(const uint64_t id)
+void Project::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Project::insertColumns() noexcept
@@ -634,7 +634,7 @@ void Project::getManager(const DbClientPtr& clientPtr,
             ecb(UnexpectedRows("Found more than one row") );
         else
             rcb(Account(r[0]) );
-    }
+        }
         >> ecb;
 }
 

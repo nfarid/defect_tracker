@@ -104,7 +104,7 @@ Ticket::Ticket(const Row& r, const ssize_t indexOffset) noexcept
             assignedId_=std::make_shared<int32_t>(r["assigned_id"].as<int32_t>() );
         if(!r["project_id"].isNull() )
             projectId_=std::make_shared<int32_t>(r["project_id"].as<int32_t>() );
-    } else  {
+    } else {
         size_t offset = (size_t)indexOffset;
         if(offset + 11 > r.size() ) {
             LOG_FATAL << "Invalid SQL result for this model";
@@ -803,7 +803,7 @@ void Ticket::setProjectId(const int32_t& pProjectId) noexcept
     dirtyFlag_[10] = true;
 }
 
-void Ticket::updateId(const uint64_t id)
+void Ticket::updateId(const uint64_t)
 {}
 
 const std::vector<std::string>& Ticket::insertColumns() noexcept
@@ -1157,35 +1157,35 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("title") ) {
         if(!validJsonOfField(1, "title", pJson["title"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The title column cannot be null";
         return false;
     }
     if(pJson.isMember("description") ) {
         if(!validJsonOfField(2, "description", pJson["description"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The description column cannot be null";
         return false;
     }
     if(pJson.isMember("status") ) {
         if(!validJsonOfField(3, "status", pJson["status"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The status column cannot be null";
         return false;
     }
     if(pJson.isMember("severity") ) {
         if(!validJsonOfField(4, "severity", pJson["severity"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The severity column cannot be null";
         return false;
     }
     if(pJson.isMember("created_date") ) {
         if(!validJsonOfField(5, "created_date", pJson["created_date"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The created_date column cannot be null";
         return false;
     }
@@ -1200,7 +1200,7 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("reporter_id") ) {
         if(!validJsonOfField(8, "reporter_id", pJson["reporter_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The reporter_id column cannot be null";
         return false;
     }
@@ -1211,7 +1211,7 @@ bool Ticket::validateJsonForCreation(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("project_id") ) {
         if(!validJsonOfField(10, "project_id", pJson["project_id"], err, true) )
             return false;
-    } else  {
+    } else {
         err="The project_id column cannot be null";
         return false;
     }
@@ -1237,7 +1237,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[1]) ) {
                 if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[1] + " column cannot be null";
                 return false;
             }
@@ -1246,7 +1246,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[2]) ) {
                 if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[2] + " column cannot be null";
                 return false;
             }
@@ -1255,7 +1255,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[3]) ) {
                 if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[3] + " column cannot be null";
                 return false;
             }
@@ -1264,7 +1264,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[4]) ) {
                 if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[4] + " column cannot be null";
                 return false;
             }
@@ -1273,7 +1273,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[5]) ) {
                 if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[5] + " column cannot be null";
                 return false;
             }
@@ -1294,7 +1294,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[8]) ) {
                 if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[8] + " column cannot be null";
                 return false;
             }
@@ -1309,7 +1309,7 @@ bool Ticket::validateMasqueradedJsonForCreation(const Json::Value& pJson,
             if(pJson.isMember(pMasqueradingVector[10]) ) {
                 if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, true) )
                     return false;
-            } else    {
+            } else {
                 err="The " + pMasqueradingVector[10] + " column cannot be null";
                 return false;
             }
@@ -1327,7 +1327,7 @@ bool Ticket::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
     if(pJson.isMember("id") ) {
         if(!validJsonOfField(0, "id", pJson["id"], err, false) )
             return false;
-    } else  {
+    } else {
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
@@ -1386,7 +1386,7 @@ bool Ticket::validateMasqueradedJsonForUpdate(const Json::Value& pJson,
         if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]) ) {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false) )
                 return false;
-        } else    {
+        } else {
             err = "The value of primary key must be set in the json object for update";
             return false;
         }
@@ -1575,7 +1575,7 @@ void Ticket::getProject(const DbClientPtr& clientPtr,
             ecb(UnexpectedRows("Found more than one row") );
         else
             rcb(Project(r[0]) );
-    }
+        }
         >> ecb;
 }
 
@@ -1610,6 +1610,6 @@ void Ticket::getReporter(const DbClientPtr& clientPtr,
             ecb(UnexpectedRows("Found more than one row") );
         else
             rcb(Account(r[0]) );
-    }
+        }
         >> ecb;
 }
