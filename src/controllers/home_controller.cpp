@@ -2,6 +2,7 @@
 #include "auxiliary.hpp"
 
 #include "../models/account.hpp"
+#include "../models/notification.hpp"
 #include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 
@@ -45,12 +46,24 @@ Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
     HttpViewData data = getViewData("Home", *session);
     data.insert("demo-username-lst", Util::toJson(demoUsernameLst) );
+
+    if(isLoggedIn(*session) ) {
+        try {
+            const Model::Account currentUser = co_await mAccountOrm.findByPrimaryKey( getUserId(*session) );
+            const std::vector notifcationLst = co_await currentUser.getNotifications();
+            data.insert("notification-lst", toViewJson(notifcationLst) );
+        }  catch(const std::exception& ex) {
+            std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+            co_return HttpResponse::newNotFoundResponse();
+        }
+    } else {
+        data.insert("notification-lst", Json::Value{});
+    }
+
     co_return HttpResponse::newHttpViewResponse("home.csp", data);
 }
 
 Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {
-    std::clog<<"HERE!"<<std::endl;
-
     const Util::StringMap& postParams = req->parameters();
     const SessionPtr session = getSession(req);
 

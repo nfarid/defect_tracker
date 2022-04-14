@@ -6,15 +6,26 @@
 <%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
 <%c++ const auto sessionUsername = @@.get<std::string>("session-username"); %>
 <%c++ const auto demoUsernameLst = @@.get<Json::Value>("demo-username-lst"); %>
+<%c++ const auto notificationLst = @@.get<Json::Value>("notification-lst"); %>
 
 
 
 <%c++ if(isLoggedIn) { %>
-    <h1>Welcome {%sessionUsername%}!</h1>
-    <hr/>
+    <h1>Welcome {%sessionUsername%}!</h1> <hr/>
+    <%c++ if(!notificationLst.empty() ) { %>
+        <form action="/notification" method="POST">
+        <%c++ for(const auto& notification : notificationLst) { %>
+            <%c++ const auto notificationId = notification["id"].asInt(); %>
+            <%c++ const auto notificationSummary = notification["summary"].asString(); %>
+            <button type="submit" formaction="/notification/{%notificationId%}">{%notificationSummary%}</button>
+        <%c++ } %>
+        </form>
+        <ul>
+    <%c++ } else { %>
+        <p>You have no notifications.</p>
+    <%c++ } %>
 <%c++ } else { %>
-    <h1>Guest welcome.</h1>
-    <hr/>
+    <h1>Guest welcome.</h1> <hr/>
 
     <form action="/demo-login" method="POST">
         <fieldset>

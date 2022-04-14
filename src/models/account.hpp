@@ -11,6 +11,9 @@ namespace Model
 {
 
 
+class Notification;
+
+
 /**
  * @brief The Account class - an extension of the generated Account model with custom methods
  */
@@ -31,6 +34,9 @@ public:
      * @throws Util::FormError if the data is invalid
      */
     static drogon::Task<Account> createAccount(const Util::StringMap& postParams);
+
+
+    drogon::Task<std::vector<Notification> > getNotifications() const;
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

@@ -1,6 +1,8 @@
 
 #include "account.hpp"
 
+#include "notification.hpp"
+
 #include "../util/form_error.hpp"
 #include "../util/hash.hpp"
 
@@ -64,6 +66,12 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
     newAccount.setUsername(username);
     newAccount.setPasswordHash(Util::hash(password) );
     co_return co_await orm.insert(newAccount);
+}
+
+drogon::Task<std::vector<Notification> > Account::getNotifications() const {
+    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+    const Criteria toUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
+    co_return co_await notificationOrm.findBy(toUser);
 }
 
 Json::Value Account::toViewJson() const {

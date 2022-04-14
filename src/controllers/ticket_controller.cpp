@@ -2,6 +2,7 @@
 #include "auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../models/comment.hpp"
+#include "../models/notification.hpp"
 #include "../models/project.hpp"
 #include "../models/staff.hpp"
 #include "../models/ticket.hpp"
@@ -33,6 +34,7 @@ public:
         ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post);
         ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post);
         ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post);
+        ADD_METHOD_TO(TicketController::throughNotification, "/notification/{1}", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -42,12 +44,14 @@ public:
     Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t projectId);
     Task<HttpResponsePtr> update(HttpRequestPtr req, int32_t id);
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> throughNotification(HttpRequestPtr req, int32_t notificationId);
 
 private:
     DbClientPtr mDB = app().getDbClient("db");
 
     CoroMapper<Model::Ticket> mTicketOrm{mDB};
     CoroMapper<Model::Project> mProjectOrm{mDB};
+    CoroMapper<Model::Notification> mNotifcationOrm{mDB};
 
     Task<HttpResponsePtr> newImpl(HttpRequestPtr req, int32_t projectId,
             Util::StringMap formData, std::string errorMessage);
@@ -201,6 +205,27 @@ Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) 
 
     co_await mTicketOrm.deleteByPrimaryKey(id);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+}
+
+Task<HttpResponsePtr> TicketController::throughNotification(HttpRequestPtr req, int32_t notificationId) {
+    SessionPtr session = getSession(req);
+    if(!isLoggedIn(*session) ) // Not authenticated
+        co_return HttpResponse::newNotFoundResponse();
+
+    try {
+        const Model::Notification notification = co_await mNotifcationOrm.findByPrimaryKey(notificationId);
+
+        if(notification.getValueOfUserId() != getUserId(*session) ) // Not authorised
+            co_return HttpResponse::newNotFoundResponse();
+
+        // Redirect to the notification's ticket page
+        const std::string ticketId = std::to_string(notification.getValueOfTicketId() );
+        co_await mNotifcationOrm.deleteByPrimaryKey(notificationId);
+        co_return HttpResponse::newRedirectionResponse("/ticket/" + ticketId);
+    } catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
+    }
 }
 
 
