@@ -1,6 +1,9 @@
 
 #include "auxiliary.hpp"
+
 #include "../models/account.hpp"
+#include "../util/form_error.hpp"
+#include "../util/misc.hpp"
 
 #include <drogon/HttpController.h>
 
@@ -23,19 +26,48 @@ public:
         ADD_METHOD_TO(HomeController::index, "/", Get);
         ADD_METHOD_TO(HomeController::index, "/index", Get);
         ADD_METHOD_TO(HomeController::index, "/home", Get);
+        ADD_METHOD_TO(HomeController::demoLogin, "/demo-login", Post);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     Task<HttpResponsePtr> index(HttpRequestPtr req);
+    Task<HttpResponsePtr> demoLogin(HttpRequestPtr req);
 
 private:
+    CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
+
+    std::vector<std::string> demoUsernameLst = {"demo_regular_user", "demo_project_staff", "demo_project_manager"};
 };
+
 
 
 Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
     HttpViewData data = getViewData("Home", *session);
+    data.insert("demo-username-lst", Util::toJson(demoUsernameLst) );
     co_return HttpResponse::newHttpViewResponse("home.csp", data);
+}
+
+Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {
+    std::clog<<"HERE!"<<std::endl;
+
+    const Util::StringMap& postParams = req->parameters();
+    const SessionPtr session = getSession(req);
+
+    try {
+        const std::string& username = postParams.at("demo-username");
+        if(!Util::contains(demoUsernameLst, username) )
+            throw Util::FormError("Not a valid demo user");
+
+        const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
+        const Model::Account user = co_await mAccountOrm.findOne(hasUsername);
+
+        logIn(*session, user.getValueOfId(), username);
+        co_return HttpResponse::newRedirectionResponse("/");
+    }  catch(const std::exception& ex) {
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
+    }
 }
 
 

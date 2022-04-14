@@ -1,15 +1,32 @@
 
+<%inc #include <json/value.h> %>
+
 <%view _header.csp %>
 
 <%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
 <%c++ const auto sessionUsername = @@.get<std::string>("session-username"); %>
+<%c++ const auto demoUsernameLst = @@.get<Json::Value>("demo-username-lst"); %>
+
+
 
 <%c++ if(isLoggedIn) { %>
     <h1>Welcome {%sessionUsername%}!</h1>
+    <hr/>
 <%c++ } else { %>
     <h1>Guest welcome.</h1>
+    <hr/>
+
+    <form action="/demo-login" method="POST">
+        <fieldset>
+            <legend>Demo Login</legend>
+            <%c++ for(const auto& demoUsernameJson : demoUsernameLst) { %>
+                <%c++ const auto demoUsername = demoUsernameJson.asString(); %>
+                <button type="submit" name="demo-username" value="{%demoUsername%}">{%demoUsername%}</button>
+                <br/>
+            <%c++ } %>
+        </fieldset>
+    </form>
 <%c++ } %>
-<hr/>
 
 
 <%view _footer.csp %>
