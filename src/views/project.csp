@@ -7,14 +7,53 @@
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
 <%c++ const auto managerName = @@.get<std::string>("manager-name"); %>
 <%c++ const auto ticketLst = @@.get<Json::Value>("ticket-lst"); %>
+<%c++ const auto severityLst = @@.get<Json::Value>("severity-lst"); %>
+<%c++ const auto statusLst = @@.get<Json::Value>("status-lst"); %>
+<%c++ const auto stats = @@.get<Json::Value>("stats"); %>
 <%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
 <%c++ const auto userId = @@.get<int32_t>("session-user-id"); %>
 
 
-<h1>Project:{%title%}</h1>
+<h1>Project: {%title%}</h1>
 <%c++ const auto projectDescription = project["description"].asString(); %>
 <p>Description: {%projectDescription%}</p>
 <p>Manager: {%managerName%}</p>
+
+<article>
+    <h2>Project stats: </h2>
+
+    <%c++ const auto ticketCount = stats["ticket-count"].asInt(); %>
+    <p>Number of tickets: {%ticketCount%}</p>
+
+    <%c++ if( !stats["average-resolution-duration-hours"].isNull() ) { %>
+        <%c++ const auto averageResolutionDurationHours = stats["average-resolution-duration-hours"].asInt(); %>
+        <p>Average time to resolve a ticket: {%averageResolutionDurationHours%}</p>
+    <%c++ } else { %>
+        <p>No ticket has been resolved yet.</p>
+    <%c++ } %>
+
+    <article>
+        <p>Number of tickets by status: </p>
+        <ul>
+            <%c++ for(const auto& statusJson : statusLst) { %>
+                <%c++ const auto statusStr = statusJson.asString(); %>
+                <%c++ const auto statusCount = stats[statusStr].asInt(); %>
+                <p>{%statusStr%}: {%statusCount%}</p>
+            <%c++ } %>
+        </ul>
+    </article>
+
+    <article>
+        <p>Number of tickets by severity: </p>
+        <ul>
+            <%c++ for(const auto& severityJson : severityLst) { %>
+                <%c++ const auto severityStr = severityJson.asString(); %>
+                <%c++ const auto severityCount = stats[severityStr].asInt(); %>
+                <p>{%severityStr%}: {%severityCount%}</p>
+            <%c++ } %>
+        </ul>
+    </article>
+</article>
 
 
 

@@ -19,6 +19,7 @@ using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
 using std::string_literals::operator""s;
+using namespace std::chrono;
 
 class ProjectController : public HttpController<ProjectController> {
 public:
@@ -43,6 +44,8 @@ private:
 
     HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);
+
+    Json::Value getStats(const std::vector<Model::Ticket>& ticketLst);
 };
 
 Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
@@ -56,11 +59,50 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
         data.insert("project", project.toViewJson() );
         data.insert("manager-name", manager.getValueOfUsername() );
         data.insert("ticket-lst", toViewJson(ticketLst) );
+        data.insert("severity-lst", Model::Ticket::getSeverityLst() );
+        data.insert("status-lst", Model::Ticket::getStatusLst() );
+        data.insert("stats", getStats(ticketLst) );
         co_return HttpResponse::newHttpViewResponse("project.csp", data);
     } catch(std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
+}
+
+Json::Value ProjectController::getStats(const std::vector<Model::Ticket>& ticketLst) {
+    Json::Value stats{};
+    stats["ticket-count"] = size(ticketLst);
+
+    // Obtain average resolution time
+    microseconds totalResolutionDuration{0};
+    int countResolution = 0;
+    for(const auto& ticket : ticketLst) {
+        if(ticket.getResolvedDate() ) {  // check if the ticket has resolved date - i.e. its already resolved
+            const int64_t resolvedEpoch = ticket.getValueOfResolvedDate().microSecondsSinceEpoch();
+            const int64_t creationEpoch = ticket.getValueOfCreatedDate().microSecondsSinceEpoch();
+            const microseconds resolutionDuration{resolvedEpoch - creationEpoch};
+            totalResolutionDuration += resolutionDuration;
+            ++countResolution;
+        }
+    }
+    if(countResolution != 0) {
+        const microseconds averageResolutionDuration = totalResolutionDuration / countResolution;
+        const hours averageResolutionDurationHours = duration_cast<hours>(averageResolutionDuration);
+        stats["average-resolution-duration-hours"] = averageResolutionDurationHours.count();
+    }
+
+    // Obtain count of types of tickets:
+    for(const auto& statusType : Model::Ticket::getStatusLst() )
+        stats[statusType.asString()] = 0;
+    for(const auto& severity : Model::Ticket::getSeverityLst() )
+        stats[severity.asString()] = 0;
+
+    for(const auto& ticket : ticketLst) {
+        stats[ticket.getValueOfStatus()] = stats[ticket.getValueOfStatus()].asInt() + 1;
+        stats[ticket.getValueOfSeverity()] = stats[ticket.getValueOfSeverity()].asInt() + 1;
+    }
+
+    return stats;
 }
 
 Task<HttpResponsePtr> ProjectController::newForm(HttpRequestPtr req){
