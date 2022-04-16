@@ -19,40 +19,46 @@
 <p>Description: {%projectDescription%}</p>
 <p>Manager: {%managerName%}</p>
 
+
 <article>
-    <h2>Project stats: </h2>
+    <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapse-stats" role="button" aria-expanded="false">
+        <h2>Project stats: </h2>
+    </a>
 
-    <%c++ const auto ticketCount = stats["ticket-count"].asInt(); %>
-    <p>Number of tickets: {%ticketCount%}</p>
+    <div class="collapse" id="collapse-stats">
 
-    <%c++ if( !stats["average-resolution-duration-hours"].isNull() ) { %>
-        <%c++ const auto averageResolutionDurationHours = stats["average-resolution-duration-hours"].asInt(); %>
-        <p>Average time to resolve a ticket: {%averageResolutionDurationHours%}</p>
-    <%c++ } else { %>
-        <p>No ticket has been resolved yet.</p>
-    <%c++ } %>
+        <%c++ const auto ticketCount = stats["ticket-count"].asInt(); %>
+        <p>Number of tickets: {%ticketCount%}</p>
 
-    <article>
-        <p>Number of tickets by status: </p>
-        <ul>
-            <%c++ for(const auto& statusJson : statusLst) { %>
-                <%c++ const auto statusStr = statusJson.asString(); %>
-                <%c++ const auto statusCount = stats[statusStr].asInt(); %>
-                <p>{%statusStr%}: {%statusCount%}</p>
-            <%c++ } %>
-        </ul>
-    </article>
+        <%c++ if( !stats["average-resolution-duration-hours"].isNull() ) { %>
+            <%c++ const auto averageResolutionDurationHours = stats["average-resolution-duration-hours"].asInt(); %>
+            <p>Average time to resolve a ticket: {%averageResolutionDurationHours%} hours</p>
+        <%c++ } else { %>
+            <p>No ticket has been resolved yet.</p>
+        <%c++ } %>
 
-    <article>
-        <p>Number of tickets by severity: </p>
-        <ul>
-            <%c++ for(const auto& severityJson : severityLst) { %>
-                <%c++ const auto severityStr = severityJson.asString(); %>
-                <%c++ const auto severityCount = stats[severityStr].asInt(); %>
-                <p>{%severityStr%}: {%severityCount%}</p>
-            <%c++ } %>
-        </ul>
-    </article>
+        <article>
+            <p>Number of tickets by status: </p>
+            <ul>
+                <%c++ for(const auto& statusJson : statusLst) { %>
+                    <%c++ const auto statusStr = statusJson.asString(); %>
+                    <%c++ const auto statusCount = stats[statusStr].asInt(); %>
+                    <p>{%statusStr%}: {%statusCount%}</p>
+                <%c++ } %>
+            </ul>
+        </article>
+
+        <article>
+            <p>Number of tickets by severity: </p>
+            <ul>
+                <%c++ for(const auto& severityJson : severityLst) { %>
+                    <%c++ const auto severityStr = severityJson.asString(); %>
+                    <%c++ const auto severityCount = stats[severityStr].asInt(); %>
+                    <p>{%severityStr%}: {%severityCount%}</p>
+                <%c++ } %>
+            </ul>
+        </article>
+    <div>
 </article>
 
 

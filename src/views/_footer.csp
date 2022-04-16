@@ -3,6 +3,7 @@
         <footer>
 
 
+        <script src="/data/scripts/bootstrap.min.js" defer></script>
         <script src="/data/scripts/custom_script.js" defer></script>
 
         </footer>

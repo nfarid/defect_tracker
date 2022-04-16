@@ -53,3 +53,7 @@ fieldset {
     width: 90%;
     margin:8px auto;
 }
+
+.collapse {
+    border: 1px dotted grey;
+}
