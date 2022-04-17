@@ -3,15 +3,42 @@
 
 #include "notification.hpp"
 
+#include "../util/cstring_view.hpp"
 #include "../util/form_error.hpp"
-#include "../util/hash.hpp"
+#include "../util/string.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpViewData.h>
 
+#include <sodium.h>
+
 
 namespace Model
 {
+
+
+namespace
+{
+
+
+// Creates a hash from a password
+std::string hash(Util::CStringView password) {
+    std::string passwordHash(crypto_pwhash_STRBYTES, '\0');
+    if(crypto_pwhash_str(passwordHash.data(), password.c_str(), size(password),
+                crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) )
+    {
+        throw std::runtime_error{"Hashing failed"};
+    }
+    return passwordHash;
+}
+
+// Checks if the hash matches against the password
+bool verifyHash(Util::CStringView passwordHash, Util::CStringView password) {
+    return !crypto_pwhash_str_verify(passwordHash.c_str(), password.c_str(), size(password) );
+}
+
+
+}  // namespace
 
 
 using namespace drogon;
@@ -34,7 +61,7 @@ Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
     const Model::Account& user = userLst.front();
 
     // Check if the entered password is correct
-    if(!Util::verifyHash(user.getValueOfPasswordHash(), password) )
+    if(!verifyHash(user.getValueOfPasswordHash(), password) )
         throw Util::FormError("Invalid password.");
 
     // Verification is complete
@@ -64,7 +91,7 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
     // Validation is complete, so create a new account
     Model::Account newAccount;
     newAccount.setUsername(username);
-    newAccount.setPasswordHash(Util::hash(password) );
+    newAccount.setPasswordHash(hash(password) );
     co_return co_await orm.insert(newAccount);
 }
 

@@ -2,7 +2,6 @@
 #include "auxiliary.hpp"
 #include "../models/account.hpp"
 #include "../util/form_error.hpp"
-#include "../util/hash.hpp"
 
 #include <drogon/HttpController.h>
 
