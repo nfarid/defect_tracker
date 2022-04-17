@@ -4,6 +4,7 @@
 
 #include "cstring_view.hpp"
 
+#include <algorithm>
 #include <string>
 #include <string_view>
 
@@ -20,20 +21,10 @@ using std::string_view_literals::operator""sv;
 // This string contains the whitespace characters
 constexpr CStringView whitespaceCharacters = " \f\n\r\t\v";
 
-// Check if a character is a whitespace character
-constexpr inline bool isWhitespace(char c) {
-    return (c == ' ') ||
-           (c == '\t') ||
-           (c == '\n') ||
-           (c == '\v') ||
-           (c == '\f') ||
-           (c == '\r');
-}
-
 /**
  * @brief returns a view of the string without any leading or trailing whitespace
  */
-[[nodiscard]] inline string_view getTrimmedView(string_view str) {
+[[nodiscard]] constexpr inline string_view getTrimmedView(string_view str) {
     const size_t beginPos = str.find_first_not_of(whitespaceCharacters);
     if(beginPos == string::npos)
         return "";
@@ -61,9 +52,24 @@ inline void trimIt(string& str) {
     str.erase(0, beginPos);
 }
 
-// Checks if a character is valid ascii
+// Checks if a character is ascii
 constexpr inline bool isAscii(char c) {
     return c <= 127  &&  c >= 0;
+}
+
+// Checks if a string only contains ascii
+inline bool isAscii(string_view str) {
+    return std::all_of(end(str), begin(str), [](char c){return isAscii(c);});
+}
+
+// Checks if a character is a valid alphabet, number or underscore
+inline bool isAlNumUnderscore(char c) {
+    return c == '_' || (isAscii(c) && std::isalnum(c) );
+}
+
+// Check if a string only contains valid alphabet, number or underscore
+inline bool isAlNumUnderscore(string_view str) {
+    return std::all_of(end(str), begin(str), [](char c){return isAlNumUnderscore(c);});
 }
 
 
