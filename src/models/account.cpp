@@ -49,9 +49,9 @@ Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
 {
     CoroMapper<Account> orm = app().getDbClient("db");
 
-    // Obtain the data from the POST request
-    const std::string& username = postParams.at("form-username");
-    const std::string password = postParams.at("form-password");
+    // Obtain and trim the data from the POST request
+    const std::string username = Util::getTrimmed(postParams.at("form-username") );
+    const std::string password = Util::getTrimmed(postParams.at("form-password") );
 
     // Find a user with the specified username
     const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
@@ -72,13 +72,17 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
 {
     CoroMapper<Account> orm = app().getDbClient("db");
 
-    // Obtain the data from the POST request
-    const std::string& username = postParams.at("form-username");
-    const std::string& password = postParams.at("form-password");
+    // Obtain and trim the data from the POST request
+    const std::string& username = Util::getTrimmed(postParams.at("form-username") );
+    const std::string& password = Util::getTrimmed(postParams.at("form-password") );
 
-    // TODO: Add more requirements for a valid username & password
+    // TODO: Add more requirements
     if(username.empty() )
         throw Util::FormError("Username cannot be empty.");
+    if(!Util::isAlNumUnderscore(username) )
+        throw Util::FormError("Username can only contain alphabet, number or underscore.");
+    if(username.size() < 30)
+        throw Util::FormError("Username cannot be longer than 30 characters");
     if(password.empty() )
         throw Util::FormError("Password cannot be empty.");
 

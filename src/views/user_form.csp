@@ -10,21 +10,18 @@
 
 <div class="form-user">
 <form action="{%formAction%}" method="POST">
-    <fieldset>
-        <legend>{%title%}</legend>
-        <%c++ if(!formError.empty() ) { %>
-            <p>Error: {%formError%}</p>
-        <%c++ } %>
-        <div class="form-floating">
-            <input type="text" id="form-username" name="form-username" class="form-control" value="{%formUsername%}" placeholder="username"/>
-            <label for="form-username">Username</label>
-        </div>
-        <div class="form-floating">
-            <input type="password" id="form-password" name="form-password" class="form-control" value="{%formPassword%}" placeholder="password"/>
-            <label for="form-password">Password</label>
-        </div>
-    <input type="submit" class="w-100 btn btn-lg btn-primary" value="{%title%}">
-    </fieldset>
+    <%c++ if(!formError.empty() ) { %>
+        <p>Error: {%formError%}</p>
+    <%c++ } %>
+    <div class="form-floating">
+        <input type="text" id="form-username" name="form-username" class="form-control" value="{%formUsername%}" placeholder="username" maxlength="30" pattern="^[a-zA-Z0-9_]*$" required/>
+        <label for="form-username">Username</label>
+    </div>
+    <div class="form-floating">
+        <input type="password" id="form-password" name="form-password" class="form-control" value="{%formPassword%}" placeholder="password" required/>
+        <label for="form-password">Password</label>
+    </div>
+<input type="submit" class="w-100 btn btn-lg btn-primary" value="{%title%}">
 </form>
 </div>
 
