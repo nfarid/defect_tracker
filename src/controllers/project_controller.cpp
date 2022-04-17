@@ -71,7 +71,7 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
 
 Json::Value ProjectController::getStats(const std::vector<Model::Ticket>& ticketLst) {
     Json::Value stats{};
-    stats["ticket-count"] = size(ticketLst);
+    stats["ticket-count"] = static_cast<Json::UInt64>(size(ticketLst) );
 
     // Obtain average resolution time
     microseconds totalResolutionDuration{0};
@@ -88,7 +88,7 @@ Json::Value ProjectController::getStats(const std::vector<Model::Ticket>& ticket
     if(countResolution != 0) {
         const microseconds averageResolutionDuration = totalResolutionDuration / countResolution;
         const hours averageResolutionDurationHours = duration_cast<hours>(averageResolutionDuration);
-        stats["average-resolution-duration-hours"] = averageResolutionDurationHours.count();
+        stats["average-resolution-duration-hours"] = static_cast<Json::Int64>(averageResolutionDurationHours.count() );
     }
 
     // Obtain count of types of tickets:

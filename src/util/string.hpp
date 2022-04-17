@@ -54,7 +54,7 @@ inline void trimIt(string& str) {
 
 // Checks if a character is ascii
 constexpr inline bool isAscii(char c) {
-    return c <= 127  &&  c >= 0;
+    return (c & 0x80) == 0;
 }
 
 // Checks if a string only contains ascii
