@@ -45,6 +45,7 @@ private:
 
 Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
+
     HttpViewData data = getViewData("Home", *session);
     data.insert("demo-username-lst", Util::toJson(demoUsernameLst) );
 

@@ -84,9 +84,8 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
 
 Task<HttpResponsePtr> UserSessionController::destroy(HttpRequestPtr req)
 {
-    const SessionPtr session = getSession(req);
-    // There's no check if the user is logged in or not, since the result is the same either way
-    req->session()->clear();
+    SessionPtr session = getSession(req);
+    logOut(*session);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 

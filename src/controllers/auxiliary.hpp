@@ -63,6 +63,11 @@ std::string getUsername(const drogon::Session& session);
  */
 void logIn(drogon::Session& session, int32_t userId, const std::string& username);
 
+/**
+ * @brief Clears out the session data for this user
+ */
+void logOut(drogon::Session& session);
+
 
 /**
  * @brief Turns an array of elements into its json equivalent

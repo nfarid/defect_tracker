@@ -2,6 +2,8 @@
 #include "auxiliary.hpp"
 #include "../util/form_error.hpp"
 
+#include <drogon/utils/Utilities.h>
+
 #include <cassert>
 #include <string>
 
@@ -20,10 +22,12 @@ SessionPtr getSession(const HttpRequestPtr& req) {
         std::cerr<<"Session is not enabled"<<std::endl;
         throw std::runtime_error("Session is not enabled");
     }
+    if(session->find("token") )
+        session->insert("token",  drogon::utils::genRandomString(10) );
     return session;
 }
 
-HttpViewData getViewData(const std::string& title, const drogon::Session& session) {
+HttpViewData getViewData(const std::string& title, const Session& session) {
     HttpViewData data;
     data.insert("title", title);
 
@@ -44,17 +48,23 @@ int32_t getUserId(const Session& session) {
     return userId.value_or(0);
 }
 
-std::string getUsername(const drogon::Session& session) {
+std::string getUsername(const Session& session) {
     const std::optional<std::string> username = session.getOptional<std::string>("username");
     return username.value_or("");
 }
 
-void logIn(drogon::Session& session, int32_t userId, const std::string& username) {
+void logIn(Session& session, int32_t userId, const std::string& username) {
     session.insert("user_id", userId);
     session.insert("username", username);
+    session.changeSessionIdToClient();
 }
 
-std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const drogon::HttpRequestPtr& req) {
+void logOut(Session& session) {
+    session.clear();
+    session.changeSessionIdToClient();
+}
+
+std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const HttpRequestPtr& req) {
     Util::StringMap postParams;
     MultiPartParser parser;
     if(parser.parse(req) != 0)
