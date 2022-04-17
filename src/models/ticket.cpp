@@ -9,6 +9,7 @@
 #include "../util/core.hpp"
 #include "../util/constants.hpp"
 #include "../util/form_error.hpp"
+#include "../util/string.hpp"
 #include "../util/misc.hpp"
 
 #include <drogon/HttpAppFramework.h>
@@ -25,7 +26,8 @@ namespace Model
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace std::literals;
+using namespace Util;
+using std::string_literals::operator""s;
 
 
 namespace
@@ -39,31 +41,38 @@ const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproduc
 }  // namespace
 
 
-drogon::Task<Ticket> Ticket::createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
+drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const FileMap& fileParams,
         int32_t reporterId, int32_t projectId)
 {
+    for(const auto& [k, v] : postParams)
+        std::clog<<k<<"; "<<v<<std::endl;
+
     // Obtain the data from the POST request
-    const std::string title = postParams.at("form-title");
-    const std::string description = postParams.at("form-description");
-    const std::string severity = postParams.at("form-severity");
+    const std::string title = getTrimmed(postParams.at("form-title") );
+    const std::string description = getTrimmed(postParams.at("form-description") );
+    const std::string severity = getTrimmed(postParams.at("form-severity") );
     std::string imageFilename = "";
 
     // TODO: Add more requirements for a valid username & password
     if(title.empty() )
-        throw Util::FormError("Title cannot be empty");
+        throw FormError("Title cannot be empty");
+    if(title.size() > 80)
+        throw FormError("Title cannot be longer than 80 characters");
+    if(!std::ranges::all_of(title, [](char c){return c == ' ' || c == '-' || isAlNumUnderscore(c);}) )
+        throw FormError("Title cannot contain invalid characters");
     if(description.empty() )
-        throw Util::FormError("Description cannot be empty");
-    if(!Util::contains(severityLst, severity) )
-        throw Util::FormError("Invalid severity.");
+        throw FormError("Description cannot be empty");
+    if(!contains(severityLst, severity) )
+        throw FormError("Invalid severity.");
 
     // Handling the image upload
     const HttpFile& image = fileParams.at("form-image");
     if(image.getFileType() == FileType::FT_IMAGE) {  // If an image file is uploaded
         imageFilename = postParams.at("form-image");
         if(image.saveAs(imageFilename) != 0) // saveAs function returns zero on success
-            throw Util::FormError("Unable to upload image");
+            throw FormError("Unable to upload image");
     } else if(image.getFileType() != 0) {  // If a non-image file is uploaded
-        throw Util::FormError("Non-image file has been uploaded");
+        throw FormError("Non-image file has been uploaded");
     }
 
     // Validation is complete, so create a new ticket
@@ -154,21 +163,24 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
     co_return{};
 }
 
-drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId) {
+drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
     CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
     const Model::Project project  = co_await getProject();
 
     if(!co_await canEdit(userId) ) // cannot edit if not authorised
-        throw Util::FormError("Unauthoried to edit ticket");
+        throw FormError("Unauthoried to edit ticket");
 
     // The ticket's reporter can edit the ticket
-    if(isReporter(userId) )
-        setDescription(postParams.at("form-description") );
+    if(isReporter(userId) ) {
+        const std::string description = getTrimmed(postParams.at("form-description") );
+        setDescription(description);
+    }
 
     // Can only assign to people in the assingableLst
     const std::vector assingableLst = co_await getAssignables(userId);
     if(!assingableLst.empty() && postParams.contains("form-assign") ) {
-        const int32_t assignedId = Util::StrToNum{postParams.at("form-assign")};
+        const std::string assignedIdStr = getTrimmed(postParams.at("form-assign") );
+        const int32_t assignedId = StrToNum{assignedIdStr};
         for(const auto& staff : assingableLst) {
             if(staff.getValueOfId() == assignedId) {  // if the assigned staff is valid
                 if(!getAssignedId() || (getValueOfAssignedId() != assignedId) ) {  // if assigning to a new staff member
@@ -188,12 +200,12 @@ drogon::Task<> Ticket::update(const Util::StringMap& postParams, int32_t userId)
     // Staff can edit severity and status
     const bool isStaff = co_await project.isStaff(userId);
     if(isStaff) {
-        const std::string severity = postParams.at("form-severity");
-        const std::string status = postParams.at("form-status");
-        if(!Util::contains(severityLst, severity) )
-            throw Util::FormError("Severity is invalid");
-        if(!Util::contains(statusLst, status) )
-            throw Util::FormError("Status is invalid");
+        const std::string severity = getTrimmed(postParams.at("form-severity") );
+        const std::string status = getTrimmed(postParams.at("form-status") );
+        if(!contains(severityLst, severity) )
+            throw FormError("Severity is invalid");
+        if(!contains(statusLst, status) )
+            throw FormError("Status is invalid");
         setSeverity(severity);
         if( (status == "resolved") && (getValueOfStatus() != status) ) {  // if change status to resolved
             // Create a notification
@@ -218,10 +230,10 @@ Json::Value Ticket::toViewJson() const {
     json["description"] = HttpViewData::htmlTranslate(getValueOfDescription() );
     json["status"] = HttpViewData::htmlTranslate(getValueOfStatus() );
     json["severity"] = HttpViewData::htmlTranslate(getValueOfSeverity() );
-    const auto createdDate = getValueOfCreatedDate().toCustomedFormattedString(Util::dateFormat);
+    const auto createdDate = getValueOfCreatedDate().toCustomedFormattedString(dateFormat);
     json["created-date"] = HttpViewData::htmlTranslate(createdDate);
     if(getResolvedDate() ) {
-        const auto resolvedDate = getValueOfResolvedDate().toCustomedFormattedString(Util::dateFormat);
+        const auto resolvedDate = getValueOfResolvedDate().toCustomedFormattedString(dateFormat);
         json["resolved-date"] = HttpViewData::htmlTranslate(resolvedDate);
     }
     if(getImageFilename() )

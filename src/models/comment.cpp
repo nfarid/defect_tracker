@@ -2,6 +2,7 @@
 #include "comment.hpp"
 
 #include "../util/constants.hpp"
+#include "../util/string.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpViewData.h>
@@ -20,7 +21,7 @@ drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, 
     CoroMapper<Comment> orm = app().getDbClient("db");
 
     Model::Comment newComment{};
-    newComment.setPost(postParams.at("form-post") );
+    newComment.setPost(Util::getTrimmed(postParams.at("form-post") ) );
     newComment.setCreatedDate(trantor::Date::now() );
     newComment.setPosterId(userId);
     newComment.setTicketId(ticketId);

@@ -28,14 +28,14 @@
         <div class="form-group">
             <label for="form-title">Title:</label>
             <div class="col-md-10">
-                <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
+                <input type="text" id="form-title" name="form-title" value="{%formTitle%}"  maxlength="80" pattern="^[a-zA-Z0-9_\-\ ]*$" required/>
             </div>
         </div>
 
         <div class="form-group">
             <label for="form-image">Image:</label>
             <div class="col-md-10">
-                <input type="file" id="form-image" name="form-image"/>
+                <input type="file" id="form-image" name="form-image" accept="image/*"/>
             </div>
         </div>
 
@@ -43,15 +43,15 @@
         <div class="form-group">
             <label for="form-description">Description:</label>
             <div class="col-md-10">
-                <textarea id="form-description" name="form-description" rows="4" cols="50">{%formDescription%}</textarea>
+                <textarea id="form-description" name="form-description" rows="4" cols="50" required>{%formDescription%}</textarea>
             </div>
         </div>
 
         <div class="form-group">
             <label for="form-severity">Severity:</label>
             <div class="col-md-10">
-                <select name="form-severity" id="form-severity">
-                    <option value="0" selected="selected" disabled="true">[!Select!]</option>
+                <select name="form-severity" id="form-severity" required>
+                    <option value="" selected="selected" disabled="true">[!Select!]</option>
                     <%c++ for(const Json::Value& severityJson : severityLst) { %>
                         <%c++ const auto severity = severityJson.asString(); %>
                         <option value="{%severity%}">{%severity%}</option>

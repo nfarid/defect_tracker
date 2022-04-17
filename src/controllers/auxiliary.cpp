@@ -11,6 +11,7 @@ namespace Aux
 
 
 using namespace drogon;
+using std::string_literals::operator""s;
 
 SessionPtr getSession(const HttpRequestPtr& req) {
     assert(req && "HttpRequestPtr cannot be null");
@@ -64,7 +65,8 @@ std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const drogon::HttpReque
 
     for(const auto& [key, file] : parser.getFilesMap() ) {
         const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
-        const std::string& filename = timestamp + file.getMd5() + file.getFileName();
+        const std::string filename = timestamp + file.getMd5() + "." + std::string(file.getFileExtension() );
+        std::cerr<<"filename; "<<filename<<std::endl;
         postParams[key] = filename;
     }
 
