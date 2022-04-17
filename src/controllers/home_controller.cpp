@@ -60,7 +60,7 @@ Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
         data.insert("notification-lst", Json::Value{});
     }
 
-    co_return HttpResponse::newHttpViewResponse("home.csp", data);
+    co_return HttpResponse::newHttpViewResponse("home_index.csp", data);
 }
 
 Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {

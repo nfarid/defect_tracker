@@ -62,7 +62,7 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
         data.insert("severity-lst", Model::Ticket::getSeverityLst() );
         data.insert("status-lst", Model::Ticket::getStatusLst() );
         data.insert("stats", getStats(ticketLst) );
-        co_return HttpResponse::newHttpViewResponse("project.csp", data);
+        co_return HttpResponse::newHttpViewResponse("project_show.csp", data);
     } catch(std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
@@ -159,7 +159,7 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
         const std::vector projectLst = co_await Model::Project::searchProject(param);
         HttpViewData data = getViewData("project_search", *getSession(req) );
         data.insert("project-lst", toViewJson(projectLst) );
-        co_return HttpResponse::newHttpViewResponse("search.csp", data);
+        co_return HttpResponse::newHttpViewResponse("project_search.csp", data);
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();

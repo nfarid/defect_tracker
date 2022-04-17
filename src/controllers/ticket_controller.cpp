@@ -80,7 +80,7 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
             data.insert("can-delete", ticket.isReporter(userId) );
         }
 
-        co_return HttpResponse::newHttpViewResponse("ticket.csp", data);
+        co_return HttpResponse::newHttpViewResponse("ticket_show.csp", data);
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();

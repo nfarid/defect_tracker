@@ -48,7 +48,7 @@ Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, int32_t id)
         HttpViewData data = getViewData(user.getValueOfUsername(), *session);
         data.insert("user", user.toViewJson() );
 
-        co_return HttpResponse::newHttpViewResponse("user.csp", data);
+        co_return HttpResponse::newHttpViewResponse("user_show.csp", data);
     }  catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();

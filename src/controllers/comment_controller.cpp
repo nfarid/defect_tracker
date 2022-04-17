@@ -48,7 +48,7 @@ HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, int32_t ticketId,
     auto data = getViewData("Post Comment", *getSession(req) );
     data.insert("ticket-id", std::to_string(ticketId) );
     data.insert("form-error", errorMessage);
-    return HttpResponse::newHttpViewResponse("comment_form.csp", data);
+    return HttpResponse::newHttpViewResponse("comment_new.csp", data);
 }
 
 Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t ticketId)
