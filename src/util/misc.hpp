@@ -31,10 +31,10 @@ bool contains(const C& container, const T& val) {
 /**
  * @brief convert a list of string into a JSON
  */
-inline Json::Value toJson(const std::vector<std::string>& lst) {
+inline Json::Value toJson(const std::vector<std::string_view>& lst) {
     Json::Value json{};
     for(const auto& elem : lst)
-        json.append(elem);
+        json.append(std::string(elem) );
     return json;
 }
 

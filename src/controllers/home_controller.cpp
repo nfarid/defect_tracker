@@ -37,7 +37,8 @@ public:
 private:
     CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
 
-    std::vector<std::string> demoUsernameLst = {"demo_regular_user", "demo_project_staff", "demo_project_manager"};
+    const std::vector<std::string_view> demoUsernameLst = {"demo_regular_user",
+                                                           "demo_project_staff", "demo_project_manager"};
 };
 
 

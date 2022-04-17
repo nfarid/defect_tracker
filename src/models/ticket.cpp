@@ -32,8 +32,8 @@ namespace
 {
 
 
-std::vector<std::string> severityLst = {"low", "medium", "high"};
-std::vector<std::string> statusLst = {"new", "confirmed", "unreproducible", "resolved", "reopened"};
+const std::vector<std::string_view> severityLst = {"low", "medium", "high"};
+const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproducible", "resolved", "reopened"};
 
 
 }  // namespace
