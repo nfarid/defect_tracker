@@ -34,10 +34,10 @@ public:
     /**
      * @brief search for projects that match the query
      * @param db - the database client
-     * @param getQuery - the query from a GET request
+     * @param getParam - the query from a GET request
      * @return a list of projects
      */
-    static drogon::Task<std::vector<Project> > searchProject(std::string_view getQuery);
+    static drogon::Task<std::vector<Project> > searchProject(std::string_view getParam);
 
     /**
      * @brief obtain the manager of this project

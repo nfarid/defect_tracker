@@ -16,13 +16,13 @@
         <br/>
         <label>
             Title:
-            <input type="text" id="form-title" name="form-title" value="{%formTitle%}"/>
+            <input type="text" id="form-title" name="form-title" value="{%formTitle%}" maxlength="80" pattern="^[a-zA-Z0-9_\-\ ]*$" required/>
         </label>
         <br/>
 
         <label>
             Description:
-            <textarea id="form-description" name="form-description" rows="4" cols="50">{%formDescription%}</textarea>
+            <textarea id="form-description" name="form-description" rows="4" cols="60" required>{%formDescription%}</textarea>
         </label>
         <br/>
     <input type="submit" value="submit">

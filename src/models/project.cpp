@@ -3,8 +3,10 @@
 
 #include "account.hpp"
 #include "ticket.hpp"
+
 #include "../util/core.hpp"
 #include "../util/form_error.hpp"
+#include "../util/string.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpViewData.h>
@@ -27,47 +29,45 @@ namespace
 {
 
 
-std::vector<std::string> split(std::string_view str, std::string_view delim) {
-    std::vector<std::string> tokens;
+std::vector<std::string_view> splitView(std::string_view str, char delim) {
+    std::vector<std::string_view> tokenLst;
     auto beginPos = str.find_first_not_of(delim, 0);
     auto endPos = str.find_first_of(delim, beginPos);
     while(std::string::npos != beginPos || std::string::npos != endPos) {
-        tokens.emplace_back(str.substr(beginPos, endPos - beginPos) );
+        tokenLst.push_back(str.substr(beginPos, endPos - beginPos) );
         beginPos = str.find_first_not_of(delim, endPos);
         endPos = str.find_first_of(delim, beginPos);
     }
-    return tokens;
-}
-
-bool isalnum(std::string_view str) {
-    for(const char c : str) {
-        if(!std::isalnum(c) )
-            return false;
-    }
-    return true;
+    return tokenLst;
 }
 
 
-} // namespace
+}  // namespace
 
 
 drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, int32_t userId)
 {
-    CoroMapper<Project> orm = app().getDbClient("db");
+    CoroMapper<Project> projectOrm = app().getDbClient("db");
 
-    // Obtain the data from the POST request
-    const std::string& title = postParams.at("form-title");
-    const std::string& description = postParams.at("form-description");
+    // Obtain and filter the data from the POST request
 
-    // TODO: Add more requirements for a valid title & description
+    // Obtain and trim the data from the POST request
+    const std::string title = Util::getTrimmed(postParams.at("form-title") );
+    const std::string description = Util::getTrimmed(postParams.at("form-description") );
+
+    // Validate the data
     if(title.empty() )
         throw Util::FormError("Title cannot be empty");
+    if(title.size() > 80)
+        throw Util::FormError("Title cannot be longer than 80 characters");
+    if(!std::ranges::all_of(title, [](char c){return c == ' ' || c == '-' || Util::isAlNumUnderscore(c);}) )
+        throw Util::FormError("Title cannot contain invalid characters");
     if(description.empty() )
         throw Util::FormError("Description cannot be empty");
 
     // Title must be unique
     const Criteria hasTitle{Model::Project::Cols::_title, CompareOperator::EQ, title};
-    if(co_await orm.count(hasTitle) != 0)
+    if(co_await projectOrm.count(hasTitle) != 0)
         throw Util::FormError("That title already exists");
 
     Model::Project newProject;
@@ -75,26 +75,30 @@ drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, 
     newProject.setDescription(description);
     newProject.setManagerId(userId);
 
-    co_return co_await orm.insert(newProject);
+    co_return co_await projectOrm.insert(newProject);
 }
 
-Task<std::vector<Project> > Project::searchProject(std::string_view getQuery) {
+Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
     const DbClientPtr db = app().getDbClient("db");
 
-    // Convert the query from the GET request to a form suitable for tsquery
-    std::string tsQuery{};
-    for(const auto& token : split(getQuery, " ") ) {
-        if(isalnum(token) )
-            tsQuery.append(token).append("|");
+    // Convert the get data from the GET request to a form suitable for tsquery
+    // If the getParam is "foo bar <ínválíd;>" then the query is "foo|bar"
+    getParam = Util::getTrimmedView(getParam);
+    std::string query{};
+    for(const std::string_view token : splitView(getParam, ' ') ) {
+        const auto trimmedToken = Util::getTrimmedView(token);
+        if(Util::isAlNumUnderscore(trimmedToken) )
+            query.append(trimmedToken).append("|");
     }
-    if(tsQuery.empty() ) {
+    if(query.empty() ) {
         co_return{};
     }
-    tsQuery.pop_back();
+    query.pop_back();
 
     // Use postgres's full text search to search for projects that match the query
     const Result res = co_await db->execSqlCoro(
-        "SELECT * FROM project WHERE to_tsvector(title) @@ to_tsquery($1)", tsQuery
+        "SELECT * FROM project WHERE to_tsvector(title) @@ to_tsquery($1);",
+        query
     );
 
     // Convert the sql result into a list of project models
@@ -121,10 +125,10 @@ Task<std::vector<Account> > Project::getStaff() const {
     const DbClientPtr db = app().getDbClient("db");
 
     // Since user - project is a many-to-many relationship, a staff pivot table is used
-    const static std::string sql =
-            "SELECT Account.* FROM Account,Staff WHERE Staff.project_id = $1 AND Staff.staff_id = Account.id";
-    const int32_t id = getValueOfId();
-    const Result res = co_await db->execSqlCoro(sql, id);
+    const Result res = co_await db->execSqlCoro(
+        "SELECT account.* FROM account,staff WHERE staff.project_id = $1 AND staff.staff_id = account.id;",
+        getValueOfId()
+    );
 
     // Convert the sql result into a list of user models
     std::vector<Account> staffLst;
