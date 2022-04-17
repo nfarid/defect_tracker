@@ -7,6 +7,7 @@
 #include "form_error.hpp"
 #include "misc.hpp"
 #include "size.hpp"
+#include "string.hpp"
 #include "span.hpp"
 
 #include <sodium.h>
