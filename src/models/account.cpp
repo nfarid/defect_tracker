@@ -81,7 +81,7 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
         throw Util::FormError("Username cannot be empty.");
     if(!Util::isAlNumUnderscore(username) )
         throw Util::FormError("Username can only contain alphabet, number or underscore.");
-    if(username.size() < 30)
+    if(username.size() > 30)
         throw Util::FormError("Username cannot be longer than 30 characters");
     if(password.empty() )
         throw Util::FormError("Password cannot be empty.");
