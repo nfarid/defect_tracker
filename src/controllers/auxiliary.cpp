@@ -54,6 +54,10 @@ std::string getUsername(const Session& session) {
     return username.value_or("");
 }
 
+bool isValidToken(std::string_view token, const Session& session) {
+    return token == session.get<std::string>("token");
+}
+
 void logIn(Session& session, int32_t userId, const std::string& username) {
     session.insert("user_id", userId);
     session.insert("username", username);

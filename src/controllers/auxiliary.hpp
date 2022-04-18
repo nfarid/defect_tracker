@@ -59,6 +59,11 @@ int32_t getUserId(const drogon::Session& session);
 std::string getUsername(const drogon::Session& session);
 
 /**
+ * @brief checks if the sent token is valid
+ */
+bool isValidToken(std::string_view token, const drogon::Session& session);
+
+/**
  * @brief Creates the session when the user logs in
  */
 void logIn(drogon::Session& session, int32_t userId, const std::string& username);

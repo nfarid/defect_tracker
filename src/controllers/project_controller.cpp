@@ -140,6 +140,9 @@ Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
+        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
+            throw std::runtime_error("Invalid token");
+
         const Model::Project project = co_await Model::Project::createProject(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(Util::FormError& ex) {
@@ -168,9 +171,17 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
 
 Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
+    const Util::StringMap& postParams = req->parameters();
+
     if(!isLoggedIn(*session) ) // Not authenticated
         co_return HttpResponse::newNotFoundResponse();
+    if(!isValidToken(postParams.at("token"), *session) ) {  // Token isn't valid
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<"Invalid token"<<std::endl;
+        co_return HttpResponse::newNotFoundResponse();
+    }
+
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
+
     if(getUserId(*session) != project.getValueOfManagerId() ) // Not authorised (i.e. only project manager can delete their own project)
         co_return HttpResponse::newNotFoundResponse();
 

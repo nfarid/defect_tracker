@@ -70,6 +70,9 @@ Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
+        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
+            throw std::runtime_error("Invalid token");
+
         const std::string& username = postParams.at("demo-username");
         if(!Util::contains(demoUsernameLst, username) )
             throw Util::FormError("Not a valid demo user");

@@ -152,6 +152,9 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     std::optional<Task<HttpResponsePtr> > retryForm;
 
     try {
+        if(!isValidToken(postParams.at("token"), *session) )
+            throw std::runtime_error("Invalid token");
+
         co_await Model::Ticket::createTicket(postParams, fileParams, userId, projectId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     }  catch(const Util::FormError& ex) {
@@ -175,6 +178,9 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const auto& postParams = req->parameters();
     std::optional<Task<HttpResponsePtr> > retryForm;
     try {
+        if(!isValidToken(postParams.at("token"), *session) )
+            throw std::runtime_error("Invalid token");
+
         Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
         co_await ticket.update(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/");
@@ -191,9 +197,15 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
+    const Util::StringMap& postParams = req->parameters();
 
     if(!isLoggedIn(*session) ) // Not authenticated
         co_return HttpResponse::newNotFoundResponse();
+    if(!isValidToken(postParams.at("token"), *session) ) {
+        std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<"Invalid token"<<std::endl;
+        throw std::runtime_error("Invalid token");
+    }
+
     const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
     const int32_t userId = getUserId(*session);
     if(!ticket.isReporter(userId) ) // Not authorised (i.e. only the defect reporter can delete their own ticket)

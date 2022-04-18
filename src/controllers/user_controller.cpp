@@ -81,17 +81,19 @@ HttpResponsePtr UserController::newImpl(HttpRequestPtr req,
 
 Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
     // Data from the HTTP POST request
-    const auto& postParams = req->parameters();
+    const Util::StringMap& postParams = req->parameters();
+    const SessionPtr session = getSession(req);
 
     try {
+        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
+            throw std::runtime_error("Invalid token");
+
         const Model::Account account = co_await Model::Account::createAccount(postParams);
         // If the form data is valid and the user can be created, then login
         logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(Util::FormError& ex) {
-        // There was a form error, so let the user retry again
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
-        co_return newImpl(req, postParams, ex.what() );
+        co_return newImpl(req, postParams, ex.what() );  // There was a form error, so let the user retry again
     }  catch(const std::exception& ex) {
         // An unexpected error has occured
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
