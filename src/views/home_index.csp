@@ -41,6 +41,8 @@
     </form>
 <%c++ } %>
 
+<a href="/about">About</a>
+
 
 <%view _footer.csp %>
 

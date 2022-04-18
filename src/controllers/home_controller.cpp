@@ -24,6 +24,7 @@ class HomeController : public HttpController<HomeController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
+        ADD_METHOD_TO(HomeController::about, "/about", Get);
         ADD_METHOD_TO(HomeController::index, "/", Get);
         ADD_METHOD_TO(HomeController::index, "/index", Get);
         ADD_METHOD_TO(HomeController::index, "/home", Get);
@@ -31,6 +32,7 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
+    Task<HttpResponsePtr> about(HttpRequestPtr req);
     Task<HttpResponsePtr> index(HttpRequestPtr req);
     Task<HttpResponsePtr> demoLogin(HttpRequestPtr req);
 
@@ -41,7 +43,10 @@ private:
                                                            "demo_project_staff", "demo_project_manager"};
 };
 
-
+Task<HttpResponsePtr> HomeController::about(HttpRequestPtr req) {
+    HttpViewData data = getViewData("Home", *getSession(req) );
+    co_return HttpResponse::newHttpViewResponse("home_about.csp", data);
+}
 
 Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
