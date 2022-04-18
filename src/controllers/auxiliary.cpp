@@ -22,7 +22,7 @@ SessionPtr getSession(const HttpRequestPtr& req) {
         std::cerr<<"Session is not enabled"<<std::endl;
         throw std::runtime_error("Session is not enabled");
     }
-    if(session->find("token") )
+    if(!session->find("token") )
         session->insert("token",  drogon::utils::genRandomString(10) );
     return session;
 }
@@ -34,6 +34,7 @@ HttpViewData getViewData(const std::string& title, const Session& session) {
     data.insert("is-logged-in", isLoggedIn(session) );
     data.insert("session-username", HttpViewData::htmlTranslate(getUsername(session) ) );
     data.insert("session-user-id", getUserId(session) );
+    data.insert("token", session.get<std::string>("token") );
 
     return data;
 }

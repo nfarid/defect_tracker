@@ -4,6 +4,7 @@
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto ticketId = @@.get<std::string>("ticket-id"); %>
 <%c++ const auto formError = @@.get<std::string>("form-error"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 <h1>{%title%}</h1>
 
@@ -12,6 +13,7 @@
             <p>Error:{%formError%}</p>
         <%c++ } %>
         <textarea id="form-post" name="form-post" rows="4" cols="50"></textarea>
+        <input type="hidden" name="token" value="{%token%}"/>
         <input type="submit" value="submit">
     </fieldset>
 </form>

@@ -7,6 +7,7 @@
 <%c++ const auto project = @@.get<Json::Value>("project"); %>
 <%c++ const auto reporter = @@.get<Json::Value>("reporter"); %>
 <%c++ const auto commentLst = @@.get<Json::Value>("comment-lst"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 <%c++ const auto ticketId = ticket["id"].asInt(); %>
 <%c++ const auto ticketTitle = ticket["title"].asString();%>
@@ -61,6 +62,7 @@
 
         <%c++ if(canDelete) { %>
             <form action="/ticket/{%ticketId%}/delete" method="POST">
+                <input type="hidden" name="token" value="{%token%}"/>
                 <input type="submit" value="Delete" class="btn btn-danger me-2" onclick="return onDelete();"/>
             </form>
         <%c++ } %>

@@ -7,6 +7,7 @@
 <%c++ const auto sessionUsername = @@.get<std::string>("session-username"); %>
 <%c++ const auto demoUsernameLst = @@.get<Json::Value>("demo-username-lst"); %>
 <%c++ const auto notificationLst = @@.get<Json::Value>("notification-lst"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 
 
@@ -14,13 +15,13 @@
     <h1>Welcome {%sessionUsername%}!</h1> <hr/>
     <%c++ if(!notificationLst.empty() ) { %>
         <form action="/notification" method="POST">
-        <%c++ for(const auto& notification : notificationLst) { %>
-            <%c++ const auto notificationId = notification["id"].asInt(); %>
-            <%c++ const auto notificationSummary = notification["summary"].asString(); %>
-            <button type="submit" formaction="/notification/{%notificationId%}">{%notificationSummary%}</button>
-        <%c++ } %>
+            <%c++ for(const auto& notification : notificationLst) { %>
+                <%c++ const auto notificationId = notification["id"].asInt(); %>
+                <%c++ const auto notificationSummary = notification["summary"].asString(); %>
+                <button type="submit" formaction="/notification/{%notificationId%}">{%notificationSummary%}</button>
+            <%c++ } %>
+            <input type="hidden" name="token" value="{%token%}"/>
         </form>
-        <ul>
     <%c++ } else { %>
         <p>You have no notifications.</p>
     <%c++ } %>
@@ -36,6 +37,7 @@
                 <br/>
             <%c++ } %>
         </fieldset>
+        <input type="hidden" name="token" value="{%token%}"/>
     </form>
 <%c++ } %>
 

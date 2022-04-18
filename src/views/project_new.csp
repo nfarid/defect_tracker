@@ -6,6 +6,7 @@
 <%c++ const auto formError = @@.get<std::string>("form-error"); %>
 <%c++ const auto formTitle = @@.get<std::string>("form-username"); %>
 <%c++ const auto formDescription = @@.get<std::string>("form-password"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 <form action="{%formAction%}" method="POST">
     <fieldset>
@@ -25,7 +26,8 @@
             <textarea id="form-description" name="form-description" rows="4" cols="60" required>{%formDescription%}</textarea>
         </label>
         <br/>
-    <input type="submit" value="submit">
+        <input type="hidden" name="token" value="{%token%}"/>
+        <input type="submit" value="submit">
     </fieldset>
 </form>
 

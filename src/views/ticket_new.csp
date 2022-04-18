@@ -10,8 +10,9 @@
 <%c++ const auto formTitle = @@.get<std::string>("form-title"); %>
 <%c++ const auto formDescription = @@.get<std::string>("form-description"); %>
 <%c++ const auto formSeverity = @@.get<std::string>("form-severity"); %>
-
 <%c++ const auto projectName = project["title"].asString(); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
+
 <h1>{%projectName%}'s Report Form: </h1>
 
 <%c++ const auto projectId = project["id"].asInt(); %>
@@ -60,6 +61,7 @@
             </div>
         </div>
 
+        <input type="hidden" name="token" value="{%token%}"/>
         <div class="form-group">
             <input type="submit" value="submit">
         </div>

@@ -17,6 +17,7 @@
 <%c++ const auto isStaff = @@.get<bool>("is_staff"); %>
 <%c++ const auto statusLst = @@.get<Json::Value>("status_lst"); %>
 <%c++ const auto severityLst = @@.get<Json::Value>("severity-lst"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 <h1>Edit {%ticketTitle%} </h1>
 
@@ -79,6 +80,7 @@
             </div>
         </div>
 
+        <input type="hidden" name="token" value="{%token%}"/>
         <div class="form-group">
             <input type="submit" value="submit"/>
         </div>

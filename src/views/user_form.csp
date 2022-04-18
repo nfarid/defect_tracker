@@ -6,6 +6,7 @@
 <%c++ const auto formError = @@.get<std::string>("form-error"); %>
 <%c++ const auto formUsername = @@.get<std::string>("form-username"); %>
 <%c++ const auto formPassword = @@.get<std::string>("form-password"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 
 <div class="form-user">
@@ -21,7 +22,8 @@
         <input type="password" id="form-password" name="form-password" class="form-control" value="{%formPassword%}" placeholder="password" required/>
         <label for="form-password">Password</label>
     </div>
-<input type="submit" class="w-100 btn btn-lg btn-primary" value="{%title%}">
+    <input type="hidden" name="token" value="{%token%}"/>
+    <input type="submit" class="w-100 btn btn-lg btn-primary" value="{%title%}">
 </form>
 </div>
 

@@ -1,6 +1,7 @@
 
 <%c++ const auto title = @@.get<std::string>("title"); %>
 <%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
+<%c++ const auto token = @@.get<std::string>("token"); %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,6 +35,7 @@
     <div class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
     <%c++ if(isLoggedIn) {%>
         <form action="/logout" method="POST">
+            <input type="hidden" name="token" value="{%token%}"/>
             <input type="submit" value="Logout" class="btn btn-primary me-2"/>
         </form>
     <%c++ } else { %>
