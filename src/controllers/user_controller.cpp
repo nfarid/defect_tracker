@@ -85,8 +85,7 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
-            throw std::runtime_error("Invalid token");
+        CHECK_TOKEN();
 
         const Model::Account account = co_await Model::Account::createAccount(postParams);
         // If the form data is valid and the user can be created, then login

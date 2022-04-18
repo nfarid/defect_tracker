@@ -93,7 +93,7 @@ add_executable("${TEST_NAME}"
 
     "main.test.cpp"
 )
-
+target_compile_definitions("${TEST_NAME}" PRIVATE "TEST_")
 target_link_libraries("${TEST_NAME}" PRIVATE "${LIBRARIES}")
 ParseAndAddDrogonTests("${TEST_NAME}")
 target_include_directories("${TEST_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")

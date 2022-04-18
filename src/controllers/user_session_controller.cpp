@@ -70,8 +70,7 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
-            throw std::runtime_error("Invalid token");
+        CHECK_TOKEN();
 
         const auto user = co_await Model::Account::verifyLogin(postParams);
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
@@ -89,13 +88,7 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
 Task<HttpResponsePtr> UserSessionController::destroy(HttpRequestPtr req)
 {
     SessionPtr session = getSession(req);
-    const Util::StringMap& postParams = req->parameters();
-
-    if(!isValidToken(postParams.at("token"), *session) ) {  // Token isn't valid
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<"Invalid token"<<std::endl;
-        co_return HttpResponse::newNotFoundResponse();
-    }
-
+    CHECK_TOKEN();
     logOut(*session);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }

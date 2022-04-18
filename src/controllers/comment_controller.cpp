@@ -60,9 +60,7 @@ Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t tick
 
     const auto& postParams = req->parameters();
     try {
-        if(!isValidToken(postParams.at("token"), *session) ) // token must be valid
-            throw std::runtime_error("Invalid token");
-
+        CHECK_TOKEN();
         co_await Model::Comment::createComment(postParams, userId, ticketId);
         co_return HttpResponse::newRedirectionResponse("/");
     }  catch(const Util::FormError& ex) {

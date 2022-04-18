@@ -59,11 +59,6 @@ int32_t getUserId(const drogon::Session& session);
 std::string getUsername(const drogon::Session& session);
 
 /**
- * @brief checks if the sent token is valid
- */
-bool isValidToken(std::string_view token, const drogon::Session& session);
-
-/**
  * @brief Creates the session when the user logs in
  */
 void logIn(drogon::Session& session, int32_t userId, const std::string& username);
@@ -87,6 +82,20 @@ Json::Value toViewJson(const std::vector<T>& lst) {
 
 // A drogon callback function object that takes a http response from the controller
 using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;
+
+
+/*NO-FORMAT*/
+#ifndef TEST_
+    #define CHECK_TOKEN() do{ \
+            if(req->parameters().at("token") != getSession(req)->get<std::string>("token") ) { \
+                std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<"Invalid token"<<std::endl; \
+                co_return HttpResponse::newNotFoundResponse(); \
+            } \
+        }while(0) \
+    /*YES-FORMAT*/
+#else
+    #define CHECK_TOKEN()
+#endif
 
 
 }  // namespace Aux
