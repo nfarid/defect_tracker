@@ -44,9 +44,6 @@ const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproduc
 drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const FileMap& fileParams,
         int32_t reporterId, int32_t projectId)
 {
-    for(const auto& [k, v] : postParams)
-        std::clog<<k<<"; "<<v<<std::endl;
-
     // Obtain the data from the POST request
     const std::string title = getTrimmed(postParams.at("form-title") );
     const std::string description = getTrimmed(postParams.at("form-description") );
