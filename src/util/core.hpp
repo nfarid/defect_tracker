@@ -9,71 +9,16 @@
 #include <cstdint>
 
 
-/*For some basic core utilities (without making the header file too large), including:
- *
- * byte literal _B;  size_t literal _UZ;  ptrdiff_t literal _Z
- * Finally class for a scope guard
- * UNREACHABLE macro to indicate unreachable path
- * INTERNAL macro to indicate internal linkage
- * IMPLICIT macro to indicate implicit conversion
- * PURE and CONSTPURE macro to indicate pure and const functions
- * DumbPtr to indicate ownership, if smart pointers cannot be used
- * minmax function to get a min max pair, as well as respective min and max functions
- * STRINGIFY and STRINGIFY_MACRO macros to turn tokens into string or evaluated macros into string
- *
- */
+// For some basic core utilities
 
 namespace Util
 {
-
-
-// To indicate internal linkage
-// Because static has too many unrelated meanings
-#define UTIL_INTERNAL static
 
 
 // To explicitly state a constructor or conversion is implicit
 // Since there's no [[implicit]] attribute
 #define UTIL_IMPLICIT    /*[[implicit]]*/
 
-
-/**
- *\brief A scope guard to make sure a function is called once and only once at the end of scope
- *
- *\example Finally f = []{cleanup();}; //cleanup is guaranteed to be called
- */
-template<typename F>
-class Finally final {
-public:
-    UTIL_IMPLICIT Finally( F&& lambda ) noexcept :
-        mFunc{static_cast<F&&>( lambda ) },
-        mValid{true}
-    {}
-
-    UTIL_IMPLICIT Finally(const F& lambda ) noexcept :
-        mFunc{lambda},
-        mValid{true}
-    {}
-
-    Finally& operator=(Finally&&) = delete;  // No move nor copy
-
-    // mFunc will be called once and only once by the end of Finally's scope
-    ~Finally() noexcept {
-        (*this)();
-    }
-
-    // func can be called early
-    void operator()() noexcept {
-        if(mValid) {
-            mValid = false;
-            mFunc();
-        }
-    }
-
-private:
-    F mFunc;
-    bool mValid{};
-};
 
 // To indicate pure functions (i.e. it only returns a value and has no side effects)
 #if defined( __GNUG__ )
@@ -90,80 +35,6 @@ private:
     #define CONSTPURE [[nodiscard]] constexpr inline
 #endif  // if defined( __GNUG__ )
 
-inline namespace Udl
-{
-
-
-/**
- * @brief Creates a byte literal
- */
-UTIL_CONSTPURE std::byte operator"" _B( unsigned long long int x ) {
-    assert( x <= UCHAR_MAX );
-    return std::byte( x );
-}
-
-/**
- * @brief Creates a byte literal
- */
-UTIL_CONSTPURE std::byte operator"" _b( unsigned long long int x ) {
-    assert( x <= UCHAR_MAX );
-    return std::byte( x );
-}
-
-
-}  // namespace Udl
-
-
-// To indicate owning pointers and when smart pointers can't be used
-template<typename T>
-using DumbPtr = T*;
-
-
-/**
- *\brief Obtain a min-max pair from 2 values
- *
- *\example const auto [a, b] = minmax(9, 1);  // a is 1 and b is 9
- */
-template<typename T> UTIL_PURE constexpr
-auto minmax(const T& lhs, const T& rhs) noexcept {
-    using MinMaxPair = struct MinMaxPair {
-        T min;
-        T max;
-    };
-
-    return lhs < rhs ? MinMaxPair{lhs, rhs} : MinMaxPair{rhs, lhs};
-}
-
-/**
- *\brief Obtain the minimum from 2 values
- */
-template<typename T> UTIL_PURE constexpr
-T min(const T& lhs, const T& rhs) noexcept {
-    return lhs < rhs ? lhs : rhs;
-}
-
-/**
- *\brief Obtain the maximum from 2 values
- */
-template<typename T> UTIL_PURE constexpr
-T max(const T& lhs, const T& rhs) noexcept {
-    return lhs > rhs ? lhs : rhs;
-}
-
-// STRINGIFY turns a token into a string (char-array)
-// STRINGIFY_MACRO will first evaluate the macro then stringify it
-#define UTIL_STRINGIFY_MACRO(S) UTIL_STRINGIFY(S)
-#define UTIL_STRINGIFY(S) #S
-
-// An assertion that always assert even on release builds
-#ifndef NDEBUG
-    #define UTIL_ALWAYS_ASSERT(COND) assert(COND)
-#else
-#define UTIL_ALWAYS_ASSERT(COND) \
-    if(!(COND) ) { \
-        Util::Details::abort_with_message_(STRINGIFY(COND), __func__, STRINGIFY_MACRO(__LINE__) ); \
-    }
-#endif    // ifndef NDEBUG
 
 /*
  * To indicate that a code path should never be reached
@@ -188,20 +59,7 @@ T max(const T& lhs, const T& rhs) noexcept {
 /*YES-FORMAT*/
 
 
-
-// Details namespace for private internal details to be used by Util only
-/*NO-FORMAT*/
-namespace Details
-{
-// Immediately exits (with a failure return) and prints message to stderr
-// Only used for ALWAYS_ASSERT macro
-[[noreturn]]
-void abortWithMessage_(const char* message, const char* func = "", const char* line = "");
-}    // namespace Detail
-/*YES-FORMAT*/
-
-
-}// namespace Util
+}  // namespace Util
 
 
 // These are already in the global namespace anyway, and should be

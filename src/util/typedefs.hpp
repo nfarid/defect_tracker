@@ -13,14 +13,14 @@
 namespace drogon{class HttpFile;} //forward declaration
 
 
+//Some type aliases for common types
+
 namespace Util
 {
-
 
 using StringMap = std::unordered_map<std::string, std::string>;
 
 using FileMap = std::unordered_map<std::string, drogon::HttpFile>;
-
 
 }  // namespace Util
 

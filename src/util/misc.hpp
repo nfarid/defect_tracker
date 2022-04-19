@@ -10,7 +10,6 @@
 #include <charconv>
 #include <stdexcept>
 #include <string_view>
-#include <variant>
 
 
 namespace Util
@@ -42,7 +41,12 @@ inline Json::Value toJson(const std::vector<std::string_view>& lst) {
  * @brief Obtain the value of the specified environmental variable
  * @throws runtime_error if the specified environmental variable does not exist
  */
-CStringView getEnvironment(CStringView env_var);
+inline CStringView getEnvironment(CStringView envVar) {
+    const char* retval = std::getenv(envVar.c_str() );
+    if(!retval)
+        throw std::runtime_error("Error: " + to_string(envVar) + " not in environment");
+    return CStringView(retval);
+}
 
 /**
  * @brief Converts a string to a number
@@ -82,27 +86,6 @@ using StrToNum = struct [[nodiscard]] StrToNum {
 
     std::string_view m_str_ = "";
 };
-
-/**
- * @brief A function object class to apply functions to a variant
- *
- * @example:
- *  constexpr Visitor example_visitor{
- *      [](double d) -> int {return d + 3.4;},
- *      [](int i) -> int {return i - 2;},
- *  };
- *  constexpr auto example_variant = std::variant<double,int>{9.0};
- *  constexpr auto example_result = std::visit(example_visitor, example_variant); //will be 12
- *
- */
-template<typename ... Base>
-class Visitor : public Base ... {
-public:
-    using Base::operator() ...;
-};
-
-template<typename ... T>
-Visitor(T ...)->Visitor<T...>;
 
 
 }  // namespace Util

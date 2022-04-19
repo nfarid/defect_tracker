@@ -42,8 +42,6 @@ set(APP_SRC
     "models/generated/staff.cpp"
     "models/generated/ticket.cpp"
 
-    "util/all.cpp"
-
     "${VIEW_SRC}"
 )
 add_executable("${APP_NAME}"
