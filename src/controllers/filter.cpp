@@ -31,6 +31,31 @@ public:
     explicit OnlyLoggedIn() {}
 };
 
+//
+
+// This check if the token is valid
+class ValidToken : public HttpFilter<ValidToken> {
+public:
+    void doFilter(const HttpRequestPtr& req,
+            FilterCallback&& errorCallback,
+            FilterChainCallback&& continueCallback) override
+    {
+        /*NO-FORMAT*/
+        #ifndef TEST_
+            if(req->parameters().at("token") != Aux::getSession(req)->get<std::string>("token") )
+                continueCallback();
+            else
+                errorCallback(HttpResponse::newNotFoundResponse() );
+        #else
+            continueCallback();
+        #endif  // ifndef TEST_
+        /*YES-FORMAT*/
+    }
+
+    // This empty constructor is also needed due it being a drogon filter
+    explicit ValidToken() {}
+};
+
 
 }// namespace Ctrlr
 

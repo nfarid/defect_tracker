@@ -31,9 +31,9 @@ public:
         ADD_METHOD_TO(TicketController::show, "/ticket/{1}", Get);
         ADD_METHOD_TO(TicketController::newForm, "/project/{1}/report", Get, "Fltr::OnlyLoggedIn");
         ADD_METHOD_TO(TicketController::edit, "/ticket/{1}/edit", Get, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
+        ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
+        ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
         ADD_METHOD_TO(TicketController::throughNotification, "/notification/{1}", Post, "Fltr::OnlyLoggedIn");
     METHOD_LIST_END
     /*YES-FORMAT*/
@@ -145,8 +145,6 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     std::optional<Task<HttpResponsePtr> > retryForm;
 
     try {
-        CHECK_TOKEN();
-
         co_await Model::Ticket::createTicket(postParams, fileParams, userId, projectId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     }  catch(const Util::FormError& ex) {
@@ -168,8 +166,6 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const auto& postParams = req->parameters();
     std::optional<Task<HttpResponsePtr> > retryForm;
     try {
-        CHECK_TOKEN();
-
         Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
         co_await ticket.update(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/");
@@ -186,8 +182,6 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
-
-    CHECK_TOKEN();
 
     const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
     const int32_t userId = getUserId(*session);

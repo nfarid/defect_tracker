@@ -28,7 +28,7 @@ public:
         ADD_METHOD_TO(HomeController::index, "/", Get);
         ADD_METHOD_TO(HomeController::index, "/index", Get);
         ADD_METHOD_TO(HomeController::index, "/home", Get);
-        ADD_METHOD_TO(HomeController::demoLogin, "/demo-login", Post);
+        ADD_METHOD_TO(HomeController::demoLogin, "/demo-login", Post, "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -75,8 +75,6 @@ Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        CHECK_TOKEN();
-
         const std::string& username = postParams.at("demo-username");
         if(!Util::contains(demoUsernameLst, username) )
             throw Util::FormError("Not a valid demo user");

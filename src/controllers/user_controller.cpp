@@ -23,7 +23,7 @@ public:
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(UserController::show, "/user/{1}", Get);
         ADD_METHOD_TO(UserController::newForm, "/signup", Get);
-        ADD_METHOD_TO(UserController::create, "/signup", Post);
+        ADD_METHOD_TO(UserController::create, "/signup", Post, "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -85,8 +85,6 @@ Task<HttpResponsePtr> UserController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        CHECK_TOKEN();
-
         const Model::Account account = co_await Model::Account::createAccount(postParams);
         // If the form data is valid and the user can be created, then login
         logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );

@@ -25,8 +25,8 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(UserSessionController::newForm, "/login", Get);
-        ADD_METHOD_TO(UserSessionController::create, "/login", Post);
-        ADD_METHOD_TO(UserSessionController::destroy, "/logout", Post);
+        ADD_METHOD_TO(UserSessionController::create, "/login", Post, "Fltr::ValidToken");
+        ADD_METHOD_TO(UserSessionController::destroy, "/logout", Post, "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -70,8 +70,6 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        CHECK_TOKEN();
-
         const auto user = co_await Model::Account::verifyLogin(postParams);
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
@@ -88,7 +86,6 @@ Task<HttpResponsePtr> UserSessionController::create(HttpRequestPtr req) {
 Task<HttpResponsePtr> UserSessionController::destroy(HttpRequestPtr req)
 {
     SessionPtr session = getSession(req);
-    CHECK_TOKEN();
     logOut(*session);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }

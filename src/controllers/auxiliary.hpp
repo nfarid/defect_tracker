@@ -84,20 +84,6 @@ Json::Value toViewJson(const std::vector<T>& lst) {
 using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;
 
 
-/*NO-FORMAT*/
-#ifndef TEST_
-    #define CHECK_TOKEN() do{ \
-            if(req->parameters().at("token") != getSession(req)->get<std::string>("token") ) { \
-                std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<"Invalid token"<<std::endl; \
-                co_return HttpResponse::newNotFoundResponse(); \
-            } \
-        }while(0) \
-    /*YES-FORMAT*/
-#else
-    #define CHECK_TOKEN()
-#endif
-
-
 }  // namespace Aux
 
 #endif  // ifndef HPP_CONTROLLERS_AUXILIARY

@@ -27,9 +27,9 @@ public:
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(ProjectController::show, "/project/{1}", Get);
         ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(ProjectController::create, "/project-new", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(ProjectController::create, "/project-new", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
         ADD_METHOD_TO(ProjectController::search, "/search", Get);
-        ADD_METHOD_TO(ProjectController::destroy, "/project/{1}/delete", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(ProjectController::destroy, "/project/{1}/delete", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -134,8 +134,6 @@ Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const auto& postParams = req->parameters();
 
     try {
-        CHECK_TOKEN();
-
         const Model::Project project = co_await Model::Project::createProject(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
     } catch(Util::FormError& ex) {
@@ -164,8 +162,6 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
 
 Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
-
-    CHECK_TOKEN();
 
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
 

@@ -23,7 +23,7 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(CommentController::newForm, "/ticket/{1}/comment", Get, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(CommentController::create, "/ticket/{1}/comment", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(CommentController::create, "/ticket/{1}/comment", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -54,7 +54,6 @@ Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t tick
 
     const auto& postParams = req->parameters();
     try {
-        CHECK_TOKEN();
         co_await Model::Comment::createComment(postParams, userId, ticketId);
         co_return HttpResponse::newRedirectionResponse("/");
     }  catch(const Util::FormError& ex) {
