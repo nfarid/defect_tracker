@@ -22,6 +22,7 @@
 
 <%c++ const auto canEdit = @@.get<bool>("can-edit"); %>
 <%c++ const auto canDelete = @@.get<bool>("can-delete"); %>
+<%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
 
 <article>
     <h1>Ticket: {%ticketTitle%}</h1>
@@ -53,7 +54,9 @@
 
 <nav class="d-flex flex-wrap align-items-center justify-content-center">
 
-    <a href="/ticket/{%ticketId%}/comment" class="btn btn-secondary me-2">New comment</a>
+    <%c++ if(isLoggedIn) { %>
+        <a href="/ticket/{%ticketId%}/comment" class="btn btn-secondary me-2">New comment</a>
+    <%c++ } %>
 
 
     <%c++ if(canEdit) { %>
