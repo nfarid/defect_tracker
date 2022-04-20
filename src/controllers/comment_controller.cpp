@@ -22,8 +22,8 @@ class CommentController : public HttpController<CommentController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(CommentController::newForm, "/ticket/{1}/comment", Get);
-        ADD_METHOD_TO(CommentController::create, "/ticket/{1}/comment", Post);
+        ADD_METHOD_TO(CommentController::newForm, "/ticket/{1}/comment", Get, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(CommentController::create, "/ticket/{1}/comment", Post, "Fltr::OnlyLoggedIn");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -41,10 +41,6 @@ Task<HttpResponsePtr> CommentController::newForm(HttpRequestPtr req, int32_t tic
 }
 
 HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, int32_t ticketId, string errorMessage) {
-    const SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
-        return HttpResponse::newRedirectionResponse("/");
-
     auto data = getViewData("Post Comment", *getSession(req) );
     data.insert("ticket-id", std::to_string(ticketId) );
     data.insert("form-error", errorMessage);
@@ -54,8 +50,6 @@ HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, int32_t ticketId,
 Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t ticketId)
 {
     const SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) ) // Cannot create a comment if not logged in
-        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
 
     const auto& postParams = req->parameters();

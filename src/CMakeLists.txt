@@ -21,6 +21,8 @@ set(APP_SRC
     "app.cpp"
 
     "controllers/auxiliary.cpp"
+    "controllers/filter.cpp"
+
     "controllers/comment_controller.cpp"
     "controllers/home_controller.cpp"
     "controllers/project_controller.cpp"

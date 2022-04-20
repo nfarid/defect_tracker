@@ -29,12 +29,12 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(TicketController::show, "/ticket/{1}", Get);
-        ADD_METHOD_TO(TicketController::newForm, "/project/{1}/report", Get);
-        ADD_METHOD_TO(TicketController::edit, "/ticket/{1}/edit", Get);
-        ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post);
-        ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post);
-        ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post);
-        ADD_METHOD_TO(TicketController::throughNotification, "/notification/{1}", Post);
+        ADD_METHOD_TO(TicketController::newForm, "/project/{1}/report", Get, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::edit, "/ticket/{1}/edit", Get, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::create, "/project/{1}/report", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::update, "/ticket/{1}/edit", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(TicketController::throughNotification, "/notification/{1}", Post, "Fltr::OnlyLoggedIn");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -95,9 +95,6 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
         Util::StringMap formData, std::string errorMessage)
 {
     const SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) ) // Cannot create a new form if not logged in
-        co_return HttpResponse::newRedirectionResponse("/");
-
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
 
@@ -117,8 +114,6 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
 
 Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
-    if(!isLoggedIn(*session) ) // cannot edit if not authenticated
-        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
 
     try {
@@ -144,8 +139,6 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
 
 Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t projectId) {
     const SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) ) // Cannot create a ticket if not logged in
-        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
     const auto& [postParams, fileParams] = parseMultiPart(req);
 
@@ -170,8 +163,6 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
 
 Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     const auto session = getSession(req);
-    if(!isLoggedIn(*session) ) // cannot edit if not authenticated
-        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
@@ -196,8 +187,6 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
 
-    if(!isLoggedIn(*session) ) // Not authenticated
-        co_return HttpResponse::newNotFoundResponse();
     CHECK_TOKEN();
 
     const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
@@ -211,9 +200,6 @@ Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) 
 
 Task<HttpResponsePtr> TicketController::throughNotification(HttpRequestPtr req, int32_t notificationId) {
     SessionPtr session = getSession(req);
-    if(!isLoggedIn(*session) ) // Not authenticated
-        co_return HttpResponse::newNotFoundResponse();
-
     try {
         const Model::Notification notification = co_await mNotifcationOrm.findByPrimaryKey(notificationId);
 

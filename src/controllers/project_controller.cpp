@@ -26,10 +26,10 @@ public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(ProjectController::show, "/project/{1}", Get);
-        ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get);
-        ADD_METHOD_TO(ProjectController::create, "/project-new", Post);
+        ADD_METHOD_TO(ProjectController::newForm, "/project-new", Get, "Fltr::OnlyLoggedIn");
+        ADD_METHOD_TO(ProjectController::create, "/project-new", Post, "Fltr::OnlyLoggedIn");
         ADD_METHOD_TO(ProjectController::search, "/search", Get);
-        ADD_METHOD_TO(ProjectController::destroy, "/project/{1}/delete", Post);
+        ADD_METHOD_TO(ProjectController::destroy, "/project/{1}/delete", Post, "Fltr::OnlyLoggedIn");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
@@ -113,9 +113,6 @@ HttpResponsePtr ProjectController::newImpl(HttpRequestPtr req,
         Util::StringMap formData, std::string errorMessage)
 {
     const SessionPtr session = getSession(req);
-    // If the user hasn't logged in, they cannot create a project
-    if(!isLoggedIn(*session) )
-        return HttpResponse::newRedirectionResponse("/");
 
     // Else show the project creation
     HttpViewData data = getViewData("Create project."s, *session);
@@ -131,9 +128,6 @@ HttpResponsePtr ProjectController::newImpl(HttpRequestPtr req,
 
 Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
-    // If the user hasn't logged in, they cannot create a project
-    if(!isLoggedIn(*session) )
-        co_return HttpResponse::newRedirectionResponse("/");
     const int32_t userId = getUserId(*session);
 
     // Data from the HTTP POST request
@@ -171,8 +165,6 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
 Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
     SessionPtr session = getSession(req);
 
-    if(!isLoggedIn(*session) ) // Not authenticated
-        co_return HttpResponse::newNotFoundResponse();
     CHECK_TOKEN();
 
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
