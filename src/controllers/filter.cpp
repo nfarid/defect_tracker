@@ -10,7 +10,7 @@ namespace Fltr
 
 using namespace drogon;
 
-// This check if the user is logged in
+// This filter check if the user is logged in
 class OnlyLoggedIn : public HttpFilter<OnlyLoggedIn> {
 public:
     void doFilter(const HttpRequestPtr& req,
@@ -18,7 +18,7 @@ public:
             FilterChainCallback&& continueCallback) override
     {
         const SessionPtr session = Aux::getSession(req);
-        // If the user is logged in, then continue with the request, otherwise return a 401 error
+        // If the user is logged in, then continue with the request, otherwise redirect to the login page
         if(Aux::isLoggedIn(*session) )
             continueCallback();
         else
@@ -33,7 +33,7 @@ public:
 
 //
 
-// This check if the token is valid
+// This filter check if the token is valid during a POST request
 class ValidToken : public HttpFilter<ValidToken> {
 public:
     void doFilter(const HttpRequestPtr& req,
@@ -42,7 +42,8 @@ public:
     {
         /*NO-FORMAT*/
         #ifndef TEST_
-            if(req->parameters().at("token") != Aux::getSession(req)->get<std::string>("token") )
+            //If the token is correct continue, otherwise return an error page
+            if(req->parameters().at("token") == Aux::getSession(req)->get<std::string>("token") )
                 continueCallback();
             else
                 errorCallback(HttpResponse::newNotFoundResponse() );
