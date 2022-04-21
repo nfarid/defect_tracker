@@ -17,6 +17,28 @@ foreach(CSP_FILE ${CSP_LIST})
 endforeach()
 
 
+option(USE_POSTGRESQL "Use the postgresql database (if off use sqlite3 instead)" OFF)
+
+if(USE_POSTGRESQL)
+    set(GENERATED_MODELS
+        "models/generated_postgresql/account.cpp"
+        "models/generated_postgresql/comment.cpp"
+        "models/generated_postgresql/notification.cpp"
+        "models/generated_postgresql/project.cpp"
+        "models/generated_postgresql/staff.cpp"
+        "models/generated_postgresql/ticket.cpp"
+    )
+else()
+    set(GENERATED_MODELS
+        "models/generated_sqlite3/account.cpp"
+        "models/generated_sqlite3/comment.cpp"
+        "models/generated_sqlite3/notification.cpp"
+        "models/generated_sqlite3/project.cpp"
+        "models/generated_sqlite3/staff.cpp"
+        "models/generated_sqlite3/ticket.cpp"
+    )
+endif()
+
 set(APP_SRC
     "controllers/auxiliary.cpp"
     "controllers/filter.cpp"
@@ -35,19 +57,7 @@ set(APP_SRC
     "models/staff.cpp"
     "models/ticket.cpp"
 
-    "models/generated_postgresql/account.cpp"
-    "models/generated_postgresql/comment.cpp"
-    "models/generated_postgresql/notification.cpp"
-    "models/generated_postgresql/project.cpp"
-    "models/generated_postgresql/staff.cpp"
-    "models/generated_postgresql/ticket.cpp"
-
-    "models/generated_sqlite3/account.cpp"
-    "models/generated_sqlite3/comment.cpp"
-    "models/generated_sqlite3/notification.cpp"
-    "models/generated_sqlite3/project.cpp"
-    "models/generated_sqlite3/staff.cpp"
-    "models/generated_sqlite3/ticket.cpp"
+    "${GENERATED_MODELS}"
 
     "${VIEW_SRC}"
 
@@ -85,6 +95,10 @@ set(LIBRARIES
     "unofficial-sodium::sodium_config_public"
 )
 target_link_libraries("${APP_NAME}" PRIVATE "${LIBRARIES}")
+
+if(USE_POSTGRESQL)
+    target_compile_definitions("${APP_NAME}" PRIVATE "USE_POSTGRESQL")
+endif()
 
 
 
