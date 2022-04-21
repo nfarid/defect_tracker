@@ -70,13 +70,13 @@ add_subdirectory("src/")
 
 
 
-#Data directory
+#Other directories
 
-set(RES_SRC "${CMAKE_SOURCE_DIR}/data")
-if(EXISTS "${RES_SRC}")
-    set(RES_DEST "${CMAKE_BINARY_DIR}/app/data")
-    add_custom_target("resource_directory" ALL
-        COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${RES_SRC}" "${RES_DEST}"
-    )
-endif()
+add_custom_target("data_directory" ALL
+    COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${CMAKE_SOURCE_DIR}/data" "${CMAKE_BINARY_DIR}/app/data"
+)
+
+add_custom_target("sql_directory" ALL
+    COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${CMAKE_SOURCE_DIR}/sql" "${CMAKE_BINARY_DIR}/sql"
+)
 
