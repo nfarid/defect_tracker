@@ -4,7 +4,7 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated/account.hpp"
+#include "generated_postgresql/account.hpp"
 
 
 namespace Model

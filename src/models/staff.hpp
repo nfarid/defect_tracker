@@ -3,7 +3,7 @@
 #define HPP_MODELS_STAFF
 
 #include "../util/coroutine.hpp"
-#include "generated/staff.hpp"
+#include "generated_postgresql/staff.hpp"
 
 
 namespace Model

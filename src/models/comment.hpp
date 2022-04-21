@@ -4,7 +4,7 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated/comment.hpp"
+#include "generated_postgresql/comment.hpp"
 
 
 namespace Model
@@ -41,4 +41,4 @@ private:
 
 } // namespace Model
 
-#endif // ifndef HPP_MODELS_COMMENT
+#endif  // ifndef HPP_MODELS_COMMENT

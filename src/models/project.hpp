@@ -4,7 +4,7 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated/project.hpp"
+#include "generated_postgresql/project.hpp"
 
 #include <drogon/utils/coroutine.h>
 

@@ -3,7 +3,7 @@
 #define HPP_MODELS_NOTIFICATIONS
 
 #include "../util/coroutine.hpp"
-#include "generated/notification.hpp"
+#include "generated_postgresql/notification.hpp"
 
 
 namespace Model
