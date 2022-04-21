@@ -1,6 +1,9 @@
 
 #include "auxiliary.hpp"
+
 #include "../models/comment.hpp"
+
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>
@@ -31,7 +34,7 @@ public:
     Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t ticketId);
 
 private:
-    CoroMapper<Model::Comment> mCommentOrm{app().getDbClient("db")};
+    CoroMapper<Model::Comment> mCommentOrm{Util::getDb()};
 
     HttpResponsePtr newImpl(HttpRequestPtr req, int32_t ticketId, string errorMessage);
 };

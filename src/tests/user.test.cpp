@@ -1,7 +1,9 @@
 
+#include "../models/account.hpp"
+
 #include "../util/constants.hpp"
 #include "../util/coroutine.hpp"
-#include "../models/account.hpp"
+#include "../util/database.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpClient.h>
@@ -60,7 +62,7 @@ DROGON_TEST(UserController_Create){
         }
 
         // User should be in the database
-        CoroMapper<Model::Account> accountOrm = app().getDbClient("db");
+        CoroMapper<Model::Account> accountOrm = Util::getDb();
         const auto foundUsersAfterCreation = co_await accountOrm.findBy(hasUsername);
         CO_REQUIRE(size(foundUsersAfterCreation) == 1);                    // there should be 1 new user with the username
 

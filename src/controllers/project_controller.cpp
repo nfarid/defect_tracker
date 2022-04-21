@@ -3,6 +3,8 @@
 #include "../models/account.hpp"
 #include "../models/project.hpp"
 #include "../models/ticket.hpp"
+
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>
@@ -40,7 +42,7 @@ public:
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
 
 private:
-    CoroMapper<Model::Project> mProjectOrm = app().getDbClient("db");
+    CoroMapper<Model::Project> mProjectOrm = Util::getDb();
 
     HttpResponsePtr newImpl(HttpRequestPtr req, Util::StringMap formData,
             std::string errorMessage);

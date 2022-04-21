@@ -1,6 +1,8 @@
 
-#include "../util/constants.hpp"
 #include "../models/ticket.hpp"
+
+#include "../util/constants.hpp"
+#include "../util/database.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpClient.h>
@@ -14,7 +16,7 @@ using namespace drogon::orm;
 using std::string_literals::operator""s;
 
 DROGON_TEST(TicketController_Show){
-    auto orm = Mapper<Model::Ticket>(app().getDbClient("db") );
+    auto orm = Mapper<Model::Ticket>(Util::getDb() );
     const Criteria hasTitle{Model::Ticket::Cols::_title, CompareOperator::EQ, "ticket"};
     DrogonDbException ex;
     orm.findOne(hasTitle,

@@ -2,6 +2,7 @@
 #include "comment.hpp"
 
 #include "../util/constants.hpp"
+#include "../util/database.hpp"
 #include "../util/string.hpp"
 
 #include <drogon/HttpAppFramework.h>
@@ -18,7 +19,7 @@ using namespace drogon::orm;
 
 drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, int32_t userId, int32_t ticketId)
 {
-    CoroMapper<Comment> orm = app().getDbClient("db");
+    CoroMapper<Comment> orm = Util::getDb();
 
     Model::Comment newComment{};
     newComment.setPost(Util::getTrimmed(postParams.at("form-post") ) );

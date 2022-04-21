@@ -18,8 +18,6 @@ endforeach()
 
 
 set(APP_SRC
-    "app.cpp"
-
     "controllers/auxiliary.cpp"
     "controllers/filter.cpp"
 
@@ -45,6 +43,8 @@ set(APP_SRC
     "models/generated/ticket.cpp"
 
     "${VIEW_SRC}"
+
+    "util/database.cpp"
 )
 add_executable("${APP_NAME}"
     "${APP_SRC}"

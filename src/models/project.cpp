@@ -5,6 +5,7 @@
 #include "ticket.hpp"
 
 #include "../util/core.hpp"
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/string.hpp"
 
@@ -47,7 +48,7 @@ std::vector<std::string_view> splitView(std::string_view str, char delim) {
 
 drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, int32_t userId)
 {
-    CoroMapper<Project> projectOrm = app().getDbClient("db");
+    CoroMapper<Project> projectOrm = Util::getDb();
 
     // Obtain and filter the data from the POST request
 
@@ -79,7 +80,7 @@ drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, 
 }
 
 Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
-    const DbClientPtr db = app().getDbClient("db");
+    const DbClientPtr db = Util::getDb();
 
     // Convert the get data from the GET request to a form suitable for tsquery
     // If the getParam is "foo bar <ínválíd;>" then the query is "foo|bar"
@@ -111,18 +112,18 @@ Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
 }
 
 Task<Account> Project::getManager() const {
-    CoroMapper<Account> accountOrm = app().getDbClient("db");
+    CoroMapper<Account> accountOrm = Util::getDb();
     co_return co_await accountOrm.findByPrimaryKey(getValueOfManagerId() );
 }
 
 Task<std::vector<Ticket> > Project::getTickets() const {
-    CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
+    CoroMapper<Ticket> ticketOrm = Util::getDb();
     const Criteria belongsToProject{Ticket::Cols::_project_id, CompareOperator::EQ, getValueOfId()};
     co_return co_await ticketOrm.findBy(belongsToProject);
 }
 
 Task<std::vector<Account> > Project::getStaff() const {
-    const DbClientPtr db = app().getDbClient("db");
+    const DbClientPtr db = Util::getDb();
 
     // Since user - project is a many-to-many relationship, a staff pivot table is used
     const Result res = co_await db->execSqlCoro(

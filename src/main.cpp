@@ -1,53 +1,26 @@
 
-#include "app.hpp"
+#include "util/database.hpp"
+
 #include "util/misc.hpp"
 
-#include <cstring>
-#include <string_view>
+#include <drogon/HttpAppFramework.h>
+
+using drogon::app;
 
 int main(int argc, char** argv) {
-    std::string_view portStr{};
-    std::string_view dbUrl{};
-
-    // Parse command line arguments
-    // E.g. if arguments are ./app  --port 5000;   then set portStr to 5000
-    for(int i=1; i+1<argc; ++i) {
-        if(!std::strcmp(argv[i], "--port") )
-            portStr = argv[i+1];
-        if(!std::strcmp(argv[i], "--db") )
-            dbUrl = argv[i+1];
-    }
-
-    // If not passed by command line then use environment
-    if(portStr.empty() ) {
-        try {
-            portStr = Util::getEnvironment("PORT");
-        } catch(std::exception& ex) {
-            std::cerr<<ex.what()<<std::endl;
-            std::cerr<<"No port specified, defaulting to 3000"<<std::endl;
-            portStr = "3000";
-        }
-    }
     unsigned short port = 3000;
     try {
+        const Util::CStringView portStr = Util::getEnvironment("PORT");
         port = Util::StrToNum{portStr};
-    } catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        std::cerr<<"Invalid port specified, defaulting to 3000"<<std::endl;
+    }  catch(const std::exception& ex) {
+        std::cerr<<"Port not specified! Defaulting to 3000"<<std::endl;
     }
+    std::cout<<"Listening to port "<<port<<std::endl;
 
-    try {
-        if(dbUrl.empty() )
-            dbUrl = Util::getEnvironment("DATABASE_URL");
-    } catch(std::exception& ex) {
-        std::cerr<<ex.what()<<std::endl;
-        std::cerr<<"Database url not specified"<<std::endl;
-        std::cerr<<"Either set DATABASE_URL environment or pass in --db parameter"<<std::endl;
-        return EXIT_FAILURE;
-    }
+    app().addListener("0.0.0.0", port);
+    app().enableSession();
 
-    auto& app = getApp(port, dbUrl);
-    app.run();
+    app().run();
 
     return EXIT_SUCCESS;
 }

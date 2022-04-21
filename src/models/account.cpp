@@ -4,6 +4,7 @@
 #include "notification.hpp"
 
 #include "../util/cstring_view.hpp"
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/string.hpp"
 
@@ -47,7 +48,7 @@ using namespace drogon::orm;
 
 Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
 {
-    CoroMapper<Account> orm = app().getDbClient("db");
+    CoroMapper<Account> orm = Util::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string username = Util::getTrimmed(postParams.at("form-username") );
@@ -70,7 +71,7 @@ Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
 
 Task<Account> Account::createAccount(const Util::StringMap& postParams)
 {
-    CoroMapper<Account> orm = app().getDbClient("db");
+    CoroMapper<Account> orm = Util::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string& username = Util::getTrimmed(postParams.at("form-username") );
@@ -100,7 +101,7 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
 }
 
 drogon::Task<std::vector<Notification> > Account::getNotifications() const {
-    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+    CoroMapper<Notification> notificationOrm = Util::getDb();
     const Criteria toUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
     co_return co_await notificationOrm.findBy(toUser);
 }

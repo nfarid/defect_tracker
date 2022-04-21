@@ -1,11 +1,14 @@
 
 #include "auxiliary.hpp"
+
 #include "../models/account.hpp"
 #include "../models/comment.hpp"
 #include "../models/notification.hpp"
 #include "../models/project.hpp"
 #include "../models/staff.hpp"
 #include "../models/ticket.hpp"
+
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 
@@ -47,7 +50,7 @@ public:
     Task<HttpResponsePtr> throughNotification(HttpRequestPtr req, int32_t notificationId);
 
 private:
-    DbClientPtr mDB = app().getDbClient("db");
+    DbClientPtr mDB = Util::getDb();
 
     CoroMapper<Model::Ticket> mTicketOrm{mDB};
     CoroMapper<Model::Project> mProjectOrm{mDB};

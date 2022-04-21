@@ -3,6 +3,8 @@
 
 #include "../models/account.hpp"
 #include "../models/notification.hpp"
+
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 
@@ -37,7 +39,7 @@ public:
     Task<HttpResponsePtr> demoLogin(HttpRequestPtr req);
 
 private:
-    CoroMapper<Model::Account> mAccountOrm = app().getDbClient("db");
+    CoroMapper<Model::Account> mAccountOrm = Util::getDb();
 
     const std::vector<std::string_view> demoUsernameLst = {"demo_regular_user",
                                                            "demo_project_staff", "demo_project_manager"};

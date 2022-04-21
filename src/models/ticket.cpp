@@ -8,6 +8,7 @@
 
 #include "../util/core.hpp"
 #include "../util/constants.hpp"
+#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/string.hpp"
 #include "../util/misc.hpp"
@@ -73,7 +74,7 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const Fil
     }
 
     // Validation is complete, so create a new ticket
-    CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
+    CoroMapper<Ticket> ticketOrm = Util::getDb();
     Ticket newTicket;
     newTicket.setTitle(title);
     newTicket.setDescription(description);
@@ -87,7 +88,7 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const Fil
     const Ticket createdTicket = co_await ticketOrm.insert(newTicket);
 
     // Create a notification for the new ticket
-    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+    CoroMapper<Notification> notificationOrm = Util::getDb();
     Notification newNotifcation;
     newNotifcation.setSummary("A new defect has been reported: "s + title);
     newNotifcation.setTicketId( createdTicket.getValueOfId() );
@@ -111,23 +112,23 @@ Json::Value Ticket::getStatusLst() {
 }
 
 Task<Account> Ticket::getReporter() const {
-    CoroMapper<Account> accountOrm = app().getDbClient("db");
+    CoroMapper<Account> accountOrm = Util::getDb();
     co_return co_await accountOrm.findByPrimaryKey(getValueOfReporterId() );
 }
 
 drogon::Task<Project> Ticket::getProject() const {
-    CoroMapper<Project> projectOrm = app().getDbClient("db");
+    CoroMapper<Project> projectOrm = Util::getDb();
     co_return co_await projectOrm.findByPrimaryKey(getValueOfProjectId() );
 }
 
 drogon::Task<std::vector<Comment> > Ticket::getComments() const {
-    CoroMapper<Comment> commentOrm = app().getDbClient("db");
+    CoroMapper<Comment> commentOrm = Util::getDb();
     const Criteria belongToTicket{Comment::Cols::_ticket_id, CompareOperator::EQ, getValueOfId()};
     co_return co_await commentOrm.findBy(belongToTicket);
 }
 
 drogon::Task<bool> Ticket::canEdit(int32_t userId) const {
-    const DbClientPtr db = app().getDbClient("db");
+    const DbClientPtr db = Util::getDb();
 
     // The reporter can edit the ticket
     if(isReporter(userId) )
@@ -151,7 +152,7 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
 
     // If the ticket is not yet assigned, then a staff can self-assign
     if(!getAssignedId() && co_await project.isStaff(userId) ) {
-        CoroMapper<Account> accountOrm = app().getDbClient("db");
+        CoroMapper<Account> accountOrm = Util::getDb();
         const Account staff = co_await accountOrm.findByPrimaryKey(userId);
         co_return{staff};
     }
@@ -161,7 +162,7 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
 }
 
 drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
-    CoroMapper<Ticket> ticketOrm = app().getDbClient("db");
+    CoroMapper<Ticket> ticketOrm = Util::getDb();
     const Model::Project project  = co_await getProject();
 
     if(!co_await canEdit(userId) ) // cannot edit if not authorised
@@ -183,7 +184,7 @@ drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
                 if(!getAssignedId() || (getValueOfAssignedId() != assignedId) ) {  // if assigning to a new staff member
                     setAssignedId(assignedId);
                     // Create a notification
-                    CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+                    CoroMapper<Notification> notificationOrm = Util::getDb();
                     Notification newNotifcation;
                     newNotifcation.setSummary("You have been assigned a ticket: "s + getValueOfTitle() );
                     newNotifcation.setTicketId(getValueOfId() );
@@ -206,7 +207,7 @@ drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
         setSeverity(severity);
         if( (status == "resolved") && (getValueOfStatus() != status) ) {  // if change status to resolved
             // Create a notification
-            CoroMapper<Notification> notificationOrm = app().getDbClient("db");
+            CoroMapper<Notification> notificationOrm = Util::getDb();
             Notification newNotifcation;
             newNotifcation.setSummary("Your ticket has been resolved: "s + getValueOfTitle() );
             newNotifcation.setTicketId(getValueOfId() );
