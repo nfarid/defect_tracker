@@ -4,7 +4,12 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated_postgresql/account.hpp"
+
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/account.hpp"
+#else
+    #include "generated_sqlite3/account.hpp"
+#endif  // ifndef USE_POSTGRESQL
 
 
 namespace Model
@@ -17,7 +22,7 @@ class Notification;
 /**
  * @brief The Account class - an extension of the generated Account model with custom methods
  */
-class Account : public drogon_model::bug_tracker::Account {
+class Account : public drogon_model::Account {
 public:
     /**
      * @brief verifies the data from the login form
@@ -44,7 +49,7 @@ public:
     Json::Value toViewJson() const;
 
 private:
-    using drogon_model::bug_tracker::Account::Account;
+    using drogon_model::Account::Account;
 
     friend drogon::orm::CoroMapper<Account>;
 };

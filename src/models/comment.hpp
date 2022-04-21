@@ -4,7 +4,12 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated_postgresql/comment.hpp"
+
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/comment.hpp"
+#else
+    #include "generated_sqlite3/comment.hpp"
+#endif  // ifndef USE_POSTGRESQL
 
 
 namespace Model
@@ -14,7 +19,7 @@ namespace Model
 /**
  * @brief The Comment class - an extension of the generated Comment model with custom methods
  */
-class Comment : public drogon_model::bug_tracker::Comment {
+class Comment : public drogon_model::Comment {
 public:
     /**
      * @brief validates the data from the comment creation form
@@ -33,7 +38,7 @@ public:
     Json::Value toViewJson() const;
 
 private:
-    using drogon_model::bug_tracker::Comment::Comment;
+    using drogon_model::Comment::Comment;
 
     friend drogon::orm::CoroMapper<Comment>;
 };

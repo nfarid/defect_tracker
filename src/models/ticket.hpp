@@ -4,7 +4,12 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated_postgresql/ticket.hpp"
+
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/ticket.hpp"
+#else
+    #include "generated_sqlite3/ticket.hpp"
+#endif  // ifndef USE_POSTGRESQL
 
 
 namespace Model
@@ -19,7 +24,7 @@ class Project;
 /**
  * @brief The Ticket class - an extension of the generated Ticket model with custom methods
  */
-class Ticket : public drogon_model::bug_tracker::Ticket {
+class Ticket : public drogon_model::Ticket {
 public:
     /**
      * @brief creates a ticket from the data from the form
@@ -87,7 +92,7 @@ public:
     Json::Value toViewJson() const;
 
 private:
-    using drogon_model::bug_tracker::Ticket::Ticket;
+    using drogon_model::Ticket::Ticket;
     friend drogon::orm::CoroMapper<Ticket>;
 };
 

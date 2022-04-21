@@ -3,7 +3,12 @@
 #define HPP_MODELS_STAFF
 
 #include "../util/coroutine.hpp"
-#include "generated_postgresql/staff.hpp"
+
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/staff.hpp"
+#else
+    #include "generated_sqlite3/staff.hpp"
+#endif  // ifndef USE_POSTGRESQL
 
 
 namespace Model
@@ -13,9 +18,9 @@ namespace Model
 /**
  * @brief The Staff class - an extension of the generated Staff model with custom methods
  */
-class Staff : public drogon_model::bug_tracker::Staff {
-public:
-    using drogon_model::bug_tracker::Staff::Staff;
+class Staff : public drogon_model::Staff {
+private:
+    using drogon_model::Staff::Staff;
 
     friend drogon::orm::CoroMapper<Staff>;
 };

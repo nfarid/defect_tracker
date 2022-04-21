@@ -3,7 +3,12 @@
 #define HPP_MODELS_NOTIFICATIONS
 
 #include "../util/coroutine.hpp"
-#include "generated_postgresql/notification.hpp"
+
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/notification.hpp"
+#else
+    #include "generated_sqlite3/notification.hpp"
+#endif  // ifndef USE_POSTGRESQL
 
 
 namespace Model
@@ -13,7 +18,7 @@ namespace Model
 /**
  * @brief The Notification class - an extension of the generated Notification model with custom methods
  */
-class Notification : public drogon_model::bug_tracker::Notification {
+class Notification : public drogon_model::Notification {
 public:
 
     /**
@@ -22,7 +27,7 @@ public:
     Json::Value toViewJson() const;
 
 private:
-    using drogon_model::bug_tracker::Notification::Notification;
+    using drogon_model::Notification::Notification;
 
     friend drogon::orm::CoroMapper<Notification>;
 };

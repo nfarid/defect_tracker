@@ -4,9 +4,13 @@
 
 #include "../util/coroutine.hpp"
 #include "../util/typedefs.hpp"
-#include "generated_postgresql/project.hpp"
 
-#include <drogon/utils/coroutine.h>
+#ifdef USE_POSTGRESQL
+    #include "generated_postgresql/project.hpp"
+#else
+    #include "generated_sqlite3/project.hpp"
+#endif  // ifndef USE_POSTGRESQL
+
 
 
 namespace Model
@@ -19,7 +23,7 @@ class Ticket;
 /**
  * @brief The Project class - an extension of the generated Project model with custom methods
  */
-class Project : public drogon_model::bug_tracker::Project {
+class Project : public drogon_model::Project {
 public:
     /**
      * @brief validates the data from the POST parameter
@@ -65,7 +69,7 @@ public:
     Json::Value toViewJson() const;
 
 private:
-    using drogon_model::bug_tracker::Project::Project;
+    using drogon_model::Project::Project;
 
     friend drogon::orm::CoroMapper<Project>;
 };
