@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace sqlite3
-{
-
-
 class Account;
 class Ticket;
 
@@ -254,9 +250,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace sqlite3
 
 
 } // namespace drogon_model

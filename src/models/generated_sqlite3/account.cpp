@@ -14,7 +14,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::sqlite3;
+using namespace drogon_model;
 
 const std::string Account::Cols::_id = "id";
 const std::string Account::Cols::_username = "username";

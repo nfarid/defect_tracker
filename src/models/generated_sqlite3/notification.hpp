@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace sqlite3
-{
-
-
 class Notification{
 public:
     struct Cols{
@@ -229,9 +225,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace sqlite3
 
 
 } // namespace drogon_model

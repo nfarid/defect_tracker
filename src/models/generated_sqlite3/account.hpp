@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace sqlite3
-{
-
-
 class Comment;
 class Project;
 class Staff;
@@ -231,9 +227,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace sqlite3
 
 
 } // namespace drogon_model

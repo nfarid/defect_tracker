@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace sqlite3
-{
-
-
 class Staff{
 public:
     struct Cols{
@@ -212,9 +208,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace sqlite3
 
 
 } // namespace drogon_model

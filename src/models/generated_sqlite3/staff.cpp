@@ -9,7 +9,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::sqlite3;
+using namespace drogon_model;
 
 const std::string Staff::Cols::_id = "id";
 const std::string Staff::Cols::_project_id = "project_id";

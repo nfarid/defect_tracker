@@ -13,7 +13,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::sqlite3;
+using namespace drogon_model;
 
 const std::string Project::Cols::_id = "id";
 const std::string Project::Cols::_title = "title";

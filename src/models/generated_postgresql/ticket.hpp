@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace bug_tracker
-{
-
-
 class Account;
 class Comment;
 class Project;
@@ -390,9 +386,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace bug_tracker
 
 
 } // namespace drogon_model

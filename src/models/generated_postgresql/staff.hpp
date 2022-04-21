@@ -43,10 +43,6 @@ namespace drogon_model
 {
 
 
-namespace bug_tracker
-{
-
-
 class Staff{
 public:
     struct Cols{
@@ -225,9 +221,6 @@ public:
         return sql;
     }
 };
-
-
-}  // namespace bug_tracker
 
 
 } // namespace drogon_model

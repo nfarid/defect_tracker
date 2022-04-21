@@ -8,7 +8,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::bug_tracker;
+using namespace drogon_model;
 
 const std::string Notification::Cols::_id = "id";
 const std::string Notification::Cols::_summary = "summary";
