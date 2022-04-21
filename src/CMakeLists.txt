@@ -42,6 +42,13 @@ set(APP_SRC
     "models/generated/staff.cpp"
     "models/generated/ticket.cpp"
 
+    "models/generated_sqlite3/account.cpp"
+    "models/generated_sqlite3/comment.cpp"
+    "models/generated_sqlite3/notification.cpp"
+    "models/generated_sqlite3/project.cpp"
+    "models/generated_sqlite3/staff.cpp"
+    "models/generated_sqlite3/ticket.cpp"
+
     "${VIEW_SRC}"
 
     "util/database.cpp"
