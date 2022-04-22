@@ -96,11 +96,18 @@ Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
     }
     query.pop_back();
 
+#ifdef USE_POSTGRESQL
     // Use postgres's full text search to search for projects that match the query
     const Result res = co_await db->execSqlCoro(
         "SELECT * FROM project WHERE to_tsvector(title) @@ to_tsquery($1);",
         query
     );
+#else
+    const Result res = co_await db->execSqlCoro(
+        "SELECT * FROM project WHERE title LIKE '%?%'",
+        query
+    );
+#endif // ifdef USE_POSTGRESQL
 
     // Convert the sql result into a list of project models
     std::vector<Project> projectLst;
@@ -126,10 +133,17 @@ Task<std::vector<Account> > Project::getStaff() const {
     const DbClientPtr db = Util::getDb();
 
     // Since user - project is a many-to-many relationship, a staff pivot table is used
+#ifdef USE_POSTGRESQL
     const Result res = co_await db->execSqlCoro(
         "SELECT account.* FROM account,staff WHERE staff.project_id = $1 AND staff.staff_id = account.id;",
         getValueOfId()
     );
+#else
+    const Result res = co_await db->execSqlCoro(
+        "SELECT account.* FROM account,staff WHERE staff.project_id = ? AND staff.staff_id = account.id;",
+        getValueOfId()
+    );
+#endif  // ifdef USE_POSTGRESQL
 
     // Convert the sql result into a list of user models
     std::vector<Account> staffLst;
