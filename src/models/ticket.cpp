@@ -43,7 +43,7 @@ const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproduc
 
 
 drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const FileMap& fileParams,
-        int32_t reporterId, int32_t projectId)
+        PrimaryKeyType reporterId, PrimaryKeyType projectId)
 {
     // Obtain the data from the POST request
     const std::string title = getTrimmed(postParams.at("form-title") );
@@ -127,7 +127,7 @@ drogon::Task<std::vector<Comment> > Ticket::getComments() const {
     co_return co_await commentOrm.findBy(belongToTicket);
 }
 
-drogon::Task<bool> Ticket::canEdit(int32_t userId) const {
+drogon::Task<bool> Ticket::canEdit(PrimaryKeyType userId) const {
     const DbClientPtr db = Util::getDb();
 
     // The reporter can edit the ticket
@@ -139,11 +139,11 @@ drogon::Task<bool> Ticket::canEdit(int32_t userId) const {
     co_return co_await project.isStaff(userId);
 }
 
-bool Ticket::isReporter(int32_t userId) const {
+bool Ticket::isReporter(PrimaryKeyType userId) const {
     return userId == getValueOfReporterId();
 }
 
-drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const {
+drogon::Task<std::vector<Account> > Ticket::getAssignables(PrimaryKeyType userId) const {
     const Model::Project project = co_await getProject();
 
     // Manager can assign to any staff
@@ -161,7 +161,7 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(int32_t userId) const
     co_return{};
 }
 
-drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
+drogon::Task<> Ticket::update(const StringMap& postParams, PrimaryKeyType userId) {
     CoroMapper<Ticket> ticketOrm = Util::getDb();
     const Model::Project project  = co_await getProject();
 
@@ -178,7 +178,7 @@ drogon::Task<> Ticket::update(const StringMap& postParams, int32_t userId) {
     const std::vector assingableLst = co_await getAssignables(userId);
     if(!assingableLst.empty() && postParams.contains("form-assign") ) {
         const std::string assignedIdStr = getTrimmed(postParams.at("form-assign") );
-        const int32_t assignedId = StrToNum{assignedIdStr};
+        const PrimaryKeyType assignedId = StrToNum{assignedIdStr};
         for(const auto& staff : assingableLst) {
             if(staff.getValueOfId() == assignedId) {  // if the assigned staff is valid
                 if(!getAssignedId() || (getValueOfAssignedId() != assignedId) ) {  // if assigning to a new staff member

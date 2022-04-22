@@ -33,7 +33,7 @@ public:
      * @return a newly created Project if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Project> createProject(const Util::StringMap& postParams, int32_t userId);
+    static drogon::Task<Project> createProject(const Util::StringMap& postParams, PrimaryKeyType userId);
 
     /**
      * @brief search for projects that match the query
@@ -61,7 +61,7 @@ public:
     /**
      * @brief check if the user with the specified userId is a staff of this project
      */
-    drogon::Task<bool> isStaff(int32_t userId) const;
+    drogon::Task<bool> isStaff(PrimaryKeyType userId) const;
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

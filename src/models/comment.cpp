@@ -17,7 +17,8 @@ using namespace drogon;
 using namespace drogon::orm;
 
 
-drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, int32_t userId, int32_t ticketId)
+drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, PrimaryKeyType userId,
+        PrimaryKeyType ticketId)
 {
     CoroMapper<Comment> orm = Util::getDb();
 

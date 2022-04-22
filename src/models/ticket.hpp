@@ -37,7 +37,7 @@ public:
      * @throws Util::FormError if the data is invalid
      */
     static drogon::Task<Ticket> createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
-            int32_t reporterId, int32_t projectId);
+            PrimaryKeyType reporterId, PrimaryKeyType projectId);
 
     /**
      * @brief return a list of all the severities as JSON
@@ -67,24 +67,24 @@ public:
     /**
      * @brief check if the current user can edit this ticket
      */
-    drogon::Task<bool> canEdit(int32_t userId) const;
+    drogon::Task<bool> canEdit(PrimaryKeyType userId) const;
 
     /**
      * @brief check if the current user is the reporter of this ticket
      */
-    bool isReporter(int32_t userId) const;
+    bool isReporter(PrimaryKeyType userId) const;
 
     /**
      * @brief obtain a list of users that the current user can assign this ticket to
      */
-    drogon::Task<std::vector<Account> >getAssignables(int32_t userId) const;
+    drogon::Task<std::vector<Account> >getAssignables(PrimaryKeyType userId) const;
 
     /**
      * @brief update a ticket from the data from the form
      * @param postParams - the data obtain from the POST request
      * @param userId - the id of the current user
      */
-    drogon::Task<> update(const Util::StringMap& postParams, int32_t userId);
+    drogon::Task<> update(const Util::StringMap& postParams, PrimaryKeyType userId);
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

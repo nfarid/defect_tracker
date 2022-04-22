@@ -46,7 +46,7 @@ std::vector<std::string_view> splitView(std::string_view str, char delim) {
 }  // namespace
 
 
-drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, int32_t userId)
+drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, PrimaryKeyType userId)
 {
     CoroMapper<Project> projectOrm = Util::getDb();
 
@@ -107,7 +107,7 @@ Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
         "SELECT * FROM project WHERE title LIKE '%?%'",
         query
     );
-#endif // ifdef USE_POSTGRESQL
+#endif  // ifdef USE_POSTGRESQL
 
     // Convert the sql result into a list of project models
     std::vector<Project> projectLst;
@@ -155,7 +155,7 @@ Task<std::vector<Account> > Project::getStaff() const {
     co_return staffLst;
 }
 
-Task<bool> Project::isStaff(int32_t userId) const {
+Task<bool> Project::isStaff(PrimaryKeyType userId) const {
     const std::vector staffLst = co_await getStaff();
     for(const auto& staff : staffLst) {
         if(staff.getValueOfId() == userId)

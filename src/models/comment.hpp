@@ -21,6 +21,7 @@ namespace Model
  */
 class Comment : public drogon_model::Comment {
 public:
+
     /**
      * @brief validates the data from the comment creation form
      * @param orm - the object–relational mapper for Comment
@@ -30,7 +31,8 @@ public:
      * @return a newly created Comment if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Comment> createComment(const Util::StringMap& postParams, int32_t userId, int32_t ticketId);
+    static drogon::Task<Comment> createComment(const Util::StringMap& postParams, PrimaryKeyType userId,
+            PrimaryKeyType ticketId);
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
