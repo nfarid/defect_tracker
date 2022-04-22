@@ -20,6 +20,8 @@ namespace Aux
 {
 
 
+using Util::PrimaryKeyType;
+
 /**
  * @brief parseMultiPart - obtain the parameters from a multipart/form-data request
  * @param req - The POST request
@@ -51,7 +53,7 @@ bool isLoggedIn(const drogon::Session& session);
 /**
  * @brief obtain the user id from the session if logged in (returns zero otherwise)
  */
-int32_t getUserId(const drogon::Session& session);
+PrimaryKeyType getUserId(const drogon::Session& session);
 
 /**
  * @brief obtain the username from the session if logged in (returns empty string otherwise)
@@ -61,7 +63,7 @@ std::string getUsername(const drogon::Session& session);
 /**
  * @brief Creates the session when the user logs in
  */
-void logIn(drogon::Session& session, int32_t userId, const std::string& username);
+void logIn(drogon::Session& session, PrimaryKeyType userId, const std::string& username);
 
 /**
  * @brief Clears out the session data for this user

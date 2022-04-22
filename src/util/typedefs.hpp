@@ -18,6 +18,12 @@ namespace drogon{class HttpFile;} //forward declaration
 namespace Util
 {
 
+#ifdef USE_POSTGRESQL
+using PrimaryKeyType = std::int32_t;
+#else
+using PrimaryKeyType = std::uint64_t;
+#endif
+
 using StringMap = std::unordered_map<std::string, std::string>;
 
 using FileMap = std::unordered_map<std::string, drogon::HttpFile>;

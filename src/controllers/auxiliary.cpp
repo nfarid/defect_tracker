@@ -40,21 +40,21 @@ HttpViewData getViewData(const std::string& title, const Session& session) {
 }
 
 bool isLoggedIn(const Session& session) {
-    const std::optional<int32_t> userId = session.getOptional<int32_t>("user_id");
+    const std::optional userId = session.getOptional<PrimaryKeyType>("user_id");
     return userId.has_value();
 }
 
-int32_t getUserId(const Session& session) {
-    const std::optional<int32_t> userId = session.getOptional<int32_t>("user_id");
+PrimaryKeyType getUserId(const Session& session) {
+    const std::optional userId = session.getOptional<PrimaryKeyType>("user_id");
     return userId.value_or(0);
 }
 
 std::string getUsername(const Session& session) {
-    const std::optional<std::string> username = session.getOptional<std::string>("username");
+    const std::optional username = session.getOptional<std::string>("username");
     return username.value_or("");
 }
 
-void logIn(Session& session, int32_t userId, const std::string& username) {
+void logIn(Session& session, PrimaryKeyType userId, const std::string& username) {
     session.insert("user_id", userId);
     session.insert("username", username);
     session.changeSessionIdToClient();
