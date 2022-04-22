@@ -30,30 +30,30 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> newForm(HttpRequestPtr req, int32_t ticketId);
-    Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t ticketId);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req, PrimaryKeyType ticketId);
+    Task<HttpResponsePtr> create(HttpRequestPtr req, PrimaryKeyType ticketId);
 
 private:
     CoroMapper<Model::Comment> mCommentOrm{Util::getDb()};
 
-    HttpResponsePtr newImpl(HttpRequestPtr req, int32_t ticketId, string errorMessage);
+    HttpResponsePtr newImpl(HttpRequestPtr req, PrimaryKeyType ticketId, string errorMessage);
 };
 
-Task<HttpResponsePtr> CommentController::newForm(HttpRequestPtr req, int32_t ticketId) {
+Task<HttpResponsePtr> CommentController::newForm(HttpRequestPtr req, PrimaryKeyType ticketId) {
     co_return newImpl(req, ticketId, "");
 }
 
-HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, int32_t ticketId, string errorMessage) {
+HttpResponsePtr CommentController::newImpl(HttpRequestPtr req, PrimaryKeyType ticketId, string errorMessage) {
     auto data = getViewData("Post Comment", *getSession(req) );
     data.insert("ticket-id", std::to_string(ticketId) );
     data.insert("form-error", errorMessage);
     return HttpResponse::newHttpViewResponse("comment_new.csp", data);
 }
 
-Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, int32_t ticketId)
+Task<HttpResponsePtr> CommentController::create(HttpRequestPtr req, PrimaryKeyType ticketId)
 {
     const SessionPtr session = getSession(req);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
     try {

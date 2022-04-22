@@ -41,13 +41,13 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
-    Task<HttpResponsePtr> newForm(HttpRequestPtr req, int32_t projectId);
-    Task<HttpResponsePtr> edit(HttpRequestPtr req, int32_t id);
-    Task<HttpResponsePtr> create(HttpRequestPtr req, int32_t projectId);
-    Task<HttpResponsePtr> update(HttpRequestPtr req, int32_t id);
-    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
-    Task<HttpResponsePtr> throughNotification(HttpRequestPtr req, int32_t notificationId);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> newForm(HttpRequestPtr req, PrimaryKeyType projectId);
+    Task<HttpResponsePtr> edit(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> create(HttpRequestPtr req, PrimaryKeyType projectId);
+    Task<HttpResponsePtr> update(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> throughNotification(HttpRequestPtr req, PrimaryKeyType notificationId);
 
 private:
     DbClientPtr mDB = Util::getDb();
@@ -56,11 +56,11 @@ private:
     CoroMapper<Model::Project> mProjectOrm{mDB};
     CoroMapper<Model::Notification> mNotifcationOrm{mDB};
 
-    Task<HttpResponsePtr> newImpl(HttpRequestPtr req, int32_t projectId,
+    Task<HttpResponsePtr> newImpl(HttpRequestPtr req, PrimaryKeyType projectId,
             Util::StringMap formData, std::string errorMessage);
 };
 
-Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, PrimaryKeyType id) {
     const SessionPtr session = getSession(req);
 
     try {
@@ -78,7 +78,7 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
         data.insert("reporter", reporter.toViewJson() );
         data.insert("comment-lst", toViewJson(commentLst) );
         if(isLoggedIn(*session) ) {
-            const int32_t userId = getUserId(*session);
+            const PrimaryKeyType userId = getUserId(*session);
             data.insert("can-edit", co_await ticket.canEdit(userId) );
             data.insert("can-delete", ticket.isReporter(userId) );
         }
@@ -90,11 +90,11 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, int32_t id) {
     }
 }
 
-Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, int32_t projectId) {
+Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, PrimaryKeyType projectId) {
     return newImpl(req, projectId, {}, "");
 }
 
-Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t projectId,
+Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, PrimaryKeyType projectId,
         Util::StringMap formData, std::string errorMessage)
 {
     const SessionPtr session = getSession(req);
@@ -115,9 +115,9 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, int32_t proj
     }
 }
 
-Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, PrimaryKeyType id) {
     const auto session = getSession(req);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
 
     try {
         const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
@@ -140,9 +140,9 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, int32_t id) {
     }
 }
 
-Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t projectId) {
+Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, PrimaryKeyType projectId) {
     const SessionPtr session = getSession(req);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
     const auto& [postParams, fileParams] = parseMultiPart(req);
 
     std::optional<Task<HttpResponsePtr> > retryForm;
@@ -162,9 +162,9 @@ Task<HttpResponsePtr> TicketController::create(HttpRequestPtr req, int32_t proje
     co_return co_await retryForm.value();
 }
 
-Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, PrimaryKeyType id) {
     const auto session = getSession(req);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
 
     const auto& postParams = req->parameters();
     std::optional<Task<HttpResponsePtr> > retryForm;
@@ -183,11 +183,11 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, int32_t id) {
     co_return co_await retryForm.value();
 }
 
-Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, PrimaryKeyType id) {
     SessionPtr session = getSession(req);
 
     const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
     if(!ticket.isReporter(userId) ) // Not authorised (i.e. only the defect reporter can delete their own ticket)
         co_return HttpResponse::newNotFoundResponse();
 
@@ -195,7 +195,7 @@ Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, int32_t id) 
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
-Task<HttpResponsePtr> TicketController::throughNotification(HttpRequestPtr req, int32_t notificationId) {
+Task<HttpResponsePtr> TicketController::throughNotification(HttpRequestPtr req, PrimaryKeyType notificationId) {
     SessionPtr session = getSession(req);
     try {
         const Model::Notification notification = co_await mNotifcationOrm.findByPrimaryKey(notificationId);

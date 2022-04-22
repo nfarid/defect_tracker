@@ -35,11 +35,11 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> show(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, PrimaryKeyType id);
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
     Task<HttpResponsePtr> search(HttpRequestPtr req);
-    Task<HttpResponsePtr> destroy(HttpRequestPtr req, int32_t id);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, PrimaryKeyType id);
 
 private:
     CoroMapper<Model::Project> mProjectOrm = Util::getDb();
@@ -50,7 +50,7 @@ private:
     Json::Value getStats(const std::vector<Model::Ticket>& ticketLst);
 };
 
-Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, int32_t id)
+Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, PrimaryKeyType id)
 {
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
@@ -130,7 +130,7 @@ HttpResponsePtr ProjectController::newImpl(HttpRequestPtr req,
 
 Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
-    const int32_t userId = getUserId(*session);
+    const PrimaryKeyType userId = getUserId(*session);
 
     // Data from the HTTP POST request
     const auto& postParams = req->parameters();
@@ -162,7 +162,7 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     }
 }
 
-Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, int32_t id) {
+Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, PrimaryKeyType id) {
     SessionPtr session = getSession(req);
 
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
