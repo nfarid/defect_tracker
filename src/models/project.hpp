@@ -64,6 +64,11 @@ public:
     drogon::Task<bool> isStaff(PrimaryKeyType userId) const;
 
     /**
+     * @brief check if the user with the specified userId is the manager of this project
+     */
+    bool isManager(PrimaryKeyType userId) const;
+
+    /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)
      */
     Json::Value toViewJson() const;

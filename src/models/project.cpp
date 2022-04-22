@@ -164,6 +164,10 @@ Task<bool> Project::isStaff(PrimaryKeyType userId) const {
     co_return false;
 }
 
+bool Project::isManager(PrimaryKeyType userId) const {
+    return userId == getValueOfManagerId();
+}
+
 Json::Value Project::toViewJson() const {
     Json::Value json{};
     json["id"] = getValueOfId();

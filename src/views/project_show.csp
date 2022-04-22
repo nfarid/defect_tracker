@@ -11,7 +11,7 @@
 <%c++ const auto statusLst = @@.get<Json::Value>("status-lst"); %>
 <%c++ const auto stats = @@.get<Json::Value>("stats"); %>
 <%c++ const auto isLoggedIn = @@.get<bool>("is-logged-in"); %>
-<%c++ const auto userId = @@.get<int32_t>("session-user-id"); %>
+<%c++ const auto isManager = @@.get<bool>("is-manager"); %>
 <%c++ const auto token = @@.get<std::string>("token"); %>
 
 
@@ -91,7 +91,7 @@
     <a href="/project/{%projectId%}/report">Report an issue</a>
 
     <%c++ const auto managerId = project["manager-id"].asInt(); %>
-    <%c++ if(userId == managerId) { %>
+    <%c++ if(isManager) { %>
         <form action="/project/{%projectId%}/delete" method="POST">
             <input type="hidden" name="token" value="{%token%}"/>
             <input type="submit" value="Delete">

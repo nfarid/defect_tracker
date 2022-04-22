@@ -52,6 +52,7 @@ private:
 
 Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, PrimaryKeyType id)
 {
+    const SessionPtr session = getSession(req);
     try {
         const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
         const Model::Account manager = co_await project.getManager();
@@ -64,6 +65,7 @@ Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, PrimaryKeyType
         data.insert("severity-lst", Model::Ticket::getSeverityLst() );
         data.insert("status-lst", Model::Ticket::getStatusLst() );
         data.insert("stats", getStats(ticketLst) );
+        data.insert("is-manager", project.isManager(getUserId(*session) ) );
         co_return HttpResponse::newHttpViewResponse("project_show.csp", data);
     } catch(std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
