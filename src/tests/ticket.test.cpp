@@ -22,7 +22,7 @@ DROGON_TEST(TicketController_Show){
     orm.findOne(hasTitle,
                 [TEST_CTX](const Model::Ticket& ticket){
         auto client = HttpClient::newHttpClient(Util::localhost, Util::testPort);
-        const int32_t ticketId = ticket.getValueOfId();
+        const Model::Ticket::PrimaryKeyType ticketId = ticket.getValueOfId();
 
         auto showReq = HttpRequest::newHttpRequest();
         showReq->setPath("/ticket/"s + std::to_string(ticketId) );
