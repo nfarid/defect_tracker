@@ -111,6 +111,44 @@ Json::Value Ticket::getStatusLst() {
     return statusLstJson;
 }
 
+Json::Value Ticket::getStatistics(const std::vector<Ticket>& ticketLst) {
+    using namespace std::chrono;
+
+    Json::Value stats{};
+    stats["ticket-count"] = static_cast<Json::UInt64>(size(ticketLst) );
+
+    // Obtain average resolution time
+    microseconds totalResolutionDuration{0};
+    int countResolution = 0;
+    for(const auto& ticket : ticketLst) {
+        if(ticket.getResolvedDate() ) {  // check if the ticket has resolved date - i.e. its already resolved
+            const int64_t resolvedEpoch = ticket.getValueOfResolvedDate().microSecondsSinceEpoch();
+            const int64_t creationEpoch = ticket.getValueOfCreatedDate().microSecondsSinceEpoch();
+            const microseconds resolutionDuration{resolvedEpoch - creationEpoch};
+            totalResolutionDuration += resolutionDuration;
+            ++countResolution;
+        }
+    }
+    if(countResolution != 0) {
+        const microseconds averageResolutionDuration = totalResolutionDuration / countResolution;
+        const hours averageResolutionDurationHours = duration_cast<hours>(averageResolutionDuration);
+        stats["average-resolution-duration-hours"] = static_cast<Json::Int64>(averageResolutionDurationHours.count() );
+    }
+
+    // Obtain count of types of tickets:
+    for(const auto& statusType : Model::Ticket::getStatusLst() )
+        stats[statusType.asString()] = 0;
+    for(const auto& severity : Model::Ticket::getSeverityLst() )
+        stats[severity.asString()] = 0;
+
+    for(const auto& ticket : ticketLst) {
+        stats[ticket.getValueOfStatus()] = stats[ticket.getValueOfStatus()].asInt() + 1;
+        stats[ticket.getValueOfSeverity()] = stats[ticket.getValueOfSeverity()].asInt() + 1;
+    }
+
+    return stats;
+}
+
 Task<Account> Ticket::getReporter() const {
     CoroMapper<Account> accountOrm = Util::getDb();
     co_return co_await accountOrm.findByPrimaryKey(getValueOfReporterId() );

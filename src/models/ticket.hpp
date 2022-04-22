@@ -50,6 +50,11 @@ public:
     static Json::Value getStatusLst();
 
     /**
+     * @brief obtain the statistics of a list of ticket
+     */
+    static Json::Value getStatistics(const std::vector<Ticket>& ticketLst);
+
+    /**
      * @brief obtain the reporter of this project
      */
     drogon::Task<Account> getReporter() const;
