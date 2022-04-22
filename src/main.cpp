@@ -7,7 +7,7 @@
 
 using drogon::app;
 
-int main(int argc, char** argv) {
+int main(){
     unsigned short port = 3000;
     try {
         const Util::CStringView portStr = Util::getEnvironment("PORT");
