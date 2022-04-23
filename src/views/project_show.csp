@@ -28,11 +28,11 @@
 
     <div class="collapse" id="collapse-stats">
 
-        <%c++ const auto ticketCount = stats["ticket-count"].asInt(); %>
+        <%c++ const auto ticketCount = stats["ticket-count"].asUInt64(); %>
         <p>Number of tickets: {%ticketCount%}</p>
 
         <%c++ if( !stats["average-resolution-duration-hours"].isNull() ) { %>
-            <%c++ const auto averageResolutionDurationHours = stats["average-resolution-duration-hours"].asInt(); %>
+            <%c++ const auto averageResolutionDurationHours = stats["average-resolution-duration-hours"].asUInt64(); %>
             <p>Average time to resolve a ticket: {%averageResolutionDurationHours%} hours</p>
         <%c++ } else { %>
             <p>No ticket has been resolved yet.</p>
@@ -43,7 +43,7 @@
             <ul>
                 <%c++ for(const auto& statusJson : statusLst) { %>
                     <%c++ const auto statusStr = statusJson.asString(); %>
-                    <%c++ const auto statusCount = stats[statusStr].asInt(); %>
+                    <%c++ const auto statusCount = stats[statusStr].asUInt64(); %>
                     <p>{%statusStr%}: {%statusCount%}</p>
                 <%c++ } %>
             </ul>
@@ -54,7 +54,7 @@
             <ul>
                 <%c++ for(const auto& severityJson : severityLst) { %>
                     <%c++ const auto severityStr = severityJson.asString(); %>
-                    <%c++ const auto severityCount = stats[severityStr].asInt(); %>
+                    <%c++ const auto severityCount = stats[severityStr].asUInt64(); %>
                     <p>{%severityStr%}: {%severityCount%}</p>
                 <%c++ } %>
             </ul>
@@ -74,7 +74,7 @@
         </tr>
         <%c++ for(const auto& ticket : ticketLst) { %>
             <tr>
-                <%c++ const auto ticketId = ticket["id"].asInt(); %>
+                <%c++ const auto ticketId = ticket["id"].asUInt64(); %>
                 <%c++ const auto ticketTitle = ticket["title"].asString(); %>
                 <%c++ const auto ticketStatus = ticket["status"].asString(); %>
                 <%c++ const auto ticketSeverity = ticket["severity"].asString(); %>
@@ -87,10 +87,10 @@
 <%c++ } %>
 
 <%c++ if(isLoggedIn) { %>
-    <%c++ const auto projectId = project["id"].asInt(); %>
+    <%c++ const auto projectId = project["id"].asUInt64(); %>
     <a href="/project/{%projectId%}/report">Report an issue</a>
 
-    <%c++ const auto managerId = project["manager-id"].asInt(); %>
+    <%c++ const auto managerId = project["manager-id"].asUInt64(); %>
     <%c++ if(isManager) { %>
         <form action="/project/{%projectId%}/delete" method="POST">
             <input type="hidden" name="token" value="{%token%}"/>

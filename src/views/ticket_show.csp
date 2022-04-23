@@ -9,13 +9,13 @@
 <%c++ const auto commentLst = @@.get<Json::Value>("comment-lst"); %>
 <%c++ const auto token = @@.get<std::string>("token"); %>
 
-<%c++ const auto ticketId = ticket["id"].asInt(); %>
+<%c++ const auto ticketId = ticket["id"].asUInt64(); %>
 <%c++ const auto ticketTitle = ticket["title"].asString();%>
 <%c++ const auto ticketDescription = ticket["description"].asString(); %>
 <%c++ const auto ticketImageFilename = ticket["image-filename"].asString(); %>
 <%c++ const auto ticketCreatedDate = ticket["created-date"].asString(); %>
 
-<%c++ const auto projectId = project["id"].asInt(); %>
+<%c++ const auto projectId = project["id"].asUInt64(); %>
 <%c++ const auto projectTitle = project["title"].asString(); %>
 
 <%c++ const auto reporterUsername = reporter["username"].asString(); %>

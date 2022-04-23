@@ -29,6 +29,7 @@ using namespace drogon;
 using namespace drogon::orm;
 using namespace Util;
 using std::string_literals::operator""s;
+using Json::UInt64;
 
 
 namespace
@@ -261,7 +262,7 @@ drogon::Task<> Ticket::update(const StringMap& postParams, PrimaryKeyType userId
 
 Json::Value Ticket::toViewJson() const {
     Json::Value json{};
-    json["id"] = getValueOfId();
+    json["id"] = static_cast<UInt64>(getValueOfId() );
     json["title"] = HttpViewData::htmlTranslate(getValueOfTitle() );
     json["description"] = HttpViewData::htmlTranslate(getValueOfDescription() );
     json["status"] = HttpViewData::htmlTranslate(getValueOfStatus() );
@@ -274,10 +275,10 @@ Json::Value Ticket::toViewJson() const {
     }
     if(getImageFilename() )
         json["image-filename"] = HttpViewData::htmlTranslate(getValueOfImageFilename() );
-    json["reporter-id"] = getValueOfReporterId();
+    json["reporter-id"] = static_cast<UInt64>(getValueOfReporterId() );
     if(getAssignedId() )
-        json["assigned-id"] = getValueOfAssignedId();
-    json["project-id"] = getValueOfProjectId();
+        json["assigned-id"] = static_cast<UInt64>(getValueOfAssignedId() );
+    json["project-id"] = static_cast<UInt64>(getValueOfProjectId() );
     return json;
 }
 

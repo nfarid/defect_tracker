@@ -6,8 +6,8 @@
 <%c++ const auto ticket = @@.get<Json::Value>("ticket"); %>
 <%c++ const auto ticketTitle = ticket["title"].asString(); %>
 <%c++ const auto ticketDescription = ticket["description"].asString(); %>
-<%c++ const auto ticketId = ticket["id"].asInt(); %>
-<%c++ const auto ticketAssignedId = ticket["assigned-id"].isNull() ? 0 : ticket["assigned-id"].asInt(); %>
+<%c++ const auto ticketId = ticket["id"].asUInt64(); %>
+<%c++ const auto ticketAssignedId = ticket["assigned-id"].isNull() ? 0 : ticket["assigned-id"].asUInt64(); %>
 <%c++ const auto ticketSeverity = ticket["severity"].asString(); %>
 <%c++ const auto ticketStatus = ticket["status"].asString(); %>
 
@@ -44,7 +44,7 @@
                     <%c++ } %>
                     <%c++ for(const auto& assignable : assignableLst) { %>
                         <%c++ const std::string& assignableName = assignable["username"].asString(); %>
-                        <%c++ const int assignableId = assignable["id"].asInt(); %>
+                        <%c++ const int assignableId = assignable["id"].asUInt64(); %>
                         <%c++ const auto assignSelected = (ticketAssignedId == assignableId) ? "selected=\"selected\"" : ""; %>                        
                         <option value="{%assignableId%}" {%assignSelected%}>{%assignableName%}</option>
                     <%c++ } %>

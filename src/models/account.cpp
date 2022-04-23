@@ -44,6 +44,7 @@ bool verifyHash(Util::CStringView passwordHash, Util::CStringView password) {
 
 using namespace drogon;
 using namespace drogon::orm;
+using Json::UInt64;
 
 
 Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
@@ -108,7 +109,7 @@ drogon::Task<std::vector<Notification> > Account::getNotifications() const {
 
 Json::Value Account::toViewJson() const {
     Json::Value json{};
-    json["id"] = getValueOfId();
+    json["id"] = static_cast<UInt64>(getValueOfId() );
     json["username"] = HttpViewData::htmlTranslate(getValueOfUsername() );
     return json;
 }

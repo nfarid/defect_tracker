@@ -24,6 +24,7 @@ namespace Model
 
 using namespace drogon;
 using namespace drogon::orm;
+using Json::UInt64;
 
 
 namespace
@@ -170,10 +171,10 @@ bool Project::isManager(PrimaryKeyType userId) const {
 
 Json::Value Project::toViewJson() const {
     Json::Value json{};
-    json["id"] = getValueOfId();
+    json["id"] = static_cast<UInt64>(getValueOfId() );
     json["title"] = HttpViewData::htmlTranslate(getValueOfTitle() );
     json["description"] = HttpViewData::htmlTranslate(getValueOfDescription() );
-    json["manager-id"] = getValueOfManagerId();
+    json["manager-id"] = static_cast<UInt64>(getValueOfManagerId() );
     return json;
 }
 

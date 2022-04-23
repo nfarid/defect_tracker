@@ -15,6 +15,7 @@ namespace Model
 
 using namespace drogon;
 using namespace drogon::orm;
+using Json::UInt64;
 
 
 drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, PrimaryKeyType userId,
@@ -32,12 +33,12 @@ drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, 
 
 Json::Value Comment::toViewJson() const {
     Json::Value json{};
-    json["id"] = getValueOfId();
+    json["id"] = static_cast<UInt64>(getValueOfId() );
     json["post"] = HttpViewData::htmlTranslate(getValueOfPost() );
     const auto createdDate = getValueOfCreatedDate().toCustomedFormattedString(Util::dateFormat);
     json["created-date"] = HttpViewData::htmlTranslate(createdDate);
-    json["ticket-id"] = getValueOfTicketId();
-    json["poster-id"] = getValueOfPosterId();
+    json["ticket-id"] = static_cast<UInt64>(getValueOfTicketId() );
+    json["poster-id"] = static_cast<UInt64>(getValueOfPosterId() );
     return json;
 }
 

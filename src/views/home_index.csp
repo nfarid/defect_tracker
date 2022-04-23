@@ -16,7 +16,7 @@
     <%c++ if(!notificationLst.empty() ) { %>
         <form action="/notification" method="POST">
             <%c++ for(const auto& notification : notificationLst) { %>
-                <%c++ const auto notificationId = notification["id"].asInt(); %>
+                <%c++ const auto notificationId = notification["id"].asUInt64(); %>
                 <%c++ const auto notificationSummary = notification["summary"].asString(); %>
                 <button type="submit" formaction="/notification/{%notificationId%}">{%notificationSummary%}</button>
             <%c++ } %>
