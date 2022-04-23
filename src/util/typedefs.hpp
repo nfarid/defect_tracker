@@ -19,9 +19,9 @@ namespace Util
 {
 
 #ifdef USE_POSTGRESQL
-using PrimaryKeyType = std::int32_t;
+using IdType = std::int32_t;
 #else
-using PrimaryKeyType = std::uint64_t;
+using IdType = std::uint64_t;
 #endif
 
 using StringMap = std::unordered_map<std::string, std::string>;

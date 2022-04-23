@@ -29,7 +29,7 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> show(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, IdType id);
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
 
@@ -41,7 +41,7 @@ private:
 };
 
 
-Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, PrimaryKeyType id)
+Task<HttpResponsePtr> UserController::show(HttpRequestPtr req, IdType id)
 {
     const SessionPtr session = getSession(req);
     try {

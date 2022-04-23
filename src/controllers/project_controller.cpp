@@ -34,11 +34,11 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> show(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> show(HttpRequestPtr req, IdType id);
     Task<HttpResponsePtr> newForm(HttpRequestPtr req);
     Task<HttpResponsePtr> create(HttpRequestPtr req);
     Task<HttpResponsePtr> search(HttpRequestPtr req);
-    Task<HttpResponsePtr> destroy(HttpRequestPtr req, PrimaryKeyType id);
+    Task<HttpResponsePtr> destroy(HttpRequestPtr req, IdType id);
 
 private:
     CoroMapper<Model::Project> mProjectOrm = Util::getDb();
@@ -47,7 +47,7 @@ private:
             std::string errorMessage);
 };
 
-Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, PrimaryKeyType id)
+Task<HttpResponsePtr> ProjectController::show(HttpRequestPtr req, IdType id)
 {
     const SessionPtr session = getSession(req);
     try {
@@ -93,7 +93,7 @@ HttpResponsePtr ProjectController::newImpl(HttpRequestPtr req,
 
 Task<HttpResponsePtr> ProjectController::create(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
-    const PrimaryKeyType userId = getUserId(*session);
+    const IdType userId = getUserId(*session);
 
     // Data from the HTTP POST request
     const auto& postParams = req->parameters();
@@ -125,7 +125,7 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
     }
 }
 
-Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, PrimaryKeyType id) {
+Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, IdType id) {
     SessionPtr session = getSession(req);
 
     const Model::Project project = co_await mProjectOrm.findByPrimaryKey(id);
