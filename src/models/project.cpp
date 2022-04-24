@@ -119,6 +119,16 @@ Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
     co_return projectLst;
 }
 
+drogon::Task<Project> Project::findByPrimaryKey(PrimaryKeyType projectId) {
+    CoroMapper<Project> projectOrm = Util::getDb();
+    co_return co_await projectOrm.findByPrimaryKey(projectId);
+}
+
+drogon::Task<> Project::deleteByPrimaryKey(PrimaryKeyType projectId) {
+    CoroMapper<Project> projectOrm = Util::getDb();
+    co_await projectOrm.deleteByPrimaryKey(projectId);
+}
+
 Task<Account> Project::getManager() const {
     CoroMapper<Account> accountOrm = Util::getDb();
     co_return co_await accountOrm.findByPrimaryKey(getValueOfManagerId() );

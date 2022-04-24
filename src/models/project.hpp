@@ -44,6 +44,17 @@ public:
     static drogon::Task<std::vector<Project> > searchProject(std::string_view getParam);
 
     /**
+     * @brief obtain the Project model that has the specified primary key
+     * @throws drogon::orm::UnexpectedRows if it doesn't exists
+     */
+    static drogon::Task<Project> findByPrimaryKey(PrimaryKeyType projectId);
+
+    /**
+     * @brief deletes the Project model that has the specified primary key
+     */
+    static drogon::Task<> deleteByPrimaryKey(PrimaryKeyType projectId);
+
+    /**
      * @brief obtain the manager of this project
      */
     drogon::Task<Account> getManager() const;
