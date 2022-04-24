@@ -21,53 +21,56 @@ namespace Ctrlr
 using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
+using Model::Account;
 
 class HomeController : public HttpController<HomeController> {
 public:
     /*NO-FORMAT*/
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(HomeController::about, "/about", Get);
-        ADD_METHOD_TO(HomeController::index, "/", Get);
-        ADD_METHOD_TO(HomeController::index, "/index", Get);
-        ADD_METHOD_TO(HomeController::index, "/home", Get);
+        ADD_METHOD_TO(HomeController::aboutPage, "/about", Get);
+        ADD_METHOD_TO(HomeController::indexPage, "/", Get);
+        ADD_METHOD_TO(HomeController::indexPage, "/index", Get);
+        ADD_METHOD_TO(HomeController::indexPage, "/home", Get);
     METHOD_LIST_END
     /*YES-FORMAT*/
 
-    Task<HttpResponsePtr> about(HttpRequestPtr req);
-    Task<HttpResponsePtr> index(HttpRequestPtr req);
+    // aboutPage is called whenever the user accesses the abouts page
+    Task<HttpResponsePtr> aboutPage(HttpRequestPtr req);
+
+    // indexPage is called whenever the user access the index page
+    Task<HttpResponsePtr> indexPage(HttpRequestPtr req);
 
 private:
     CoroMapper<Model::Account> mAccountOrm = Util::getDb();
-
-    const std::vector<std::string_view> demoUsernameLst = {"demo_regular_user",
-                                                           "demo_project_staff", "demo_project_manager"};
 };
 
-Task<HttpResponsePtr> HomeController::about(HttpRequestPtr req) {
+Task<HttpResponsePtr> HomeController::aboutPage(HttpRequestPtr req) {
     HttpViewData data = getViewData("Home", *getSession(req) );
     co_return HttpResponse::newHttpViewResponse("home_about.csp", data);
 }
 
-Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
+Task<HttpResponsePtr> HomeController::indexPage(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
-    HttpViewData data = getViewData("Home", *session);
-    data.insert("demo-username-lst", Util::toJson(demoUsernameLst) );
+    HttpViewData viewData = getViewData("Home", *session);
+    viewData.insert("demo-username-lst", Util::toJson(demoUsernameLst) );
 
+    // If the user is logged in then add the user's notifications to the view
     if(isLoggedIn(*session) ) {
+        const IdType currentUserId = getUserId(*session);
         try {
-            const Model::Account currentUser = co_await mAccountOrm.findByPrimaryKey( getUserId(*session) );
+            const Account currentUser = co_await Account::findByPrimaryKey(currentUserId);
             const std::vector notifcationLst = co_await currentUser.getNotifications();
-            data.insert("notification-lst", toViewJson(notifcationLst) );
+            viewData.insert("notification-lst", toViewJson(notifcationLst) );
         }  catch(const std::exception& ex) {
             std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
             co_return HttpResponse::newNotFoundResponse();
         }
     } else {
-        data.insert("notification-lst", Json::Value{});
+        viewData.insert("notification-lst", Json::Value{});
     }
 
-    co_return HttpResponse::newHttpViewResponse("home_index.csp", data);
+    co_return HttpResponse::newHttpViewResponse("home_index.csp", viewData);
 }
 
 
