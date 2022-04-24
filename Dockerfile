@@ -29,7 +29,8 @@ RUN mkdir build/ && \
 
 #Cleanup
 WORKDIR /app
-RUN mv /src/build/app/defect_tracker /src/data /app && \
+RUN mv /src/build/app/defect_tracker /src/build/app/test-defect_tracker /src/data /app && \
+    mv /src/sql /sql && \
     apt-get remove g++-11 git curl cmake zip pkg-config autoconf -y && \
     apt-get autoremove -y && \
     apt-get clean -y
