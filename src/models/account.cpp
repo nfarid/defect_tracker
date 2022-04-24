@@ -101,6 +101,11 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
     co_return co_await orm.insert(newAccount);
 }
 
+drogon::Task<Account> Account::findByPrimaryKey(PrimaryKeyType userId) {
+    CoroMapper<Account> userOrm = Util::getDb();
+    co_return co_await userOrm.findByPrimaryKey(userId);
+}
+
 drogon::Task<std::vector<Notification> > Account::getNotifications() const {
     CoroMapper<Notification> notificationOrm = Util::getDb();
     const Criteria toUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
