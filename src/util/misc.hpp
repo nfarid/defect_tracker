@@ -8,6 +8,7 @@
 #include <json/value.h>
 
 #include <charconv>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 
@@ -30,7 +31,7 @@ bool contains(const C& container, const T& val) {
 /**
  * @brief convert a list of string into a JSON
  */
-inline Json::Value toJson(const std::vector<std::string_view>& lst) {
+inline Json::Value toJson(std::span<const std::string_view> lst) {
     Json::Value json{};
     for(const auto& elem : lst)
         json.append(std::string(elem) );

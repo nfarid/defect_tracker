@@ -85,6 +85,10 @@ Json::Value toViewJson(const std::vector<T>& lst) {
 // A drogon callback function object that takes a http response from the controller
 using ResponseCallback = std::function<void(const drogon::HttpResponsePtr&)>;
 
+// A list of demo users'
+const std::array<std::string_view, 3> demoUsernameLst = {"demo_regular_user",
+                                                         "demo_project_staff", "demo_project_manager"};
+
 
 }  // namespace Aux
 

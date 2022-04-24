@@ -30,13 +30,11 @@ public:
         ADD_METHOD_TO(HomeController::index, "/", Get);
         ADD_METHOD_TO(HomeController::index, "/index", Get);
         ADD_METHOD_TO(HomeController::index, "/home", Get);
-        ADD_METHOD_TO(HomeController::demoLogin, "/demo-login", Post, "Fltr::ValidToken");
     METHOD_LIST_END
     /*YES-FORMAT*/
 
     Task<HttpResponsePtr> about(HttpRequestPtr req);
     Task<HttpResponsePtr> index(HttpRequestPtr req);
-    Task<HttpResponsePtr> demoLogin(HttpRequestPtr req);
 
 private:
     CoroMapper<Model::Account> mAccountOrm = Util::getDb();
@@ -70,26 +68,6 @@ Task<HttpResponsePtr> HomeController::index(HttpRequestPtr req) {
     }
 
     co_return HttpResponse::newHttpViewResponse("home_index.csp", data);
-}
-
-Task<HttpResponsePtr> HomeController::demoLogin(HttpRequestPtr req) {
-    const Util::StringMap& postParams = req->parameters();
-    const SessionPtr session = getSession(req);
-
-    try {
-        const std::string& username = postParams.at("demo-username");
-        if(!Util::contains(demoUsernameLst, username) )
-            throw Util::FormError("Not a valid demo user");
-
-        const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
-        const Model::Account user = co_await mAccountOrm.findOne(hasUsername);
-
-        logIn(*session, user.getValueOfId(), username);
-        co_return HttpResponse::newRedirectionResponse("/");
-    }  catch(const std::exception& ex) {
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
-        co_return HttpResponse::newNotFoundResponse();
-    }
 }
 
 
