@@ -33,7 +33,7 @@ public:
 
 //
 
-// This filter check if the token is valid during a POST request
+// This filter check if the CSRF token is valid during a POST request
 class ValidToken : public HttpFilter<ValidToken> {
 public:
     void doFilter(const HttpRequestPtr& req,
