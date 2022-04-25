@@ -55,6 +55,17 @@ public:
     static Json::Value getStatistics(const std::vector<Ticket>& ticketLst);
 
     /**
+     * @brief obtain the Ticket model that has the specified primary key
+     * @throws drogon::orm::UnexpectedRows if it doesn't exists
+     */
+    static drogon::Task<Ticket> findByPrimaryKey(PrimaryKeyType ticketId);
+
+    /**
+     * @brief delete the Ticket that has the specified primary key
+     */
+    static drogon::Task<> deleteByPrimaryKey(PrimaryKeyType ticketId);
+
+    /**
      * @brief obtain the reporter of this project
      */
     drogon::Task<Account> getReporter() const;

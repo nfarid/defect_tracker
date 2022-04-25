@@ -150,6 +150,16 @@ Json::Value Ticket::getStatistics(const std::vector<Ticket>& ticketLst) {
     return stats;
 }
 
+drogon::Task<Ticket> Ticket::findByPrimaryKey(PrimaryKeyType ticketId) {
+    CoroMapper<Ticket> ticketOrm = Util::getDb();
+    co_return co_await ticketOrm.findByPrimaryKey(ticketId);
+}
+
+drogon::Task<> Ticket::deleteByPrimaryKey(PrimaryKeyType ticketId) {
+    CoroMapper<Ticket> ticketOrm = Util::getDb();
+    co_await ticketOrm.deleteByPrimaryKey(ticketId);
+}
+
 Task<Account> Ticket::getReporter() const {
     CoroMapper<Account> accountOrm = Util::getDb();
     co_return co_await accountOrm.findByPrimaryKey(getValueOfReporterId() );

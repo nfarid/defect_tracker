@@ -24,6 +24,7 @@ namespace Ctrlr
 using namespace drogon;
 using namespace drogon::orm;
 using namespace Aux;
+using namespace Model;
 using std::string_literals::operator""s;
 
 
@@ -50,12 +51,6 @@ public:
     Task<HttpResponsePtr> throughNotification(HttpRequestPtr req, IdType notificationId);
 
 private:
-    DbClientPtr mDB = Util::getDb();
-
-    CoroMapper<Model::Ticket> mTicketOrm{mDB};
-    CoroMapper<Model::Project> mProjectOrm{mDB};
-    CoroMapper<Model::Notification> mNotifcationOrm{mDB};
-
     Task<HttpResponsePtr> newImpl(HttpRequestPtr req, IdType projectId,
             Util::StringMap formData, std::string errorMessage);
 };
@@ -64,7 +59,7 @@ Task<HttpResponsePtr> TicketController::show(HttpRequestPtr req, IdType id) {
     const SessionPtr session = getSession(req);
 
     try {
-        const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        const Model::Ticket ticket = co_await Ticket::findByPrimaryKey(id);
         const auto reporterAwaiter = ticket.getReporter();
         const auto projectAwaiter = ticket.getProject();
         const auto commentLstAwaiter = ticket.getComments();
@@ -99,7 +94,7 @@ Task<HttpResponsePtr> TicketController::newImpl(HttpRequestPtr req, IdType proje
 {
     const SessionPtr session = getSession(req);
     try {
-        const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
+        const Model::Project project = co_await Project::findByPrimaryKey(projectId);
 
         HttpViewData data = getViewData("New Ticket", *session);
         data.insert("project", project.toViewJson() );
@@ -120,7 +115,7 @@ Task<HttpResponsePtr> TicketController::edit(HttpRequestPtr req, IdType id) {
     const IdType userId = getUserId(*session);
 
     try {
-        const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        const Model::Ticket ticket = co_await Ticket::findByPrimaryKey(id);
         const Model::Project project = co_await ticket.getProject();
         if(!co_await ticket.canEdit(userId) ) // cannot edit if not authorised
             co_return HttpResponse::newRedirectionResponse("/");
@@ -169,7 +164,7 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, IdType id) {
     const auto& postParams = req->parameters();
     std::optional<Task<HttpResponsePtr> > retryForm;
     try {
-        Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+        Model::Ticket ticket = co_await Ticket::findByPrimaryKey(id);
         co_await ticket.update(postParams, userId);
         co_return HttpResponse::newRedirectionResponse("/");
     } catch(const Util::FormError& ex) {
@@ -186,26 +181,26 @@ Task<HttpResponsePtr> TicketController::update(HttpRequestPtr req, IdType id) {
 Task<HttpResponsePtr> TicketController::destroy(HttpRequestPtr req, IdType id) {
     SessionPtr session = getSession(req);
 
-    const Model::Ticket ticket = co_await mTicketOrm.findByPrimaryKey(id);
+    const Model::Ticket ticket = co_await Ticket::findByPrimaryKey(id);
     const IdType userId = getUserId(*session);
     if(!ticket.isReporter(userId) ) // Not authorised (i.e. only the defect reporter can delete their own ticket)
         co_return HttpResponse::newNotFoundResponse();
 
-    co_await mTicketOrm.deleteByPrimaryKey(id);
+    co_await Ticket::deleteByPrimaryKey(id);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 
 Task<HttpResponsePtr> TicketController::throughNotification(HttpRequestPtr req, IdType notificationId) {
     SessionPtr session = getSession(req);
     try {
-        const Model::Notification notification = co_await mNotifcationOrm.findByPrimaryKey(notificationId);
+        const Notification notification = co_await Notification::findByPrimaryKey(notificationId);
 
         if(notification.getValueOfUserId() != getUserId(*session) ) // Not authorised
             co_return HttpResponse::newNotFoundResponse();
 
         // Redirect to the notification's ticket page
         const std::string ticketId = std::to_string(notification.getValueOfTicketId() );
-        co_await mNotifcationOrm.deleteByPrimaryKey(notificationId);
+        co_await Notification::deleteByPrimaryKey(notificationId);
         co_return HttpResponse::newRedirectionResponse("/ticket/" + ticketId);
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<";"<<__LINE__<<":\n"<<ex.what()<<std::endl;
