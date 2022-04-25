@@ -66,28 +66,20 @@ set(SANITISER "")
 option(ENABLE_UNDEFINED_BEHAVIOUR_SANTISER "Turn on sanitiser for undefined behaviour" OFF)
 
 if(ENABLE_UNDEFINED_BEHAVIOUR_SANTISER)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(SANITISER "${SANITISER}" "-fsanitize=undefined")
-    endif()
+    set(SANITISER "${SANITISER}" "-fsanitize=undefined")
 endif()
 
-option(ENABLE_ADDRESS_SANTISER "Turn on sanitiser for memory errors, can slow down runtime" OFF)
+option(ENABLE_ADDRESS_SANTISER "Turn on sanitiser for memory errors, can slow down runtime (cannot be used with thread sanitiser at the same time)" OFF)
 
 if(ENABLE_ADDRESS_SANTISER)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(SANTISER "${SANITISER}" "-fsanitize=address")
-    endif()
+    set(SANITISER "${SANITISER}" "-fsanitize=address")
 endif()
 
-option(ENABLE_THREAD_SANTISER "Turn on sanitiser for data races" OFF)
+option(ENABLE_THREAD_SANITISER "Turn on sanitiser for data races (cannot be used with address sanitiser at the same time)" OFF)
 
 if(ENABLE_THREAD_SANITISER)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(SANTISER "${SANITISER}" "-fsanitize=thread")
-    endif()
+    set(SANITISER "${SANITISER}" "-fsanitize=thread")
 endif()
-
-
 
 #Misc
 
