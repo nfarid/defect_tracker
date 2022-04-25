@@ -98,7 +98,7 @@ Task<HttpResponsePtr> TicketController::showTicket(HttpRequestPtr req, IdType ti
 }
 
 Task<HttpResponsePtr> TicketController::newForm(HttpRequestPtr req, IdType projectId) {
-    return newFormImpl(req, projectId, {}, "");
+    co_return co_await newFormImpl(req, projectId, {}, "");
 }
 
 Task<HttpResponsePtr> TicketController::newFormImpl(HttpRequestPtr req, IdType projectId,
