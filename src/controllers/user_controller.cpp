@@ -16,6 +16,7 @@ namespace Ctrlr
 
 
 using std::string_literals::operator""s;
+using Model::Account;
 using namespace Aux;
 using namespace drogon;
 using namespace drogon::orm;
@@ -34,29 +35,34 @@ public:
     METHOD_LIST_END
     /*YES-FORMAT*/
 
+    // showProject is called when accessing a user's page
     Task<HttpResponsePtr> showUser(HttpRequestPtr req, IdType userId);
 
+    // signupForm is called when the user accesses the signup form
     Task<HttpResponsePtr> signupForm(HttpRequestPtr req);
+    // signupSubmit is called when the user submits from the signup form
     Task<HttpResponsePtr> signupSubmit(HttpRequestPtr req);
 
+    // signupForm is called when the user accesses the login form
     Task<HttpResponsePtr> loginForm(HttpRequestPtr req);
+    // signupSubmit is called when the user submits from the login form
     Task<HttpResponsePtr> loginSubmit(HttpRequestPtr req);
+    // logout is called when the user wants to logout
     Task<HttpResponsePtr> logout(HttpRequestPtr req);
+    // demoLogin is when the user clicks on one of the demo login buttons
     Task<HttpResponsePtr> demoLogin(HttpRequestPtr req);
 
 private:
-    CoroMapper<Model::Account> mAccountOrm = Util::getDb();
-
-    HttpResponsePtr signupFormImpl(HttpRequestPtr req, const Util::StringMap& formData, const std::string& formError);
-    HttpResponsePtr loginFormImpl(HttpRequestPtr req, const Util::StringMap& formData, const std::string& formError);
+    HttpResponsePtr formImpl(HttpRequestPtr req, const std::string& formAction,
+            const Util::StringMap& previousFormData, const std::string& previousFormError);
 };
 
 
-Task<HttpResponsePtr> UserController::showUser(HttpRequestPtr req, IdType id)
+Task<HttpResponsePtr> UserController::showUser(HttpRequestPtr req, IdType userId)
 {
     const SessionPtr session = getSession(req);
     try {
-        const Model::Account user = co_await mAccountOrm.findByPrimaryKey(id);
+        const Account user = co_await Account::findByPrimaryKey(userId);
         // Add the user's info to the ViewData to be sent to the view
         HttpViewData data = getViewData(user.getValueOfUsername(), *session);
         data.insert("user", user.toViewJson() );
@@ -69,27 +75,7 @@ Task<HttpResponsePtr> UserController::showUser(HttpRequestPtr req, IdType id)
 }
 
 Task<HttpResponsePtr> UserController::signupForm(HttpRequestPtr req) {
-    co_return signupFormImpl(req, {}, {});
-}
-
-HttpResponsePtr UserController::signupFormImpl(HttpRequestPtr req, const Util::StringMap& formData,
-        const std::string& formError)
-{
-    const SessionPtr session = getSession(req);
-
-    if(isLoggedIn(*session) ) // If the user has already logged in, there's no point of the signup page
-        return HttpResponse::newRedirectionResponse("/");
-
-    // Else show the signup page
-    HttpViewData data = getViewData("Sign Up"s, *session);
-    data.insert("form-action", "/signup"s);
-
-    // If there was an error, then redisplay the form data
-    data.insert("form-error", formError);
-    for(const auto& [k, v] : formData)
-        data.insert(k, HttpViewData::htmlTranslate(v) );
-
-    return HttpResponse::newHttpViewResponse("user_form.csp", data);
+    co_return formImpl(req, "signup", {}, {});
 }
 
 Task<HttpResponsePtr> UserController::signupSubmit(HttpRequestPtr req) {
@@ -98,40 +84,20 @@ Task<HttpResponsePtr> UserController::signupSubmit(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        const Model::Account account = co_await Model::Account::createAccount(postParams);
+        const Account user = co_await Account::createAccount(postParams);
         // If the form data is valid and the user can be created, then login
-        logIn(*getSession(req), account.getValueOfId(), account.getValueOfUsername() );
-        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+        logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
+        co_return HttpResponse::newRedirectionResponse("/");  // redirect to the home page
     } catch(Util::FormError& ex) {
-        co_return signupFormImpl(req, postParams, ex.what() );  // There was a form error, so let the user retry again
+        co_return formImpl(req, "signup", postParams, ex.what() );  // There was a form error, so let the user retry again
     }  catch(const std::exception& ex) {
-        // An unexpected error has occured
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
 }
 
 Task<HttpResponsePtr> UserController::loginForm(HttpRequestPtr req) {
-    co_return loginFormImpl(req, {}, "");
-}
-
-HttpResponsePtr UserController::loginFormImpl(HttpRequestPtr req, const Util::StringMap& formData,
-        const std::string& formError)
-{
-    const SessionPtr session = getSession(req);
-
-    if(isLoggedIn(*session) ) // If the user has already logged in, there's no point of the login page.
-        return HttpResponse::newRedirectionResponse("/");
-
-    HttpViewData data = getViewData("Login", *session);
-    data.insert("form-action", "/login"s);
-
-    // If there was an error, then redisplay the form data
-    data.insert("form-error", formError);
-    for(const auto& [k, v] : formData)
-        data.insert(k, HttpViewData::htmlTranslate(v) );
-
-    return HttpResponse::newHttpViewResponse("user_form.csp", data);
+    co_return formImpl(req, "login", {}, "");
 }
 
 Task<HttpResponsePtr> UserController::loginSubmit(HttpRequestPtr req) {
@@ -139,15 +105,14 @@ Task<HttpResponsePtr> UserController::loginSubmit(HttpRequestPtr req) {
     const SessionPtr session = getSession(req);
 
     try {
-        const auto user = co_await Model::Account::verifyLogin(postParams);
+        // Verify the submitted data, if authenticated then login
+        const Account user = co_await Account::verifyLogin(postParams);
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
-        co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+        co_return HttpResponse::newRedirectionResponse("/");  // redirect to the home page
     } catch(const Util::FormError& ex) {
-        // There was a form error, so let the user retry again
-        co_return loginFormImpl(req, postParams, ex.what() );
+        co_return formImpl(req, "login", postParams, ex.what() );  // There was a form error, so let the user retry again
     }  catch(const std::exception& ex) {
-        // An unexpected error has occured
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
 }
@@ -155,27 +120,45 @@ Task<HttpResponsePtr> UserController::loginSubmit(HttpRequestPtr req) {
 Task<HttpResponsePtr> UserController::logout(HttpRequestPtr req) {
     SessionPtr session = getSession(req);
     logOut(*session);
-    co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
+    co_return HttpResponse::newRedirectionResponse("/");
 }
 
 Task<HttpResponsePtr> UserController::demoLogin(HttpRequestPtr req) {
-    const Util::StringMap& postParams = req->parameters();
     const SessionPtr session = getSession(req);
 
     try {
-        const std::string& username = postParams.at("demo-username");
+        const std::string& username = req->parameters().at("demo-username");
         if(!Util::contains(demoUsernameLst, username) )
             throw Util::FormError("Not a valid demo user");
 
-        const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
-        const Model::Account user = co_await mAccountOrm.findOne(hasUsername);
-
-        logIn(*session, user.getValueOfId(), username);
-        co_return HttpResponse::newRedirectionResponse("/");
+        const Account user = co_await Account::findByUsername(username);
+        Aux::logIn(*session, user.getValueOfId(), username);
+        co_return HttpResponse::newRedirectionResponse("/");  // redirect to the home page
     }  catch(const std::exception& ex) {
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
+}
+
+HttpResponsePtr UserController::formImpl(HttpRequestPtr req, const std::string& formAction,
+        const Util::StringMap& previousFormData, const std::string& previousFormError)
+{
+    const SessionPtr session = getSession(req);
+
+    if(isLoggedIn(*session) ) // If the user has already logged in, there's no point of signup/login
+        return HttpResponse::newRedirectionResponse("/");
+
+    // Else show the signup page
+    HttpViewData data = getViewData(formAction, *session);
+    data.insert("form-action", "/" + formAction);
+
+    // Add the form error message and previous form data if redisplaying the form
+    data.insert("form-error", previousFormError);
+    for(const auto& [k, v] : previousFormData)
+        data.insert(k, HttpViewData::htmlTranslate(v) );
+
+    // Display the user form
+    return HttpResponse::newHttpViewResponse("user_form.csp", data);
 }
 
 
