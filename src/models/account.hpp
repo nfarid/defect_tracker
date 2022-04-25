@@ -41,10 +41,16 @@ public:
     static drogon::Task<Account> createAccount(const Util::StringMap& postParams);
 
     /**
-     * @brief get the Account model that has the specified primary key
+     * @brief obtain the Account model that has the specified primary key
      * @throws drogon::orm::UnexpectedRows if it doesn't exists
      */
     static drogon::Task<Account> findByPrimaryKey(PrimaryKeyType userId);
+
+    /**
+     * @brief obtain the Account model that has the specified username
+     * @throws drogon::orm::UnexpectedRows if it doesn't exists
+     */
+    static drogon::Task<Account> findByUsername(const std::string& username);
 
 
     drogon::Task<std::vector<Notification> > getNotifications() const;
