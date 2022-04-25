@@ -104,8 +104,9 @@ Task<std::vector<Project> > Project::searchProject(std::string_view getParam) {
         query
     );
 #else
+    query = "%" + query + "%";
     const Result res = co_await db->execSqlCoro(
-        "SELECT * FROM project WHERE title LIKE '%?%'",
+        "SELECT * FROM project WHERE title LIKE ?",
         query
     );
 #endif  // ifdef USE_POSTGRESQL

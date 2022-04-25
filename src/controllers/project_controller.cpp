@@ -124,7 +124,8 @@ Task<HttpResponsePtr> ProjectController::search(HttpRequestPtr req){
         viewData.insert("project-lst", toViewJson(projectLst) );
         co_return HttpResponse::newHttpViewResponse("project_search.csp", viewData);
     } catch(const std::exception& ex) {
-        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<std::endl;
+        std::cerr<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
     }
 }
