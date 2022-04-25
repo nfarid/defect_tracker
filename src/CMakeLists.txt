@@ -48,7 +48,6 @@ set(APP_SRC
     "controllers/project_controller.cpp"
     "controllers/ticket_controller.cpp"
     "controllers/user_controller.cpp"
-    "controllers/user_session_controller.cpp"
 
     "models/account.cpp"
     "models/comment.cpp"
