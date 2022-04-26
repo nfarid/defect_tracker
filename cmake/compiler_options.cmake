@@ -1,6 +1,15 @@
 
 
 
+#Options for database type
+option(USE_POSTGRESQL "Use the postgresql database (if off use sqlite3 instead)" OFF)
+if(USE_POSTGRESQL)
+    message(STATUS "Built application will use postgresql.")
+else()
+    message(STATUS "Built application will use sqlite3.")
+endif()
+
+
 #Options for precompiled headers
 
 option(ENABLE_PRECOMPILE_HEADERS "Use precompile to potentially speed up compilation" ON)

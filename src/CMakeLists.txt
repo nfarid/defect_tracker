@@ -17,8 +17,6 @@ foreach(CSP_FILE ${CSP_LIST})
 endforeach()
 
 
-option(USE_POSTGRESQL "Use the postgresql database (if off use sqlite3 instead)" OFF)
-
 if(USE_POSTGRESQL)
     set(GENERATED_MODELS
         "models/generated_postgresql/account.cpp"

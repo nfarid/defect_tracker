@@ -28,12 +28,12 @@ public:
     /**
      * @brief validates the data from the POST parameter
      * @param orm - the object–relational mapper for Project
-     * @param postParams - the data obtain from the POST request
+     * @param formData - the data obtain from the POST request
      * @param userId - the id of the current user
      * @return a newly created Project if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Project> createProject(const Util::StringMap& postParams, PrimaryKeyType userId);
+    static drogon::Task<Project> createProject(const Util::StringMap& formData, PrimaryKeyType userId);
 
     /**
      * @brief search for projects that match the query

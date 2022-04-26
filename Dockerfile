@@ -21,10 +21,11 @@ ENV VCPKG_ROOT="/src/vcpkg"
 #Copy source files
 COPY . .
 
+ARG use_postgresql=OFF
 #Build the application
 RUN mkdir build/ && \
     cd build/ && \
-    cmake -DCMAKE_BUILD_TYPE=Release .. -DENABLE_ADDITIONAL_WARNINGS=ON && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. -DENABLE_ADDITIONAL_WARNINGS=ON -DUSE_POSTGRESQL="$use_postgresql" && \
     cmake --build . -- -j4
 
 #Cleanup
