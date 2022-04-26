@@ -70,8 +70,8 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& formData, const FileM
         imageFilename = formData.at("form-image");
         if(image.saveAs(imageFilename) != 0) // saveAs function returns zero on success
             throw FormError("Unable to upload image");
-    } else if(image.getFileType() != 0) {  // If a non-image file is uploaded
-        throw FormError("Non-image file has been uploaded");
+    } else if(image.getFileType() != 0) {  // If the attachment is not an image uploaded
+        throw FormError("Attachment must be an image.");
     }
 
     // Validation is complete, so create a new ticket
