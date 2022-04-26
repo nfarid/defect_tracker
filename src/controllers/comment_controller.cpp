@@ -58,9 +58,9 @@ Task<HttpResponsePtr> CommentController::createSubmit(HttpRequestPtr req, IdType
     const SessionPtr session = getSession(req);
     const IdType userId = getUserId(*session);
 
-    const auto& postParams = req->parameters();
+    const auto& formData = req->parameters();
     try {
-        co_await Comment::createComment(postParams, userId, ticketId);
+        co_await Comment::createComment(formData, userId, ticketId);
         co_return HttpResponse::newRedirectionResponse("/"s + std::to_string(ticketId) );  // Redirects to the ticket page once done
     }  catch(const Util::FormError& ex) {
         co_return newImpl(req, ticketId, ex.what() );  // Retry the form if there's a form error

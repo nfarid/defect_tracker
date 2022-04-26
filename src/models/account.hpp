@@ -26,19 +26,19 @@ class Account : public drogon_model::Account {
 public:
     /**
      * @brief verifies the data from the login form
-     * @param postParams - the data obtain from the POST request
+     * @param formData - the data obtain from the POST request
      * @return the respective Account with the specified username
      * @throws Util::FormError if the data is incorrect
      */
-    static drogon::Task<Account> verifyLogin(const Util::StringMap& postParams);
+    static drogon::Task<Account> verifyLogin(const Util::StringMap& formData);
 
     /**
      * @brief validates the data from the signup form
-     * @param postParams - the data obtain from the POST request
+     * @param formData - the data obtain from the POST request
      * @return a newly created Account if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Account> createAccount(const Util::StringMap& postParams);
+    static drogon::Task<Account> createAccount(const Util::StringMap& formData);
 
     /**
      * @brief obtain the Account model that has the specified primary key

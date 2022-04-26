@@ -43,13 +43,13 @@ const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproduc
 }  // namespace
 
 
-drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const FileMap& fileParams,
+drogon::Task<Ticket> Ticket::createTicket(const StringMap& formData, const FileMap& fileData,
         PrimaryKeyType reporterId, PrimaryKeyType projectId)
 {
     // Obtain the data from the POST request
-    const std::string title = getTrimmed(postParams.at("form-title") );
-    const std::string description = getTrimmed(postParams.at("form-description") );
-    const std::string severity = getTrimmed(postParams.at("form-severity") );
+    const std::string title = getTrimmed(formData.at("form-title") );
+    const std::string description = getTrimmed(formData.at("form-description") );
+    const std::string severity = getTrimmed(formData.at("form-severity") );
     std::string imageFilename = "";
 
     // TODO: Add more requirements for a valid username & password
@@ -65,9 +65,9 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& postParams, const Fil
         throw FormError("Invalid severity.");
 
     // Handling the image upload
-    const HttpFile& image = fileParams.at("form-image");
+    const HttpFile& image = fileData.at("form-image");
     if(image.getFileType() == FileType::FT_IMAGE) {  // If an image file is uploaded
-        imageFilename = postParams.at("form-image");
+        imageFilename = formData.at("form-image");
         if(image.saveAs(imageFilename) != 0) // saveAs function returns zero on success
             throw FormError("Unable to upload image");
     } else if(image.getFileType() != 0) {  // If a non-image file is uploaded
@@ -210,7 +210,7 @@ drogon::Task<std::vector<Account> > Ticket::getAssignables(PrimaryKeyType userId
     co_return{};
 }
 
-drogon::Task<> Ticket::update(const StringMap& postParams, PrimaryKeyType userId) {
+drogon::Task<> Ticket::update(const StringMap& formData, PrimaryKeyType userId) {
     CoroMapper<Ticket> ticketOrm = Util::getDb();
     const Model::Project project  = co_await getProject();
 
@@ -219,14 +219,14 @@ drogon::Task<> Ticket::update(const StringMap& postParams, PrimaryKeyType userId
 
     // The ticket's reporter can edit the ticket
     if(isReporter(userId) ) {
-        const std::string description = getTrimmed(postParams.at("form-description") );
+        const std::string description = getTrimmed(formData.at("form-description") );
         setDescription(description);
     }
 
     // Can only assign to people in the assingableLst
     const std::vector assingableLst = co_await getAssignables(userId);
-    if(!assingableLst.empty() && postParams.contains("form-assign") ) {
-        const std::string assignedIdStr = getTrimmed(postParams.at("form-assign") );
+    if(!assingableLst.empty() && formData.contains("form-assign") ) {
+        const std::string assignedIdStr = getTrimmed(formData.at("form-assign") );
         const PrimaryKeyType assignedId = StrToNum{assignedIdStr};
         for(const auto& staff : assingableLst) {
             if(staff.getValueOfId() == assignedId) {  // if the assigned staff is valid
@@ -247,8 +247,8 @@ drogon::Task<> Ticket::update(const StringMap& postParams, PrimaryKeyType userId
     // Staff can edit severity and status
     const bool isStaff = co_await project.isStaff(userId);
     if(isStaff) {
-        const std::string severity = getTrimmed(postParams.at("form-severity") );
-        const std::string status = getTrimmed(postParams.at("form-status") );
+        const std::string severity = getTrimmed(formData.at("form-severity") );
+        const std::string status = getTrimmed(formData.at("form-status") );
         if(!contains(severityLst, severity) )
             throw FormError("Severity is invalid");
         if(!contains(statusLst, status) )

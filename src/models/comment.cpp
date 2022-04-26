@@ -18,13 +18,13 @@ using namespace drogon::orm;
 using Json::UInt64;
 
 
-drogon::Task<Comment> Comment::createComment(const Util::StringMap& postParams, PrimaryKeyType userId,
+drogon::Task<Comment> Comment::createComment(const Util::StringMap& formData, PrimaryKeyType userId,
         PrimaryKeyType ticketId)
 {
     CoroMapper<Comment> orm = Util::getDb();
 
     Model::Comment newComment{};
-    newComment.setPost(Util::getTrimmed(postParams.at("form-post") ) );
+    newComment.setPost(Util::getTrimmed(formData.at("form-post") ) );
     newComment.setCreatedDate(trantor::Date::now() );
     newComment.setPosterId(userId);
     newComment.setTicketId(ticketId);

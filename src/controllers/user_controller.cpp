@@ -80,16 +80,16 @@ Task<HttpResponsePtr> UserController::signupForm(HttpRequestPtr req) {
 
 Task<HttpResponsePtr> UserController::signupSubmit(HttpRequestPtr req) {
     // Data from the HTTP POST request
-    const Util::StringMap& postParams = req->parameters();
+    const Util::StringMap& formData = req->parameters();
     const SessionPtr session = getSession(req);
 
     try {
-        const Account user = co_await Account::createAccount(postParams);
+        const Account user = co_await Account::createAccount(formData);
         // If the form data is valid and the user can be created, then login
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/");  // redirect to the home page
     } catch(Util::FormError& ex) {
-        co_return formImpl(req, "signup", postParams, ex.what() );  // There was a form error, so let the user retry again
+        co_return formImpl(req, "signup", formData, ex.what() );  // There was a form error, so let the user retry again
     }  catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
@@ -101,16 +101,16 @@ Task<HttpResponsePtr> UserController::loginForm(HttpRequestPtr req) {
 }
 
 Task<HttpResponsePtr> UserController::loginSubmit(HttpRequestPtr req) {
-    const Util::StringMap& postParams = req->parameters();
+    const Util::StringMap& formData = req->parameters();
     const SessionPtr session = getSession(req);
 
     try {
         // Verify the submitted data, if authenticated then login
-        const Account user = co_await Account::verifyLogin(postParams);
+        const Account user = co_await Account::verifyLogin(formData);
         logIn(*getSession(req), user.getValueOfId(), user.getValueOfUsername() );
         co_return HttpResponse::newRedirectionResponse("/");  // redirect to the home page
     } catch(const Util::FormError& ex) {
-        co_return formImpl(req, "login", postParams, ex.what() );  // There was a form error, so let the user retry again
+        co_return formImpl(req, "login", formData, ex.what() );  // There was a form error, so let the user retry again
     }  catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();

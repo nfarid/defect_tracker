@@ -25,13 +25,13 @@ public:
     /**
      * @brief validates the data from the comment creation form
      * @param orm - the object–relational mapper for Comment
-     * @param postParams - the data obtain from the POST request
+     * @param formData - the data obtain from the POST request
      * @param userId - the id of the current user
      * @param ticketId - the id of the ticket for this comment's form
      * @return a newly created Comment if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Comment> createComment(const Util::StringMap& postParams, PrimaryKeyType userId,
+    static drogon::Task<Comment> createComment(const Util::StringMap& formData, PrimaryKeyType userId,
             PrimaryKeyType ticketId);
 
     /**

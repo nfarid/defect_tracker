@@ -127,19 +127,19 @@ Task<HttpResponsePtr> TicketController::newFormImpl(HttpRequestPtr req, IdType p
 Task<HttpResponsePtr> TicketController::createSubmit(HttpRequestPtr req, IdType projectId) {
     const SessionPtr session = getSession(req);
     const IdType userId = getUserId(*session);
-    const auto& [postParams, fileParams] = parseMultiPart(req);
+    const auto& [formData, fileData] = parseMultiPart(req);
 
     // Using std::optional to defer initialisation
     std::optional<Task<HttpResponsePtr> > retryForm;
 
     try {
-        const Ticket createdTicket = co_await Ticket::createTicket(postParams, fileParams, userId, projectId);
+        const Ticket createdTicket = co_await Ticket::createTicket(formData, fileData, userId, projectId);
         const std::string createdTicketId = std::to_string(createdTicket.getValueOfId() );
         co_return HttpResponse::newRedirectionResponse("/ticket/" + createdTicketId);
     }  catch(const Util::FormError& ex) {
         // If there's a form error, then retry the ticket creation form
         // co_await cannot be done in catch handler
-        retryForm = newFormImpl(req, projectId, postParams, ex.what() );
+        retryForm = newFormImpl(req, projectId, formData, ex.what() );
     } catch(const std::exception& ex) {
         std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
         co_return HttpResponse::newNotFoundResponse();
@@ -177,11 +177,11 @@ Task<HttpResponsePtr> TicketController::updateSubmit(HttpRequestPtr req, IdType 
     const auto session = getSession(req);
     const IdType userId = getUserId(*session);
 
-    const auto& postParams = req->parameters();
+    const auto& formData = req->parameters();
     std::optional<Task<HttpResponsePtr> > retryForm;
     try {
         Model::Ticket ticket = co_await Ticket::findByPrimaryKey(ticketId);
-        co_await ticket.update(postParams, userId);
+        co_await ticket.update(formData, userId);
         co_return HttpResponse::newRedirectionResponse("/ticket/" + std::to_string(ticketId) );
     } catch(const Util::FormError& ex) {
         retryForm = editForm(req, ticketId);  // If there's a form error, then retry

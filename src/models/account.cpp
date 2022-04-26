@@ -47,13 +47,13 @@ using namespace drogon::orm;
 using Json::UInt64;
 
 
-Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
+Task<Account> Account::verifyLogin(const Util::StringMap& formData)
 {
     CoroMapper<Account> orm = Util::getDb();
 
     // Obtain and trim the data from the POST request
-    const std::string username = Util::getTrimmed(postParams.at("form-username") );
-    const std::string password = Util::getTrimmed(postParams.at("form-password") );
+    const std::string username = Util::getTrimmed(formData.at("form-username") );
+    const std::string password = Util::getTrimmed(formData.at("form-password") );
 
     // Find a user with the specified username
     const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
@@ -70,15 +70,15 @@ Task<Account> Account::verifyLogin(const Util::StringMap& postParams)
     co_return user;
 }
 
-Task<Account> Account::createAccount(const Util::StringMap& postParams)
+Task<Account> Account::createAccount(const Util::StringMap& formData)
 {
-    CoroMapper<Account> orm = Util::getDb();
+    CoroMapper<Account> userOrm = Util::getDb();
 
     // Obtain and trim the data from the POST request
-    const std::string& username = Util::getTrimmed(postParams.at("form-username") );
-    const std::string& password = Util::getTrimmed(postParams.at("form-password") );
+    const std::string& username = Util::getTrimmed(formData.at("form-username") );
+    const std::string& password = Util::getTrimmed(formData.at("form-password") );
 
-    // TODO: Add more requirements
+    // Check if the submitted data is valid
     if(username.empty() )
         throw Util::FormError("Username cannot be empty.");
     if(!Util::isAlNumUnderscore(username) )
@@ -90,7 +90,7 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
 
     // Check if another user with that username already exists
     const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
-    const auto userCount = co_await orm.count(hasUsername);
+    const auto userCount = co_await userOrm.count(hasUsername);
     if(userCount != 0)
         throw Util::FormError("That username already exists, please pick another.");
 
@@ -98,7 +98,7 @@ Task<Account> Account::createAccount(const Util::StringMap& postParams)
     Model::Account newAccount;
     newAccount.setUsername(username);
     newAccount.setPasswordHash(hash(password) );
-    co_return co_await orm.insert(newAccount);
+    co_return co_await userOrm.insert(newAccount);
 }
 
 drogon::Task<Account> Account::findByPrimaryKey(PrimaryKeyType userId) {

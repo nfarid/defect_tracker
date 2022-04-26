@@ -29,14 +29,14 @@ public:
     /**
      * @brief creates a ticket from the data from the form
      * @param orm - the object–relational mapper for Ticket
-     * @param postParams - the data obtain from the POST request
-     * @param fileParams - the files obtain from the POST request
+     * @param formData - the data obtain from the POST request
+     * @param fileData - the files obtain from the POST request
      * @param reporterId - the id of the current user
      * @param projectId - the id of the project
      * @return a newly created Ticket if the data is valid
      * @throws Util::FormError if the data is invalid
      */
-    static drogon::Task<Ticket> createTicket(const Util::StringMap& postParams, const Util::FileMap& fileParams,
+    static drogon::Task<Ticket> createTicket(const Util::StringMap& formData, const Util::FileMap& fileData,
             PrimaryKeyType reporterId, PrimaryKeyType projectId);
 
     /**
@@ -97,10 +97,10 @@ public:
 
     /**
      * @brief update a ticket from the data from the form
-     * @param postParams - the data obtain from the POST request
+     * @param formData - the data obtain from the POST request
      * @param userId - the id of the current user
      */
-    drogon::Task<> update(const Util::StringMap& postParams, PrimaryKeyType userId);
+    drogon::Task<> update(const Util::StringMap& formData, PrimaryKeyType userId);
 
     /**
      * @brief Turns a model into a Json suitable for the view (uses htmlTranslate)

@@ -66,22 +66,22 @@ void logOut(Session& session) {
 }
 
 std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const HttpRequestPtr& req) {
-    Util::StringMap postParams;
+    Util::StringMap formData;
     MultiPartParser parser;
     if(parser.parse(req) != 0)
         throw Util::FormError("Cannot parse http request");
 
     for(const auto& [k, v] : parser.getParameters() )
-        postParams[k] = v;
+        formData[k] = v;
 
     for(const auto& [key, file] : parser.getFilesMap() ) {
         const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
         const std::string filename = timestamp + file.getMd5() + "." + std::string(file.getFileExtension() );
         std::cerr<<"filename; "<<filename<<std::endl;
-        postParams[key] = filename;
+        formData[key] = filename;
     }
 
-    return {postParams, parser.getFilesMap()};
+    return {formData, parser.getFilesMap()};
 }
 
 

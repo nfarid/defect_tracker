@@ -47,15 +47,15 @@ std::vector<std::string_view> splitView(std::string_view str, char delim) {
 }  // namespace
 
 
-drogon::Task<Project> Project::createProject(const Util::StringMap& postParams, PrimaryKeyType userId)
+drogon::Task<Project> Project::createProject(const Util::StringMap& formData, PrimaryKeyType userId)
 {
     CoroMapper<Project> projectOrm = Util::getDb();
 
     // Obtain and filter the data from the POST request
 
     // Obtain and trim the data from the POST request
-    const std::string title = Util::getTrimmed(postParams.at("form-title") );
-    const std::string description = Util::getTrimmed(postParams.at("form-description") );
+    const std::string title = Util::getTrimmed(formData.at("form-title") );
+    const std::string description = Util::getTrimmed(formData.at("form-description") );
 
     // Validate the data
     if(title.empty() )
