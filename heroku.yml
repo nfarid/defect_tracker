@@ -1,6 +1,8 @@
 build:
     docker:
         web: Dockerfile
+    config:
+        use_postgresql: "ON"
 run:
     web:
         /app/defect_tracker $PORT
