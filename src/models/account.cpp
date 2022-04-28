@@ -26,7 +26,7 @@ namespace
 std::string hash(Util::CStringView password) {
     std::string passwordHash(crypto_pwhash_STRBYTES, '\0');
     if(crypto_pwhash_str(passwordHash.data(), password.c_str(), size(password),
-                crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) )
+                crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) != 0)
     {
         throw std::runtime_error{"Hashing failed"};
     }
@@ -35,7 +35,7 @@ std::string hash(Util::CStringView password) {
 
 // Checks if the hash matches against the password
 bool verifyHash(Util::CStringView passwordHash, Util::CStringView password) {
-    return !crypto_pwhash_str_verify(passwordHash.c_str(), password.c_str(), size(password) );
+    return crypto_pwhash_str_verify(passwordHash.c_str(), password.c_str(), size(password) ) != 0;
 }
 
 
@@ -49,7 +49,7 @@ using Json::UInt64;
 
 Task<Account> Account::verifyLogin(const Util::StringMap& formData)
 {
-    CoroMapper<Account> orm = Util::getDb();
+    CoroMapper<Account> userOrm = Util::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string username = Util::getTrimmed(formData.at("form-username") );
@@ -57,7 +57,7 @@ Task<Account> Account::verifyLogin(const Util::StringMap& formData)
 
     // Find a user with the specified username
     const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
-    const std::vector userLst = co_await orm.findBy(hasUsername);
+    const std::vector userLst = co_await userOrm.findBy(hasUsername);
     if(userLst.size() != 1) // No users with that username exists
         throw Util::FormError("Invalid username.");
     const Model::Account& user = userLst.front();
@@ -114,8 +114,8 @@ drogon::Task<Account> Account::findByUsername(const std::string& username) {
 
 drogon::Task<std::vector<Notification> > Account::getNotifications() const {
     CoroMapper<Notification> notificationOrm = Util::getDb();
-    const Criteria toUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
-    co_return co_await notificationOrm.findBy(toUser);
+    const Criteria forUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
+    co_return co_await notificationOrm.findBy(forUser);
 }
 
 Json::Value Account::toViewJson() const {

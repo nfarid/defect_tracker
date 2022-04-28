@@ -46,13 +46,12 @@ const std::vector<std::string_view> statusLst = {"new", "confirmed", "unreproduc
 drogon::Task<Ticket> Ticket::createTicket(const StringMap& formData, const FileMap& fileData,
         PrimaryKeyType reporterId, PrimaryKeyType projectId)
 {
-    // Obtain the data from the POST request
+    // Obtain and trim the data from the POST request
     const std::string title = getTrimmed(formData.at("form-title") );
     const std::string description = getTrimmed(formData.at("form-description") );
     const std::string severity = getTrimmed(formData.at("form-severity") );
-    std::string imageFilename = "";
 
-    // TODO: Add more requirements for a valid username & password
+    // Validate the data
     if(title.empty() )
         throw FormError("Title cannot be empty");
     if(title.size() > 80)
@@ -65,6 +64,7 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& formData, const FileM
         throw FormError("Invalid severity.");
 
     // Handling the image upload
+    std::string imageFilename = "";
     const HttpFile& image = fileData.at("form-image");
     if(image.getFileType() == FileType::FT_IMAGE) {  // If an image file is uploaded
         imageFilename = formData.at("form-image");
@@ -115,8 +115,8 @@ Json::Value Ticket::getStatusLst() {
 Json::Value Ticket::getStatistics(const std::vector<Ticket>& ticketLst) {
     using namespace std::chrono;
 
-    Json::Value stats{};
-    stats["ticket-count"] = static_cast<Json::UInt64>(size(ticketLst) );
+    Json::Value statistics{};
+    statistics["ticket-count"] = static_cast<Json::UInt64>(size(ticketLst) );
 
     // Obtain average resolution time
     microseconds totalResolutionDuration{0};
@@ -133,21 +133,22 @@ Json::Value Ticket::getStatistics(const std::vector<Ticket>& ticketLst) {
     if(countResolution != 0) {
         const microseconds averageResolutionDuration = totalResolutionDuration / countResolution;
         const hours averageResolutionDurationHours = duration_cast<hours>(averageResolutionDuration);
-        stats["average-resolution-duration-hours"] = static_cast<Json::Int64>(averageResolutionDurationHours.count() );
+        statistics["average-resolution-duration-hours"] =
+                static_cast<Json::Int64>(averageResolutionDurationHours.count() );
     }
 
     // Obtain count of types of tickets:
     for(const auto& statusType : Model::Ticket::getStatusLst() )
-        stats[statusType.asString()] = 0;
+        statistics[statusType.asString()] = 0;
     for(const auto& severity : Model::Ticket::getSeverityLst() )
-        stats[severity.asString()] = 0;
+        statistics[severity.asString()] = 0;
 
     for(const auto& ticket : ticketLst) {
-        stats[ticket.getValueOfStatus()] = stats[ticket.getValueOfStatus()].asInt() + 1;
-        stats[ticket.getValueOfSeverity()] = stats[ticket.getValueOfSeverity()].asInt() + 1;
+        statistics[ticket.getValueOfStatus()] = statistics[ticket.getValueOfStatus()].asInt() + 1;
+        statistics[ticket.getValueOfSeverity()] = statistics[ticket.getValueOfSeverity()].asInt() + 1;
     }
 
-    return stats;
+    return statistics;
 }
 
 drogon::Task<Ticket> Ticket::findByPrimaryKey(PrimaryKeyType ticketId) {
@@ -214,11 +215,11 @@ drogon::Task<> Ticket::update(const StringMap& formData, PrimaryKeyType userId) 
     CoroMapper<Ticket> ticketOrm = Util::getDb();
     const Model::Project project  = co_await getProject();
 
-    if(!co_await canEdit(userId) ) // cannot edit if not authorised
+    const bool allowedToEdit = co_await canEdit(userId);
+    if(!allowedToEdit)
         throw FormError("Unauthoried to edit ticket");
 
-    // The ticket's reporter can edit the ticket
-    if(isReporter(userId) ) {
+    if(isReporter(userId) ) {  // The ticket's reporter can edit the description
         const std::string description = getTrimmed(formData.at("form-description") );
         setDescription(description);
     }
@@ -245,8 +246,8 @@ drogon::Task<> Ticket::update(const StringMap& formData, PrimaryKeyType userId) 
     }
 
     // Staff can edit severity and status
-    const bool isStaff = co_await project.isStaff(userId);
-    if(isStaff) {
+    const bool userIsStaff = co_await project.isStaff(userId);
+    if(userIsStaff) {
         const std::string severity = getTrimmed(formData.at("form-severity") );
         const std::string status = getTrimmed(formData.at("form-status") );
         if(!contains(severityLst, severity) )

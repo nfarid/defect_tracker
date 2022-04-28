@@ -51,8 +51,6 @@ drogon::Task<Project> Project::createProject(const Util::StringMap& formData, Pr
 {
     CoroMapper<Project> projectOrm = Util::getDb();
 
-    // Obtain and filter the data from the POST request
-
     // Obtain and trim the data from the POST request
     const std::string title = Util::getTrimmed(formData.at("form-title") );
     const std::string description = Util::getTrimmed(formData.at("form-description") );

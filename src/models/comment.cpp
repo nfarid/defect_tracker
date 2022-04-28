@@ -3,6 +3,7 @@
 
 #include "../util/constants.hpp"
 #include "../util/database.hpp"
+#include "../util/form_error.hpp"
 #include "../util/string.hpp"
 
 #include <drogon/HttpAppFramework.h>
@@ -15,20 +16,27 @@ namespace Model
 
 using namespace drogon;
 using namespace drogon::orm;
+using Util::StringMap;
 using Json::UInt64;
 
 
-drogon::Task<Comment> Comment::createComment(const Util::StringMap& formData, PrimaryKeyType userId,
-        PrimaryKeyType ticketId)
+drogon::Task<Comment> Comment::createComment(const StringMap& formData, PrimaryKeyType userId, PrimaryKeyType ticketId)
 {
-    CoroMapper<Comment> orm = Util::getDb();
+    CoroMapper<Comment> commentOrm = Util::getDb();
+
+    // Obtain and trim the data from the POST request
+    const std::string& post = Util::getTrimmed(formData.at("form-post") );
+
+    // Check if the submitted data is valid
+    if(post.empty() )
+        throw Util::FormError("Post cannot be empty");
 
     Model::Comment newComment{};
-    newComment.setPost(Util::getTrimmed(formData.at("form-post") ) );
+    newComment.setPost(post);
     newComment.setCreatedDate(trantor::Date::now() );
     newComment.setPosterId(userId);
     newComment.setTicketId(ticketId);
-    co_return co_await orm.insert(newComment);
+    co_return co_await commentOrm.insert(newComment);
 }
 
 Json::Value Comment::toViewJson() const {
