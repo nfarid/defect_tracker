@@ -1,13 +1,19 @@
 
 #include "util/database.hpp"
-
 #include "util/misc.hpp"
 
 #include <drogon/HttpAppFramework.h>
 
+#include <sodium.h>
+
 using drogon::app;
 
 int main(){
+    if(sodium_init() < 0) {
+        std::cerr<<"Cannot initialise sodium!"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
     unsigned short port = 3000;
     try {
         const Util::CStringView portStr = Util::getEnvironment("PORT");

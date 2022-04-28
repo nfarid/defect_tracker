@@ -35,7 +35,7 @@ std::string hash(Util::CStringView password) {
 
 // Checks if the hash matches against the password
 bool verifyHash(Util::CStringView passwordHash, Util::CStringView password) {
-    return crypto_pwhash_str_verify(passwordHash.c_str(), password.c_str(), size(password) ) != 0;
+    return crypto_pwhash_str_verify(passwordHash.c_str(), password.c_str(), size(password) ) == 0;
 }
 
 

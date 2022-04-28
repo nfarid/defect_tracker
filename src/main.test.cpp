@@ -8,9 +8,16 @@
 #include <drogon/drogon_test.h>
 #include <drogon/HttpAppFramework.h>
 
+#include <sodium.h>
+
 #include <cstring>
 
 int main(int argc, char** argv) {
+    if(sodium_init() < 0) {
+        std::cerr<<"Cannot initialise sodium!"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
     std::cout<<"Starting the tests, make sure that create data sql script has been ran before"<<std::endl;
 
     auto& app = drogon::app();
