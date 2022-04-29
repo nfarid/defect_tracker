@@ -123,8 +123,11 @@ DbUrl parseUrl(string_view urlStr) {
 
 
 DbClientPtr getDb() {
+    // Using a static variable and a iife to make sure that the database connection is opened only once
     const static DbClientPtr db = []() -> DbClientPtr {
         try {
+        #ifdef USE_POSTGRESQL
+            std::cout<<"Connecting to a postgresql database."<<std::endl;
             Util::CStringView database_url = Util::getEnvironment("DATABASE_URL");
             const DbUrl parsedUrl = parseUrl(database_url);
             const DbClientPtr db_ = DbClient::newPgClient("host="s + parsedUrl.host +
@@ -133,17 +136,20 @@ DbClientPtr getDb() {
                     " user="s + parsedUrl.username +
                     " password="s + parsedUrl.password,
                     1);
-            if(!db_)
-                throw std::runtime_error("Cannot connect to postgresql database.");
+            if(!db_) // should not be null
+                throw std::runtime_error("Unable to create a postgresql database client.");
             return db_;
-        } catch(const std::exception& ex) {
-            std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<ex.what()<<std::endl;
+        #else
             std::cout<<"Connecting to sqlite3 database."<<std::endl;
             const fs::path sqlTestDb = get_executable_dir().parent_path() / "sql/test.db";
             const DbClientPtr db_ = DbClient::newSqlite3Client("filename="s + sqlTestDb.string(), 1);
             if(!db_) // should not be null
                 throw std::runtime_error("Cannot connect to sqlite3 test.db");
             return db_;
+        #endif  // ifdef USE_POSTGRESQL
+        } catch(const std::exception& ex) {
+            std::cerr<<__PRETTY_FUNCTION__<<" ; "<<__LINE__<<"\n"<<typeid(ex).name()<<" ; "<<ex.what()<<std::endl;
+            std::exit(EXIT_FAILURE);
         }
     }();
     return db;
