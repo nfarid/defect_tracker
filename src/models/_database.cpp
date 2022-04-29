@@ -1,8 +1,8 @@
 
-#include "database.hpp"
+#include "_database.hpp"
 
-#include "core.hpp"
-#include "misc.hpp"
+#include "../util/core.hpp"
+#include "../util/misc.hpp"
 
 #include <drogon/HttpAppFramework.h>
 #include <drogon/orm/DbClient.h>
@@ -14,7 +14,7 @@
 #include <filesystem>
 
 
-namespace Util
+namespace Db
 {
 
 
@@ -150,5 +150,5 @@ DbClientPtr getDb() {
 }
 
 
-}  // namespace Util
+}  // namespace Db
 

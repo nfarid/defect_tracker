@@ -8,7 +8,6 @@
 #include "../models/staff.hpp"
 #include "../models/ticket.hpp"
 
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 

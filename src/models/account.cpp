@@ -2,9 +2,9 @@
 #include "account.hpp"
 
 #include "notification.hpp"
+#include "_database.hpp"
 
 #include "../util/cstring_view.hpp"
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/string.hpp"
 
@@ -49,7 +49,7 @@ using Json::UInt64;
 
 Task<Account> Account::verifyLogin(const Util::StringMap& formData)
 {
-    CoroMapper<Account> userOrm = Util::getDb();
+    CoroMapper<Account> userOrm = Db::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string username = Util::getTrimmed(formData.at("form-username") );
@@ -72,7 +72,7 @@ Task<Account> Account::verifyLogin(const Util::StringMap& formData)
 
 Task<Account> Account::createAccount(const Util::StringMap& formData)
 {
-    CoroMapper<Account> userOrm = Util::getDb();
+    CoroMapper<Account> userOrm = Db::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string& username = Util::getTrimmed(formData.at("form-username") );
@@ -102,18 +102,18 @@ Task<Account> Account::createAccount(const Util::StringMap& formData)
 }
 
 drogon::Task<Account> Account::findByPrimaryKey(PrimaryKeyType userId) {
-    CoroMapper<Account> userOrm = Util::getDb();
+    CoroMapper<Account> userOrm = Db::getDb();
     co_return co_await userOrm.findByPrimaryKey(userId);
 }
 
 drogon::Task<Account> Account::findByUsername(const std::string& username) {
-    CoroMapper<Account> userOrm = Util::getDb();
+    CoroMapper<Account> userOrm = Db::getDb();
     const Criteria hasUsername{Model::Account::Cols::_username, CompareOperator::EQ, username};
     co_return co_await userOrm.findOne(hasUsername);
 }
 
 drogon::Task<std::vector<Notification> > Account::getNotifications() const {
-    CoroMapper<Notification> notificationOrm = Util::getDb();
+    CoroMapper<Notification> notificationOrm = Db::getDb();
     const Criteria forUser{Notification::Cols::_user_id, CompareOperator::EQ, getValueOfId()};
     co_return co_await notificationOrm.findBy(forUser);
 }

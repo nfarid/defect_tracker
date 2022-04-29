@@ -3,7 +3,6 @@
 
 #include "../models/comment.hpp"
 
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>

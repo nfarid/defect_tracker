@@ -1,7 +1,7 @@
 
 #include "notification.hpp"
 
-#include "../util/database.hpp"
+#include "_database.hpp"
 
 #include <drogon/HttpViewData.h>
 
@@ -16,12 +16,12 @@ using Json::UInt64;
 
 
 drogon::Task<Notification> Notification::findByPrimaryKey(PrimaryKeyType notificationId) {
-    CoroMapper<Notification> notificationOrm = Util::getDb();
+    CoroMapper<Notification> notificationOrm = Db::getDb();
     co_return co_await notificationOrm.findByPrimaryKey(notificationId);
 }
 
 drogon::Task<> Notification::deleteByPrimaryKey(PrimaryKeyType notificationId) {
-    CoroMapper<Notification> notificationOrm = Util::getDb();
+    CoroMapper<Notification> notificationOrm = Db::getDb();
     co_await notificationOrm.deleteByPrimaryKey(notificationId);
 }
 

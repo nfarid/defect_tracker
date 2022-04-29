@@ -1,10 +1,10 @@
 
 #include "auxiliary.hpp"
+
 #include "../models/account.hpp"
 #include "../models/project.hpp"
 #include "../models/ticket.hpp"
 
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 
 #include <drogon/HttpController.h>
@@ -51,8 +51,6 @@ public:
     Task<HttpResponsePtr> destroy(HttpRequestPtr req, IdType projectId);
 
 private:
-    CoroMapper<Model::Project> mProjectOrm = Util::getDb();
-
     HttpResponsePtr newFormImpl(HttpRequestPtr req, const Util::StringMap& formData, const std::string& formError);
 };
 
@@ -60,7 +58,7 @@ Task<HttpResponsePtr> ProjectController::showProject(HttpRequestPtr req, IdType 
 {
     const SessionPtr session = getSession(req);
     try {
-        const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
+        const Model::Project project = co_await Model::Project::findByPrimaryKey(projectId);
         const Model::Account manager = co_await project.getManager();
         const std::vector ticketLst = co_await project.getTickets();
 
@@ -134,12 +132,12 @@ Task<HttpResponsePtr> ProjectController::destroy(HttpRequestPtr req, IdType proj
     SessionPtr session = getSession(req);
 
     // Check if the user is the project manager
-    const Model::Project project = co_await mProjectOrm.findByPrimaryKey(projectId);
+    const Model::Project project = co_await Model::Project::findByPrimaryKey(projectId);
     if(getUserId(*session) != project.getValueOfManagerId() )
         co_return HttpResponse::newNotFoundResponse();
 
     // User is authorised to delete this project
-    co_await mProjectOrm.deleteByPrimaryKey(projectId);
+    co_await Model::Project::deleteByPrimaryKey(projectId);
     co_return HttpResponse::newRedirectionResponse("/", k303SeeOther);
 }
 

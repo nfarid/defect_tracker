@@ -4,7 +4,6 @@
 #include "../models/account.hpp"
 #include "../models/notification.hpp"
 
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/misc.hpp"
 
@@ -39,9 +38,6 @@ public:
 
     // indexPage is called whenever the user access the index page
     Task<HttpResponsePtr> indexPage(HttpRequestPtr req);
-
-private:
-    CoroMapper<Model::Account> mAccountOrm = Util::getDb();
 };
 
 Task<HttpResponsePtr> HomeController::aboutPage(HttpRequestPtr req) {

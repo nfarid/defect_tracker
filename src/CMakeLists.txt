@@ -53,12 +53,10 @@ set(APP_SRC
     "models/project.cpp"
     "models/staff.cpp"
     "models/ticket.cpp"
-
     "${GENERATED_MODELS}"
+    "models/_database.cpp"
 
     "${VIEW_SRC}"
-
-    "util/database.cpp"
 )
 add_executable("${APP_NAME}"
     "${APP_SRC}"

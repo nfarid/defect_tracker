@@ -1,5 +1,4 @@
 
-#include "util/database.hpp"
 #include "util/misc.hpp"
 
 #include <drogon/HttpAppFramework.h>

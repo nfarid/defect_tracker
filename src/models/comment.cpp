@@ -1,8 +1,9 @@
 
 #include "comment.hpp"
 
+#include "_database.hpp"
+
 #include "../util/constants.hpp"
-#include "../util/database.hpp"
 #include "../util/form_error.hpp"
 #include "../util/string.hpp"
 
@@ -22,7 +23,7 @@ using Json::UInt64;
 
 drogon::Task<Comment> Comment::createComment(const StringMap& formData, PrimaryKeyType userId, PrimaryKeyType ticketId)
 {
-    CoroMapper<Comment> commentOrm = Util::getDb();
+    CoroMapper<Comment> commentOrm = Db::getDb();
 
     // Obtain and trim the data from the POST request
     const std::string& post = Util::getTrimmed(formData.at("form-post") );
