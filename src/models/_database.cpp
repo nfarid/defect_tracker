@@ -30,7 +30,7 @@ namespace
 {
 
 
-fs::path get_executable_dir() {
+[[maybe_unused]] fs::path get_executable_dir() {
     std::array<char, PATH_MAX> exe_path;
     const ssize_t byte_read = readlink("/proc/self/exe", exe_path.data(), PATH_MAX);
     if( (byte_read <= -1) || (byte_read >= PATH_MAX) )
@@ -51,7 +51,7 @@ struct DbUrl {
 };
 
 // A simple url parser for parsing a database url
-DbUrl parseUrl(string_view urlStr) {
+[[maybe_unused]] DbUrl parseUrl(string_view urlStr) {
     std::cout<<"Parsing datbase url, should be in format: scheme://username:password@host:port/path"<<std::endl;
     DbUrl parsed;
 
