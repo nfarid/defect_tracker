@@ -77,7 +77,6 @@ std::pair<Util::StringMap, Util::FileMap> parseMultiPart(const HttpRequestPtr& r
     for(const auto& [key, file] : parser.getFilesMap() ) {
         const std::string timestamp = trantor::Date::now().toCustomedFormattedString("%s");
         const std::string filename = timestamp + file.getMd5() + "." + std::string(file.getFileExtension() );
-        std::cerr<<"filename; "<<filename<<std::endl;
         formData[key] = filename;
     }
 

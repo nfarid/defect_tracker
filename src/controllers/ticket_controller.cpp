@@ -34,7 +34,7 @@ public:
         ADD_METHOD_TO(TicketController::showTicket, "/ticket/{1}", Get);
         ADD_METHOD_TO(TicketController::newForm, "/project/{1}/report", Get, "Fltr::OnlyLoggedIn");
         ADD_METHOD_TO(TicketController::editForm, "/ticket/{1}/edit", Get, "Fltr::OnlyLoggedIn");
-        ADD_METHOD_TO(TicketController::createSubmit, "/project/{1}/report", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
+        ADD_METHOD_TO(TicketController::createSubmit, "/project/{1}/report", Post, "Fltr::OnlyLoggedIn");
         ADD_METHOD_TO(TicketController::updateSubmit, "/ticket/{1}/edit", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
         ADD_METHOD_TO(TicketController::destroy, "/ticket/{1}/delete", Post, "Fltr::OnlyLoggedIn", "Fltr::ValidToken");
         ADD_METHOD_TO(TicketController::throughNotification, "/notification/{1}", Post, "Fltr::OnlyLoggedIn");
@@ -132,6 +132,12 @@ Task<HttpResponsePtr> TicketController::createSubmit(HttpRequestPtr req, IdType 
     std::optional<Task<HttpResponsePtr> > retryForm;
 
     try {
+        // Check if token is valid
+        const std::string& sessionToken = session->get<std::string>("token");
+        const std::string& sentToken = formData.at("token");
+        if(sessionToken != sentToken)
+            throw std::runtime_error("Invalid token");
+
         const Ticket createdTicket = co_await Ticket::createTicket(formData, fileData, userId, projectId);
         const std::string createdTicketId = std::to_string(createdTicket.getValueOfId() );
         co_return HttpResponse::newRedirectionResponse("/ticket/" + createdTicketId);

@@ -97,7 +97,7 @@ drogon::Task<Ticket> Ticket::createTicket(const StringMap& formData, const FileM
     newNotifcation.setUserId( project.getValueOfManagerId() );  // notify the project manager when a ticket is created
     co_await notificationOrm.insert(newNotifcation);
 
-    co_return newTicket;
+    co_return createdTicket;
 }
 
 Json::Value Ticket::getSeverityLst() {
