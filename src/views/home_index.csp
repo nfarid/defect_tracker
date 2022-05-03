@@ -12,7 +12,9 @@
 
 
 <%c++ if(isLoggedIn) { %>
-    <h1>Welcome {%sessionUsername%}!</h1> <hr/>
+    <h1>Welcome {%sessionUsername%}!</h1>
+    <p>Try to search for a project (e.g. project).</p>
+    <hr/>
     <%c++ if(!notificationLst.empty() ) { %>
         <form action="/notification" method="POST">
             <%c++ for(const auto& notification : notificationLst) { %>

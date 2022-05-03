@@ -12,7 +12,7 @@
         <li>Project staff can change status of tickets.</li>
         <li>Project managers can assign tickets to staff.</li>
     </ul>
-    <p>To search for a project use the search bar at the top.</p>
+    <p>To search for a project use the search bar at the top (e.g. project).</p>
 </article>
 
 <%view _footer.csp %>
