@@ -1,8 +1,6 @@
 
 A very simple defect tracker.
 
-Website: https://simple-defect-tracker.herokuapp.com
-
 
 
 This application requires a postgres database.
